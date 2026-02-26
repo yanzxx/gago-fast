@@ -1,0 +1,28 @@
+import { nextTick } from 'vue'
+import { viewTagsStore } from '@/store'
+
+export function beforeEach(to, from) {
+	const adminMain = document.querySelector('#adminui-main')
+	if (!adminMain) {
+		return false
+	}
+	const store = viewTagsStore()
+	store.updateViewTags({
+		fullPath: from.fullPath,
+		scrollTop: adminMain.scrollTop
+	})
+}
+
+export function afterEach(to) {
+	const adminMain = document.querySelector('#adminui-main')
+	if (!adminMain) {
+		return false
+	}
+	nextTick(() => {
+		const store = viewTagsStore()
+		const beforeRoute = store.viewTags.filter((v) => v.fullPath == to.fullPath)[0]
+		if (beforeRoute) {
+			adminMain.scrollTop = beforeRoute.scrollTop || 0
+		}
+	})
+}

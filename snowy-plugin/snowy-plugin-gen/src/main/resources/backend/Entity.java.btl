@@ -1,0 +1,52 @@
+
+package ${packageName}.${moduleName}.modular.${busName}.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
+import vip.xiaonuo.common.annotation.ExcelConfig;
+import lombok.Getter;
+import lombok.Setter;
+import java.math.BigDecimal;
+import java.util.Date;
+<% if(extendBase) { %>
+import vip.xiaonuo.common.pojo.CommonEntity;
+<% } %>
+
+/**
+ * ${functionName}实体
+ *
+ * @author ${authorName}
+ * @date ${genTime}
+ **/
+@Getter
+@Setter
+@TableName("${dbTable}")
+<% if(extendBase) { %>
+public class ${className} extends CommonEntity {
+<% } else { %>
+public class ${className} {
+<% } %>
+
+    <% for(var i = 0; i < configList.~size; i++) { %>
+    /** ${configList[i].fieldRemark} */
+    <% if(configList[i].needTableId) { %>
+    @TableId
+    <% } else if(configList[i].whetherTable){ %>
+    @ApiModelProperty(value = "${configList[i].fieldRemark}", position = ${i + 1})
+    <% } %>
+    <% if(configList[i].needAutoInsert) { %>
+    @TableField(fill = FieldFill.INSERT)
+    <% } else { %><% } %>
+    <% if(configList[i].needAutoUpdate) { %>
+    @TableField(fill = FieldFill.UPDATE)
+    <% } else { %><% } %>
+    <% if(configList[i].needLogicDelete) { %>
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    <% } else { %><% } %>
+    private ${configList[i].fieldJavaType} ${configList[i].fieldNameCamelCase};
+    <% if(i == configList.~size - 1) { %><% } else { %>
+
+    <% } %>
+    <% } %>
+}

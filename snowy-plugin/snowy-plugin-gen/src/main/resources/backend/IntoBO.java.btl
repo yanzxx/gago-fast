@@ -1,0 +1,35 @@
+
+package ${packageName}.${moduleName}.modular.${busName}.entity.BO;
+
+import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
+import vip.xiaonuo.common.annotation.ExcelConfig;
+import lombok.Getter;
+import lombok.Setter;
+import java.math.BigDecimal;
+import java.util.Date;
+
+
+/**
+ * ${functionName} Excel导入实体
+ *
+ * @author ${authorName}
+ * @date ${genTime}
+ **/
+@Getter
+@Setter
+public class ${className}IntoBO {
+
+    <% for(var i = 0; i < configList.~size; i++) { %>
+    /** ${configList[i].fieldRemark} */
+
+    @ApiModelProperty(value = "${configList[i].fieldRemark}", position = ${i + 1})
+    <% if(configList[i].needExportAndInto || configList[i].needTableId) { %>
+    @ExcelConfig(name = "${configList[i].fieldRemark}")
+    <% } else { %><% } %>
+    private ${configList[i].fieldJavaType} ${configList[i].fieldNameCamelCase};
+    <% if(i == configList.~size - 1) { %><% } else { %>
+
+    <% } %>
+    <% } %>
+}

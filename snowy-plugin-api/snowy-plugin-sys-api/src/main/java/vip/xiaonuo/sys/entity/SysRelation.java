@@ -1,0 +1,46 @@
+
+package vip.xiaonuo.sys.entity;
+
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 关系实体
+ *
+ * @author xuyuxiang
+ * @date 2022/4/21 16:13
+ **/
+@Getter
+@Setter
+@TableName("SYS_RELATION")
+public class SysRelation{
+
+    /** id */
+    @ApiModelProperty(value = "id", position = 1)
+    private String id;
+
+    /** 租户id */
+    @ApiModelProperty(value = "租户id", position = 2)
+    private String tenantId;
+
+    /** 对象id */
+    @ApiModelProperty(value = "对象id", position = 3)
+    private String objectId;
+
+    /** 目标id */
+    @ApiModelProperty(value = "目标id", position = 4)
+    private String targetId;
+
+    /** 分类 */
+    @ApiModelProperty(value = "分类", position = 5)
+    private String category;
+
+    /** 扩展信息 */
+    @ApiModelProperty(value = "扩展信息", position = 6)
+    @TableField(insertStrategy = FieldStrategy.IGNORED, updateStrategy = FieldStrategy.IGNORED)
+    private String extJson;
+}

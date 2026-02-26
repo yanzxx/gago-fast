@@ -1,0 +1,356 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Snowy框架后端开发规范
+
+## 开发规范
+
+- **数据库规范**：
+  - 统一采用大写表名称和字段名称，确保跨平台兼容性
+  - 数据库采用utf8mb4格式编码，使用utf8mb4_general_ci排序规则
+  - 表命名规则：模块缩写 + 表含义，例如系统模块表前缀为SYS_，开发工具模块表前缀为DEV_
+  - 主键统一命名为ID，数据类型使用VARCHAR(20)，由MybatisPlus框架生成
+  - 表外键命名格式：被引用表缩写_ID，如ROLE_ID，POSITION_ID
+  - 表名、字段名、索引名长度不超过25个字符
+
+- **插件化开发规范**：
+  - 框架采用Maven管理多模块，以插件化的方式进行开发，降低模块耦合度
+  - 插件基本结构包括顶级目录（snowy-plugin-xxx）、API接口（snowy-plugin-xxx-api）、接口实现（snowy-plugin-xxx-func）
+  - 插件之间的互相调用仅允许通过引用对方的API接口方式，严禁直接引入插件
+  - 标准包结构包括：controller/entity/mapper/param/provider/result/service等
+
+- **代码结构规范**：
+  - controller类需要加@RestController注解
+  - 实体类采用帕斯卡命名法（如SysUser），功能包采用小写命名
+  - 实体若需逻辑删除，可继承CommonEntity，表中需要相应字段
+  - 参数类建议不同接口使用不同param类，如SysUserPageParam、SysUserAddParam
+  - Service接口继承MybatisPlus的IService接口
+
+- **数据库规范**：
+  - 除非特殊说明，系统内数据库默认使用postgresql
+  - 除非特殊说明，数据库对象名称皆为小写
+
+## 接口文档
+
+- 基于Knife4j 4.5.0实现的接口文档系统
+- 通过独立的param和result类提高接口文档可读性
+- 接口参数和响应格式统一规范，便于前端调用
+- 建议在param类中添加完整的参数校验注解和说明
+- 通过注解方式标记接口的权限、日志、数据范围等信息
+
+## 逻辑删除
+
+- 实体继承CommonEntity获取公共字段（CREATE_USER/CREATE_TIME/UPDATE_USER/UPDATE_TIME）
+- 使用DELETE_FLAG字段标记删除状态，0表示未删除，1表示已删除
+- 通过MybatisPlus的@TableLogic注解自动实现逻辑删除功能
+- 查询时自动过滤已删除的数据，无需手动添加条件
+- 删除操作不会真正从数据库移除数据，只是更新状态标记
+
+## 关联关系
+
+- 采用中间表维护多对多关系，避免使用外键约束
+- 实体字段中使用xxxId关联其他表，如roleId关联角色表
+- 关联查询推荐使用自定义Result类接收结果
+- 删除主表数据时需要级联删除关联表数据
+
+## 数据监听
+
+- 利用Spring事件机制实现数据变更监听
+- 通过AOP实现数据操作的前置和后置处理
+- 对重要数据操作自动记录操作日志
+- 支持自定义数据变更处理逻辑
+
+## 登录鉴权
+
+- 基于SaToken 1.37.0实现登录鉴权功能
+- 支持B端和C端多种登录方式，包括账号密码、手机验证码等
+- 前端登录信息使用SM2国密算法加密传输，增强安全性
+- 提供获取当前登录用户信息的API接口
+- 支持单用户登录模式配置，可强制同一账号单一在线
+- 登录登出日志使用SM2签名完整性保护存储
+
+## 权限设计
+
+- 基于RBAC模型实现权限控制
+- 权限控制的基本单位是菜单目录、菜单和按钮
+- 角色绑定菜单后，限制相关角色人员的功能范围
+- 支持通过注解方式进行权限控制，粒度精确到按钮级别
+- 超级管理员只能获得系统权重菜单，不能获取业务权重菜单
+
+## 数据范围
+
+- 数据范围来源：用户角色的数据范围 + 用户直接分配的数据范围
+- 若用户有多个角色，系统以多个角色和用户数据范围的并集为准
+- 通过@DataScope注解标记需要数据范围控制的接口
+- 参数类继承BaseParam，通过param.getDadaScope获取数据权限列表
+- 灵活支持全部数据、本部门数据、本部门及下属数据、自定义数据等多种数据范围
+
+## 组织机构
+
+- 采用树形结构设计，支持多层级组织架构
+- 机构表中使用pid和pids字段维护层级关系
+- 员工表关联组织机构，支持主机构和附属机构
+- 提供完整的组织机构管理API，支持增删改查
+- 删除机构前检查是否有员工关联，有则不允许删除
+
+## 系统配置
+
+- 使用snowy-plugin-dev插件中的参数配置功能
+- 添加系统配置时，会将配置放到ConstantContext中，方便后续获取
+- 删除配置时，检查状态是否为Y，不是则可以删除
+- 修改配置后，会更新ConstantContext中的内容，确保实时生效
+- 支持配置项的动态增删改查
+
+## 国密使用
+
+- 支持SM2/SM3/SM4国密算法
+- 登录时使用SM2前端加密，后端解密
+- 用户密码使用SM3完整性保护存储，登录时校验
+- 用户手机号使用SM4(cbc模式)加解密实现字段脱敏
+- 操作日志和登录登出日志使用SM2签名保护存储
+
+## 多数据源
+
+- 支持动态配置多数据源
+- 通过注解方式指定使用的数据源
+- 支持多数据源事务管理
+- 提供数据源动态切换能力
+
+## 动态租户
+
+- 采用SaaS多租户模式设计
+- 支持不同级别的租户隔离机制
+- 提供租户信息的动态传递与识别
+- 支持按需扩展租户功能
+
+## 开发示例
+
+### 实体类示例
+
+```java
+@Getter
+@Setter
+@TableName(value = "SYS_USER", autoResultMap = true)
+public class SysUser extends CommonEntity implements TransPojo {
+
+    /** id */
+    @TableId
+    @ApiModelProperty(value = "id", position = 1)
+    private String id;
+
+    /** 租户id */
+    @ApiModelProperty(value = "租户id", position = 2)
+    private String tenantId;
+
+    /** 头像 */
+    @ApiModelProperty(value = "头像", position = 3)
+    @TableField(insertStrategy = FieldStrategy.IGNORED, updateStrategy = FieldStrategy.IGNORED)
+    private String avatar;
+
+    /** 签名 */
+    @ApiModelProperty(value = "签名", position = 4)
+    @TableField(insertStrategy = FieldStrategy.IGNORED, updateStrategy = FieldStrategy.IGNORED)
+    private String signature;
+
+    /** 账号 */
+    @ApiModelProperty(value = "账号", position = 5)
+    private String account;
+
+    /** 密码 */
+    @ApiModelProperty(value = "密码", position = 6)
+    private String password;
+
+    /** 姓名 */
+    @ApiModelProperty(value = "姓名", position = 7)
+    private String name;
+
+    /** 性别 */
+    @ApiModelProperty(value = "性别", position = 8)
+    @TableField(insertStrategy = FieldStrategy.IGNORED, updateStrategy = FieldStrategy.IGNORED)
+    @Trans(type = TransType.DICTIONARY, key = "GENDER")
+    private String gender;
+}
+```
+
+### 控制器示例
+
+```java
+@Api(tags = "角色控制器")
+@ApiSupport(author = "SNOWY_TEAM", order = 1)
+@RestController
+@Validated
+public class SysRoleController {
+
+    @Resource
+    private SysRoleService sysRoleService;
+
+    /**
+     * 获取角色分页
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 20:00
+     */
+    @ApiOperationSupport(order = 1)
+    @ApiOperation("获取角色分页")
+    @GetMapping("/sys/role/page")
+    public CommonResult<Page<SysRole>> page(SysRolePageParam sysRolePageParam) {
+        return CommonResult.data(sysRoleService.page(sysRolePageParam));
+    }
+
+    /**
+     * 添加角色
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 20:47
+     */
+    @ApiOperationSupport(order = 2)
+    @ApiOperation("添加角色")
+    @CommonLog("添加角色")
+    @PostMapping("/sys/role/add")
+    public CommonResult<SysRole> add(@RequestBody @Valid SysRoleAddParam sysRoleAddParam) {
+        return CommonResult.data(sysRoleService.add(sysRoleAddParam));
+    }
+
+    /**
+     * 删除角色
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 20:00
+     */
+    @ApiOperationSupport(order = 4)
+    @ApiOperation("删除角色")
+    @CommonLog("删除角色")
+    @PostMapping("/sys/role/delete")
+    public CommonResult<String> delete(@RequestBody @Valid @NotEmpty(message = "集合不能为空")
+                                 CommonValidList<SysRoleIdParam> sysRoleIdParamList) {
+        sysRoleService.delete(sysRoleIdParamList);
+        return CommonResult.ok();
+    }
+}
+```
+
+### 服务层接口示例
+
+```java
+public interface SysUserService extends IService<SysUser> {
+
+    /**
+     * 获取用户分页
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 20:08
+     */
+    Page<SysUser> page(SysUserPageParam sysUserPageParam);
+
+    /**
+     * 添加用户
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 20:48
+     */
+    void add(SysUserAddParam sysUserAddParam);
+
+    /**
+     * 编辑用户
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 21:13
+     */
+    void edit(SysUserEditParam sysUserEditParam);
+
+    /**
+     * 删除用户
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 21:18
+     */
+    void delete(List<SysUserIdParam> sysUserIdParamList);
+
+    /**
+     * 获取用户详情
+     *
+     * @author xuyuxiang
+     * @date 2022/4/24 21:18
+     */
+    SysUser detail(SysUserIdParam sysUserIdParam);
+}
+```
+
+### 服务层实现示例
+
+```java
+@Service
+public class DevFileServiceImpl extends ServiceImpl<DevFileMapper, DevFile> implements DevFileService {
+
+    @Resource
+    private DevFileMapper devFileMapper;
+
+    @Resource
+    private DevConfigApi devConfigApi;
+
+    @Override
+    public String uploadReturnId(String engine, MultipartFile file) {
+        // 校验引擎类型
+        DevFileEngineTypeEnum.validate(engine);
+        // 获取文件引擎
+        FileEngine fileEngine = EngineFactory.buildFileEngine(engine);
+        // 上传
+        DevFile devFile = fileEngine.uploadFile(file);
+        // 保存
+        this.save(devFile);
+        // 返回id
+        return devFile.getId();
+    }
+
+    @Override
+    public String uploadReturnUrl(String engine, MultipartFile file) {
+        // 校验引擎类型
+        DevFileEngineTypeEnum.validate(engine);
+        // 获取文件引擎
+        FileEngine fileEngine = EngineFactory.buildFileEngine(engine);
+        // 上传
+        DevFile devFile = fileEngine.uploadFile(file);
+        // 保存
+        this.save(devFile);
+        // 返回url
+        return devFile.getStoragePath();
+    }
+
+    @Override
+    public Page<DevFile> page(DevFilePageParam devFilePageParam) {
+        return this.page(new Page<>(devFilePageParam.getCurrent(), devFilePageParam.getSize()),
+                new LambdaQueryWrapper<DevFile>()
+                        .like(ObjectUtil.isNotEmpty(devFilePageParam.getEngine()),
+                                DevFile::getEngine, devFilePageParam.getEngine())
+                        .like(ObjectUtil.isNotEmpty(devFilePageParam.getName()),
+                                DevFile::getName, devFilePageParam.getName())
+                        .orderByDesc(DevFile::getCreateTime));
+    }
+}
+```
+
+### Mapper接口示例
+
+```java
+public interface DevFileMapper extends BaseMapper<DevFile> {
+}
+```
+
+### MyBatis-Plus使用方式
+
+- 由于使用了MyBatis-Plus框架，大多数基本的CRUD操作不需要编写SQL语句
+- 简单查询可直接使用内置方法如selectById()、selectList()等
+- 复杂查询可使用QueryWrapper或LambdaQueryWrapper构建查询条件
+- 复杂SQL可在Mapper.xml中定义，并在Mapper接口中声明方法
+
+```java
+// 示例：使用LambdaQueryWrapper构建查询条件
+LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+queryWrapper.eq(SysUser::getAccount, "admin")
+            .like(ObjectUtil.isNotEmpty(param.getName()), SysUser::getName, param.getName())
+            .in(CollUtil.isNotEmpty(orgIdList), SysUser::getOrgId, orgIdList)
+            .orderByDesc(SysUser::getCreateTime);
+return this.page(new Page<>(param.getCurrent(), param.getSize()), queryWrapper);
+```

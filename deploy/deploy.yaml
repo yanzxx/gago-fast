@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $APP_NAME
+  namespace: $KUBE_NAMESPACE
+  labels:
+    app: $APP_NAME
+  annotations:
+    servicemesh.kubesphere.io/enabled: "false"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: $APP_NAME
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      volumes:
+        - name: volumn-gago-fast-server-conf
+          configMap:
+            name: gago-fast-server-conf
+            defaultMode: 420
+        - name: volume-gago-fast-server-log
+          persistentVolumeClaim:
+            claimName: gago-fast-server-log
+        - name: volume-gago-fast-server-upload
+          persistentVolumeClaim:
+            claimName: gago-fast-server-upload
+      containers:
+        - image: $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TIME_VERSION
+          imagePullPolicy: Always
+          name: $APP_NAME
+          ports:
+            - name: http-82
+              containerPort: 82
+              protocol: TCP
+          volumeMounts:
+            - name: volumn-gago-fast-server-conf
+              mountPath: /application-test.properties
+              subPath: application-test.properties
+              readOnly: true
+            - name: volume-gago-fast-server-log
+              mountPath: /app-log
+            - name: volume-gago-fast-server-upload
+              mountPath: /defaultUploadFolder
+          resources:
+            limits:
+              cpu: '2'
+              memory: 2000Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: $QKE_DOCKER_CREDENTICAL
+      terminationGracePeriodSeconds: 30

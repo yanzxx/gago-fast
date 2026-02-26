@@ -1,0 +1,164 @@
+package ${packageName}.${moduleName}.modular.${busName}.controller;
+
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import vip.xiaonuo.common.annotation.CommonLog;
+import vip.xiaonuo.common.pojo.CommonResult;
+import vip.xiaonuo.common.pojo.CommonValidList;
+import ${packageName}.${moduleName}.modular.${busName}.entity.${className};
+import ${packageName}.${moduleName}.modular.${busName}.param.${className}AddParam;
+import ${packageName}.${moduleName}.modular.${busName}.param.${className}EditParam;
+import ${packageName}.${moduleName}.modular.${busName}.param.${className}IdParam;
+import ${packageName}.${moduleName}.modular.${busName}.param.${className}PageParam;
+import ${packageName}.${moduleName}.modular.${busName}.service.${className}Service;
+
+import javax.annotation.Resource;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * ${functionName}控制器
+ *
+ * @author ${authorName}
+ * @date ${genTime}
+ */
+@Api(tags = "${functionName}控制器")
+@ApiSupport(author = "SNOWY_TEAM", order = 1)
+@RequestMapping("/${moduleName}/${busName}/${classNameKebab}")
+@RestController
+@Validated
+public class ${className}Controller {
+
+    @Resource
+    private ${className}Service ${classNameFirstLower}Service;
+
+    /**
+     * 获取${functionName}分页
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 1)
+    @ApiOperation("获取${functionName}分页")
+    @SaCheckPermission("/${moduleName}/${busName}/${classNameKebab}/page")
+    @GetMapping("/page")
+    public CommonResult<Page<${className}>> page(${className}PageParam ${classNameFirstLower}PageParam) {
+        return CommonResult.data(${classNameFirstLower}Service.page(${classNameFirstLower}PageParam));
+    }
+
+    /**
+     * 添加${functionName}
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 2)
+    @ApiOperation("添加${functionName}")
+    @CommonLog("添加${functionName}")
+    @SaCheckPermission("/${moduleName}/${busName}/${classNameKebab}/add")
+    @PostMapping("/add")
+    public CommonResult<String> add(@RequestBody @Valid ${className}AddParam ${classNameFirstLower}AddParam) {
+        ${classNameFirstLower}Service.add(${classNameFirstLower}AddParam);
+        return CommonResult.ok();
+    }
+
+    /**
+     * 编辑${functionName}
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 3)
+    @ApiOperation("编辑${functionName}")
+    @CommonLog("编辑${functionName}")
+    @SaCheckPermission("/${moduleName}/${busName}/${classNameKebab}/edit")
+    @PostMapping("/edit")
+    public CommonResult<String> edit(@RequestBody @Valid ${className}EditParam ${classNameFirstLower}EditParam) {
+        ${classNameFirstLower}Service.edit(${classNameFirstLower}EditParam);
+        return CommonResult.ok();
+    }
+
+    /**
+     * 删除${functionName}
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 4)
+    @ApiOperation("删除${functionName}")
+    @CommonLog("删除${functionName}")
+    @SaCheckPermission("/${moduleName}/${busName}/${classNameKebab}/delete")
+    @PostMapping("/delete")
+    public CommonResult<String> delete(@RequestBody @Valid @NotEmpty(message = "集合不能为空")
+                                                   CommonValidList<${className}IdParam> ${classNameFirstLower}IdParamList) {
+        ${classNameFirstLower}Service.delete(${classNameFirstLower}IdParamList);
+        return CommonResult.ok();
+    }
+
+    /**
+     * 获取${functionName}详情
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 5)
+    @ApiOperation("获取${functionName}详情")
+    @SaCheckPermission("/${moduleName}/${busName}/${classNameKebab}/detail")
+    @GetMapping("/detail")
+    public CommonResult<${className}> detail(@Valid ${className}IdParam ${classNameFirstLower}IdParam) {
+        return CommonResult.data(${classNameFirstLower}Service.detail(${classNameFirstLower}IdParam));
+    }
+
+    /**
+     * 导出${functionName}数据
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 6)
+    @ApiOperation("导出${functionName}数据")
+    @GetMapping("/excel-out")
+    public void excelOut(HttpServletResponse response, ${className}PageParam ${classNameFirstLower}PageParam) {
+        ${classNameFirstLower}Service.excelOut(response, ${classNameFirstLower}PageParam);
+    }
+
+
+    /**
+     * 导入${functionName}数据
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 7)
+    @ApiOperation("导入${functionName}数据")
+    @PostMapping("/excel-in")
+    public CommonResult<String> excelIn(@RequestBody MultipartFile file) {
+        ${classNameFirstLower}Service.excelIn(file);
+        return CommonResult.ok();
+    }
+
+    /**
+     * 下载${functionName}导入模板
+     *
+     * @author ${authorName}
+     * @date ${genTime}
+     */
+    @ApiOperationSupport(order = 8)
+    @ApiOperation("下载${functionName}导入模板")
+    @GetMapping("/import-template")
+    public void importTemplate(HttpServletResponse response) throws Exception {
+        ${classNameFirstLower}Service.generateImportTemplate(response);
+    }
+}

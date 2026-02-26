@@ -1,0 +1,47 @@
+
+package ${packageName}.${moduleName}.modular.${busName}.entity.VO;
+
+import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
+import vip.xiaonuo.common.annotation.ExcelConfig;
+import com.fhs.core.trans.vo.TransPojo;
+import com.fhs.core.trans.anno.Trans;
+import com.fhs.core.trans.constant.TransType;
+import lombok.Getter;
+import lombok.Setter;
+import java.math.BigDecimal;
+import java.util.Date;
+
+
+/**
+ * ${functionName} Excel导出实体
+ *
+ * @author ${authorName}
+ * @date ${genTime}
+ **/
+@Getter
+@Setter
+public class ${className}ExportVO implements TransPojo {
+
+    <% for(var i = 0; i < configList.~size; i++) { %>
+
+    /** ${configList[i].fieldRemark} */
+    @ApiModelProperty(value = "${configList[i].fieldRemark}", position = ${i + 1})
+    <% if(configList[i].needExportAndInto) { %>
+    @ExcelConfig(name = "${configList[i].fieldRemark}")
+    <% } else { %><% } %>
+    <% if(configList[i].dictTypeCode != null) { %>
+    @Trans(type = TransType.DICTIONARY, key = "${configList[i].dictTypeCode}", ref = "${configList[i].fieldNameCamelCase}")
+    <% } else { %><% } %>
+    <% if(configList[i].needAutoInsert) { %>
+    @TableField(fill = FieldFill.INSERT)
+    <% } else { %><% } %>
+    <% if(configList[i].needAutoUpdate) { %>
+    @TableField(fill = FieldFill.UPDATE)
+    <% } else { %><% } %>
+    private ${configList[i].fieldJavaType} ${configList[i].fieldNameCamelCase};
+    <% if(i == configList.~size - 1) { %><% } else { %>
+
+    <% } %>
+    <% } %>
+}
