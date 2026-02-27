@@ -58,3 +58,7 @@ auto-imports.d.ts
 /app-log
 application-local.properties
 application-test.properties
+
+# local runtime/cache
+.dev/
+.m2/
