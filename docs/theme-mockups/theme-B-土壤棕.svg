@@ -1,0 +1,20 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900'>
+  <defs><linearGradient id='hB' x1='0' y1='0' x2='1' y2='0'><stop offset='0%' stop-color='#8A5A2B'/><stop offset='100%' stop-color='#B07A3F'/></linearGradient></defs>
+  <rect width='1600' height='900' fill='#F8F4EE'/><rect x='0' y='0' width='1600' height='84' fill='url(#hB)'/>
+  <rect x='0' y='84' width='260' height='816' fill='#EFE3D5'/>
+  <text x='40' y='52' fill='white' font-size='30' font-weight='700'>农场管理平台 · 土壤棕主题</text>
+  <rect x='20' y='122' width='220' height='52' rx='10' fill='#8A5A2B'/><text x='40' y='155' fill='white' font-size='24'>畜牧登记管理</text>
+  <rect x='20' y='188' width='220' height='52' rx='10' fill='#DDC8AF'/><text x='40' y='221' fill='#704922' font-size='24'>畜牧统计看板</text>
+  <rect x='286' y='108' width='1294' height='760' rx='14' fill='#FFFDF9' stroke='#E8DCCF'/>
+  <text x='320' y='154' fill='#2E241C' font-size='30' font-weight='700'>畜牧登记管理</text>
+  <rect x='320' y='176' width='1240' height='50' rx='8' fill='#FBF5ED' stroke='#E9DDCF'/><text x='340' y='208' fill='#6A5A48' font-size='20'>筛选：畜种 / 项圈编号 / 防疫状态 / 日期</text>
+  <rect x='320' y='246' width='320' height='96' rx='10' fill='#F8EEDF' stroke='#E2CCAF'/><text x='344' y='304' fill='#8A5A2B' font-size='32'>存栏 2,450</text>
+  <rect x='660' y='246' width='320' height='96' rx='10' fill='#F8EEDF' stroke='#E2CCAF'/><text x='684' y='304' fill='#8A5A2B' font-size='32'>出栏 318</text>
+  <rect x='1000' y='246' width='320' height='96' rx='10' fill='#FFF0EE' stroke='#EBCBC7'/><text x='1024' y='304' fill='#C53F3F' font-size='32'>死亡 42</text>
+  <rect x='320' y='366' width='1240' height='460' rx='10' fill='white' stroke='#EEE2D7'/>
+  <text x='344' y='408' fill='#3C2F25' font-size='24'>编号  畜种  出生日期  防疫状态  近期防疫注射时间  项圈编号</text>
+  <line x1='340' y1='424' x2='1540' y2='424' stroke='#EDE1D4'/>
+  <text x='344' y='468' fill='#3C2F25' font-size='21'>LM-2026001  骆驼  2024-03-12  已接种  2026-02-01  C-09001</text>
+  <text x='344' y='516' fill='#3C2F25' font-size='21'>LM-2026002  牛    2023-09-01  未接种  -           C-09002</text>
+  <text x='344' y='564' fill='#3C2F25' font-size='21'>LM-2026003  羊    2024-01-18  已过期  2025-01-02  C-09003</text>
+</svg>

@@ -60,7 +60,7 @@ const DEFAULT_CONFIG = {
 	LANG: 'zh-cn',
 
 	// 主题颜色
-	COLOR: '#1890FF',
+	COLOR: '#1F8A70',
 
 	// 默认整体主题
 	SNOWY_THEME: 'light',

@@ -567,7 +567,7 @@
 	.lineBetween {
 		height: 1px;
 		width: 100%;
-		background-color: #cfd7e8;
+		background-color: #cfe5de;
 		margin-top: 10px;
 	}
 </style>

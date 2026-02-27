@@ -23,12 +23,16 @@ const colorList = [
 		key: '极光绿',
 		color: '#52C41A'
 	},
+	{
+		key: '牧场青绿（默认）',
+		color: '#1F8A70'
+	},
 	// {
 	// 	key: '深绿',
 	// 	color: '#009688'
 	// },
 	{
-		key: '拂晓蓝（默认）',
+		key: '拂晓蓝',
 		color: '#1890FF'
 	},
 	// {

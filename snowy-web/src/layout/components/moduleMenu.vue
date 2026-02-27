@@ -11,22 +11,21 @@
 				v-for="item in menu"
 				:key="item.id"
 				class="module-menu-item"
-				style="display: flex; flex-direction: column; align-items: center; justify-content: center"
 				@click.stop.prevent="moduleClick(item)"
 			>
 				<template #icon>
 					<component v-if="item && item.icon && item.icon.indexOf('icon') == -1" :is="item.icon" />
-					<i v-else class="iconfont" :class="item.icon" style="font-size: 16px; height: 17px; top: -5px"></i>
+					<i v-else class="iconfont" :class="item.icon"></i>
 				</template>
 				<a
 					v-if="item.category && item.category === 'SPA' && item.menuType === 'LINK'"
 					:href="item.path"
 					target="_blank"
 					@click.stop="() => {}"
-					style="position: relative; top: 7px; color: #fff"
+					style="color: inherit"
 					>{{ item.title }}</a
 				>
-				<span v-else style="position: relative; top: 7px" :title="selectedKeys">{{ item.title }}</span>
+				<span v-else :title="selectedKeys">{{ item.title }}</span>
 			</a-menu-item>
 		</a-menu>
 	</div>
@@ -203,7 +202,7 @@
 	}
 
 	.homePageIcon:hover {
-		color: #4390ed;
+		color: #d1f1e7;
 	}
 	.module-row {
 		max-width: 357px;
@@ -211,7 +210,7 @@
 	.module-card {
 		width: 80px;
 		height: 80px;
-		background-color: #0d84ff;
+		background: linear-gradient(135deg, #1f8a70, #2ea386);
 		text-align: center;
 		align-items: center;
 		cursor: pointer;
@@ -231,18 +230,51 @@
 		content: none;
 	}
 	.module-menu {
-		line-height: 50px;
+		line-height: 1;
 		border-bottom: 0px;
 		overflow: hidden;
 		background-color: transparent !important;
+		display: flex;
+		align-items: center;
+		min-height: 72px;
 	}
 	.module-menu-item {
-		color: #fff;
-		border-radius: 0 !important;
-		border-top-left-radius: 8px !important;
-		border-top-right-radius: 8px !important;
+		height: 72px !important;
+		line-height: 1 !important;
+		margin: 0 4px !important;
+		padding: 0 18px !important;
+		border-radius: 12px 12px 0 0 !important;
+		color: rgba(255, 255, 255, 0.92);
+		display: flex !important;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+
+		.iconfont,
+		.ant-menu-item-icon {
+			font-size: 16px;
+			line-height: 1;
+			height: 16px;
+		}
+
+		.ant-menu-title-content {
+			margin-left: 0 !important;
+			line-height: 1;
+			font-size: 14px;
+			font-weight: 600;
+		}
+
+		&:hover {
+			color: #ffffff !important;
+			background: rgba(255, 255, 255, 0.16) !important;
+		}
+
 		&.ant-menu-item-selected {
-			background: linear-gradient(to bottom, rgba(255, 255, 255, 84.94%), rgba(255, 255, 255, 44.77%)) !important;
+			background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7)) !important;
+			color: #1f8a70 !important;
+			box-shadow: 0 8px 16px rgba(10, 70, 55, 0.15);
 		}
 	}
 	.module-menu-color {
