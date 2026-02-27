@@ -24,6 +24,14 @@ const routes = [
 				meta: {
 					title: '贷款管理'
 				}
+			},
+			{
+				path: '/afterLoanAdministration',
+				name: 'afterLoanAdministration',
+				component: () => import('@/views/after-loan-administration/index.vue'),
+				meta: {
+					title: '贷后管理'
+				}
 			}
 		]
 	},

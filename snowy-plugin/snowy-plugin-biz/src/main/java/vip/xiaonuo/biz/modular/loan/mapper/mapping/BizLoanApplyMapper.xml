@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.loan.mapper.BizLoanApplyMapper">
+
+    <resultMap id="BizLoanApplyPageResultMap" type="vip.xiaonuo.biz.modular.loan.result.BizLoanApplyPageResult">
+        <result column="id" property="id"/>
+        <result column="applyNo" property="applyNo"/>
+        <result column="farmId" property="farmId"/>
+        <result column="productCode" property="productCode"/>
+        <result column="productName" property="productName"/>
+        <result column="applyAmount" property="applyAmount"/>
+        <result column="applicantName" property="applicantName"/>
+        <result column="loanStatus" property="loanStatus"/>
+        <result column="applyTime" property="applyTime"/>
+    </resultMap>
+
+    <select id="page" resultMap="BizLoanApplyPageResultMap">
+        select
+            l.id as id,
+            l.apply_no as applyNo,
+            l.farm_id as farmId,
+            l.product_code as productCode,
+            p.product_name as productName,
+            l.apply_amount as applyAmount,
+            l.applicant_name as applicantName,
+            l.loan_status as loanStatus,
+            to_char(l.apply_time, 'YYYY-MM-DD HH24:MI:SS') as applyTime
+        from yzx.biz_loan_apply l
+        left join yzx.biz_fin_product p on p.product_code = l.product_code and p.delete_flag = 'NOT_DELETE'
+        where l.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.applyNo != null and param.applyNo != ''">
+            and l.apply_no like concat('%', #{param.applyNo}, '%')
+        </if>
+        <if test="param != null and param.loanStatus != null and param.loanStatus != ''">
+            and l.loan_status = #{param.loanStatus}
+        </if>
+
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and l.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and l.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+        order by l.apply_time desc, l.create_time desc
+    </select>
+</mapper>

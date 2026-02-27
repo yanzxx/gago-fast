@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.afterloan.mapper.BizAfterLoanAnomalyMapper">
+
+    <resultMap id="BizAfterLoanAnomalyPageResultMap" type="vip.xiaonuo.biz.modular.afterloan.result.BizAfterLoanAnomalyPageResult">
+        <result column="id" property="id"/>
+        <result column="farmId" property="farmId"/>
+        <result column="anomalyType" property="anomalyType"/>
+        <result column="targetNo" property="targetNo"/>
+        <result column="triggerTime" property="triggerTime"/>
+        <result column="riskLevel" property="riskLevel"/>
+        <result column="status" property="status"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <sql id="AfterLoanAnomalyWhere">
+        from yzx.biz_after_loan_anomaly a
+        where a.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.riskLevel != null and param.riskLevel != ''">
+            and a.risk_level = #{param.riskLevel}
+        </if>
+        <if test="param != null and param.startDate != null and param.startDate != ''">
+            and to_char(a.trigger_time, 'YYYY-MM-DD') &gt;= #{param.startDate}
+        </if>
+        <if test="param != null and param.endDate != null and param.endDate != ''">
+            and to_char(a.trigger_time, 'YYYY-MM-DD') &lt;= #{param.endDate}
+        </if>
+
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and a.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and a.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="LivestockScopeWhere">
+        from yzx.biz_livestock l
+        where l.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.startDate != null and param.startDate != ''">
+            and l.register_date &gt;= #{param.startDate}
+        </if>
+        <if test="param != null and param.endDate != null and param.endDate != ''">
+            and l.register_date &lt;= #{param.endDate}
+        </if>
+
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and l.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and l.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <select id="anomalyPage" resultMap="BizAfterLoanAnomalyPageResultMap">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            a.anomaly_type as anomalyType,
+            a.target_no as targetNo,
+            to_char(a.trigger_time, 'YYYY-MM-DD HH24:MI:SS') as triggerTime,
+            a.risk_level as riskLevel,
+            a.status as status,
+            a.description as description
+        <include refid="AfterLoanAnomalyWhere"/>
+        order by a.trigger_time desc, a.create_time desc
+    </select>
+
+    <select id="countTotal" resultType="java.lang.Long">
+        select count(1)
+        <include refid="AfterLoanAnomalyWhere"/>
+    </select>
+
+    <select id="countByStatus" resultType="java.lang.Long">
+        select count(1)
+        <include refid="AfterLoanAnomalyWhere"/>
+        and a.status = #{status}
+    </select>
+
+    <select id="countByStatusNot" resultType="java.lang.Long">
+        select count(1)
+        <include refid="AfterLoanAnomalyWhere"/>
+        and a.status != #{statusNot}
+    </select>
+
+    <select id="stockChart" resultType="vip.xiaonuo.biz.modular.afterloan.result.BizAfterLoanChartItemResult">
+        select '在栏' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.status = 'IN_STOCK'
+        union all
+        select '出栏' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.status = 'OUT_STOCK'
+        union all
+        select '死亡' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.status = 'DEAD'
+    </select>
+
+    <select id="mortgageChart" resultType="vip.xiaonuo.biz.modular.afterloan.result.BizAfterLoanChartItemResult">
+        with livestock_total as (
+            select count(1)::bigint as total
+            <include refid="LivestockScopeWhere"/>
+            and l.status = 'IN_STOCK'
+        ),
+        mortgage_gap as (
+            select count(1)::bigint as gap
+            <include refid="AfterLoanAnomalyWhere"/>
+            and a.anomaly_type = '抵押不足'
+        )
+        select '应抵押' as name, lt.total as value from livestock_total lt
+        union all
+        select '已抵押' as name, greatest(lt.total - mg.gap, 0)::bigint as value
+        from livestock_total lt, mortgage_gap mg
+        union all
+        select '缺口' as name, mg.gap as value from mortgage_gap mg
+    </select>
+
+    <select id="healthChart" resultType="vip.xiaonuo.biz.modular.afterloan.result.BizAfterLoanChartItemResult">
+        select '正常' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.immunity_status = 'IMMUNIZED'
+        union all
+        select '预警' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.immunity_status = 'NOT_IMMUNIZED'
+        union all
+        select '严重预警' as name, count(1)::bigint as value
+        <include refid="LivestockScopeWhere"/>
+        and l.immunity_status = 'EXPIRED'
+    </select>
+</mapper>
