@@ -211,14 +211,11 @@ a, button, input, textarea {
 	}
 
 	.module-menu .ant-menu-item:hover {
-		color: #d2f1e8 !important;
-		border-radius: 8px;
+		color: #ffffff !important;
 	}
 
 	.module-menu .ant-menu-item-selected {
-		color: #ffffff !important;
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.2) !important;
+		color: inherit !important;
 	}
 }
 
@@ -444,6 +441,22 @@ a, button, input, textarea {
 	align-items: center;
 	padding-left: 6px;
 	height: 72px;
+}
+
+.snowy-header-left .jiage-collapse {
+	width: 44px;
+	height: 44px;
+	margin: 0 8px 0 10px;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	transition: background-color 0.2s ease;
+}
+
+.snowy-header-left .jiage-collapse:hover {
+	background: rgba(255, 255, 255, 0.14);
 }
 
 .snowy-header-left .menu-unfold-outlined {

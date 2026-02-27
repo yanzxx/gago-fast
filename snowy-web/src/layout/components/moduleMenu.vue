@@ -237,6 +237,7 @@
 		display: flex;
 		align-items: center;
 		min-height: 72px;
+		margin-left: 2px;
 	}
 	.module-menu-item {
 		height: 72px !important;
@@ -272,9 +273,7 @@
 		}
 
 		&.ant-menu-item-selected {
-			background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7)) !important;
-			color: #1f8a70 !important;
-			box-shadow: 0 8px 16px rgba(10, 70, 55, 0.15);
+			background: linear-gradient(to bottom, rgba(255, 255, 255, 84.94%), rgba(255, 255, 255, 44.77%)) !important;
 		}
 	}
 	.module-menu-color {

@@ -46,7 +46,6 @@
 					<div class="snowy-header-left" style="padding-left: 0px">
 						<div
 							v-if="!ismobile"
-							style="position: absolute; left: 0; top: 4px"
 							class="panel-item hidden-sm-and-down jiage-collapse"
 							@click="menuIsCollapseClick"
 						>
