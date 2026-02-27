@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.insapply.mapper.BizInsApplyMapper">
+
+    <resultMap id="BizInsApplyPageResultMap" type="vip.xiaonuo.biz.modular.insapply.result.BizInsApplyPageResult">
+        <result column="id" property="id"/>
+        <result column="farmId" property="farmId"/>
+        <result column="applyNo" property="applyNo"/>
+        <result column="policyNo" property="policyNo"/>
+        <result column="productCode" property="productCode"/>
+        <result column="insuredName" property="insuredName"/>
+        <result column="speciesType" property="speciesType"/>
+        <result column="insuredCount" property="insuredCount"/>
+        <result column="insuredAmount" property="insuredAmount"/>
+        <result column="premiumAmount" property="premiumAmount"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <select id="page" resultMap="BizInsApplyPageResultMap">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            a.apply_no as applyNo,
+            a.policy_no as policyNo,
+            a.product_code as productCode,
+            a.insured_name as insuredName,
+            a.species_type as speciesType,
+            a.insured_count as insuredCount,
+            a.insured_amount as insuredAmount,
+            a.premium_amount as premiumAmount,
+            a.status as status
+        from yzx.biz_ins_apply a
+        where a.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.applyNo != null and param.applyNo != ''">
+            and a.apply_no like concat('%', #{param.applyNo}, '%')
+        </if>
+        <if test="param != null and param.status != null and param.status != ''">
+            and a.status = #{param.status}
+        </if>
+
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and a.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and a.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+        order by a.update_time desc
+    </select>
+</mapper>

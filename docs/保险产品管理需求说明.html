@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>保险产品管理需求说明</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; color: #222; }
+    h1 { font-size: 24px; margin: 0 0 16px; }
+    h2 { font-size: 18px; margin: 18px 0 8px; }
+    ul { margin: 6px 0 12px 22px; }
+    li { margin: 2px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #f6f8fa; }
+  </style>
+</head>
+<body>
+  <h1>保险产品管理需求说明（精简版）</h1>
+
+  <h2>1. 建设目标</h2>
+  <ul>
+    <li>统一管理保险产品信息，支持新增、查看、编辑、上架、下架。</li>
+    <li>按农场维度控制数据可见范围，管理员可查看全部农场。</li>
+    <li>为后续“投保管理”模块提供标准化产品数据来源。</li>
+  </ul>
+
+  <h2>2. 范围边界</h2>
+  <ul>
+    <li>本期仅建设“保险产品管理”页面与接口。</li>
+    <li>不包含移动端。</li>
+    <li>不包含复杂审核流（如需“审核后上架”，建议二期补充）。</li>
+  </ul>
+
+  <h2>3. 角色与权限</h2>
+  <ul>
+    <li>农场用户：仅可查看和维护本农场保险产品。</li>
+    <li>管理员：可查看和维护所有农场保险产品。</li>
+  </ul>
+
+  <h2>4. 页面与交互</h2>
+  <ul>
+    <li>页面结构：上方筛选区 + 下方列表区。</li>
+    <li>筛选条件：养殖场、产品名称、产品状态。</li>
+    <li>列表操作：详情、编辑、上架/下架、删除。</li>
+    <li>顶部按钮：新增产品。</li>
+  </ul>
+
+  <h2>5. 数据字段设计</h2>
+  <table>
+    <thead>
+      <tr><th>字段</th><th>说明</th><th>是否必填</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>farmId</td><td>养殖场ID</td><td>是（管理员可选，农场用户自动带入）</td></tr>
+      <tr><td>productName</td><td>保险产品名称</td><td>是</td></tr>
+      <tr><td>productCode</td><td>保险产品编码（唯一）</td><td>是</td></tr>
+      <tr><td>insuranceType</td><td>险种类型（字典）</td><td>是</td></tr>
+      <tr><td>coverageScope</td><td>保障范围说明</td><td>是</td></tr>
+      <tr><td>premiumRate</td><td>费率（%）</td><td>是</td></tr>
+      <tr><td>maxCompensation</td><td>最高赔付金额</td><td>是</td></tr>
+      <tr><td>status</td><td>状态：DRAFT/ON_SHELF/OFF_SHELF</td><td>系统维护</td></tr>
+      <tr><td>remark</td><td>备注</td><td>否</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. 业务规则</h2>
+  <ul>
+    <li>产品编码全局唯一。</li>
+    <li>已上架产品允许下架，不允许直接删除（需先下架）。</li>
+    <li>删除采用逻辑删除（delete_flag）。</li>
+    <li>费率、赔付金额必须为大于等于0的数值。</li>
+  </ul>
+
+  <h2>7. 接口清单（建议）</h2>
+  <ul>
+    <li>GET /biz/insProduct/page：分页查询</li>
+    <li>GET /biz/insProduct/detail：详情</li>
+    <li>POST /biz/insProduct/add：新增</li>
+    <li>POST /biz/insProduct/edit：编辑</li>
+    <li>POST /biz/insProduct/onShelf：上架</li>
+    <li>POST /biz/insProduct/offShelf：下架</li>
+    <li>POST /biz/insProduct/delete：删除</li>
+  </ul>
+
+  <h2>8. 验收标准（最小）</h2>
+  <ul>
+    <li>可完成新增、查询、编辑、上/下架、删除全流程。</li>
+    <li>权限隔离生效：农场用户无法查看其他农场产品。</li>
+    <li>列表分页、筛选、状态展示正常。</li>
+  </ul>
+</body>
+</html>

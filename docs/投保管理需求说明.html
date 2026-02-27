@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>投保管理需求说明</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; color: #222; }
+    h1 { font-size: 24px; margin: 0 0 16px; }
+    h2 { font-size: 18px; margin: 18px 0 8px; }
+    ul { margin: 6px 0 12px 22px; }
+    li { margin: 2px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #f6f8fa; }
+  </style>
+</head>
+<body>
+  <h1>投保管理需求说明（精简版）</h1>
+
+  <h2>1. 建设目标</h2>
+  <ul>
+    <li>支持多条件筛选投保记录，快速定位目标保单。</li>
+    <li>支持查看保单详情，形成“产品-投保-保单”数据闭环。</li>
+    <li>支持按农场维度进行数据隔离与权限控制。</li>
+  </ul>
+
+  <h2>2. 范围边界</h2>
+  <ul>
+    <li>本期仅做 Web 端，不包含移动端。</li>
+    <li>本期不做审核流功能，仅做登记、查询、详情查看。</li>
+    <li>理赔、保后监控、整改等能力不在本期范围。</li>
+  </ul>
+
+  <h2>3. 角色与权限</h2>
+  <ul>
+    <li>农场用户：仅查看和维护本农场投保记录。</li>
+    <li>管理员：查看全部农场投保记录。</li>
+  </ul>
+
+  <h2>4. 页面结构</h2>
+  <ul>
+    <li>上部：筛选区（养殖场、投保单号、保单号、投保状态、产品名称、时间范围）。</li>
+    <li>下部：投保记录列表（分页）。</li>
+    <li>弹窗：新增投保、投保详情。</li>
+  </ul>
+
+  <h2>5. 核心字段</h2>
+  <table>
+    <thead>
+      <tr><th>字段</th><th>说明</th><th>是否必填</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>farmId</td><td>养殖场ID</td><td>是</td></tr>
+      <tr><td>applyNo</td><td>投保单号</td><td>是（唯一）</td></tr>
+      <tr><td>policyNo</td><td>保单号</td><td>否（出单后回填）</td></tr>
+      <tr><td>productCode</td><td>保险产品编码</td><td>是</td></tr>
+      <tr><td>insuredName</td><td>被保人/主体名称</td><td>是</td></tr>
+      <tr><td>speciesType</td><td>投保畜种</td><td>是</td></tr>
+      <tr><td>insuredCount</td><td>投保数量</td><td>是</td></tr>
+      <tr><td>insuredAmount</td><td>投保金额</td><td>是</td></tr>
+      <tr><td>premiumAmount</td><td>保费金额</td><td>是</td></tr>
+      <tr><td>status</td><td>状态（待提交/已提交/已生效/已失效）</td><td>系统维护</td></tr>
+      <tr><td>startDate/endDate</td><td>保险期间</td><td>是</td></tr>
+      <tr><td>remark</td><td>备注</td><td>否</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. 功能清单</h2>
+  <ul>
+    <li>投保记录分页查询。</li>
+    <li>按条件筛选：养殖场、单号、状态、产品、时间范围。</li>
+    <li>新增投保记录。</li>
+    <li>查看保单详情。</li>
+    <li>作废/删除投保记录（逻辑删除）。</li>
+  </ul>
+
+  <h2>7. 业务规则</h2>
+  <ul>
+    <li>投保单号唯一，不允许重复。</li>
+    <li>仅允许对未生效保单进行编辑或删除。</li>
+    <li>开始日期不得晚于结束日期。</li>
+    <li>投保数量、投保金额、保费金额必须大于0。</li>
+  </ul>
+
+  <h2>8. 接口建议</h2>
+  <ul>
+    <li>GET /biz/insApply/page：分页查询投保记录</li>
+    <li>GET /biz/insApply/detail：投保详情</li>
+    <li>POST /biz/insApply/add：新增投保记录</li>
+    <li>POST /biz/insApply/edit：编辑投保记录</li>
+    <li>POST /biz/insApply/delete：删除投保记录</li>
+  </ul>
+
+  <h2>9. 验收标准</h2>
+  <ul>
+    <li>可完成查询、新增、详情、删除完整闭环。</li>
+    <li>权限隔离正确：农场用户不可查看其他农场记录。</li>
+    <li>筛选与分页准确，状态展示清晰。</li>
+  </ul>
+</body>
+</html>

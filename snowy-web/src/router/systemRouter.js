@@ -32,6 +32,38 @@ const routes = [
 				meta: {
 					title: '贷后管理'
 				}
+			},
+			{
+				path: '/bxProductManage',
+				name: 'bxProductManage',
+				component: () => import('@/views/bx-product-manage/index.vue'),
+				meta: {
+					title: '保险产品管理'
+				}
+			},
+			{
+				path: '/tbManage',
+				name: 'tbManage',
+				component: () => import('@/views/tb-manage/index.vue'),
+				meta: {
+					title: '投保管理'
+				}
+			},
+			{
+				path: '/bhManage',
+				name: 'bhManage',
+				component: () => import('@/views/bh-manage/index.vue'),
+				meta: {
+					title: '保后管理'
+				}
+			},
+			{
+				path: '/lpManage',
+				name: 'lpManage',
+				component: () => import('@/views/lp-manage/index.vue'),
+				meta: {
+					title: '理赔管理'
+				}
 			}
 		]
 	},

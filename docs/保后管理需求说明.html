@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>保后管理需求说明</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; color: #222; }
+    h1 { font-size: 24px; margin: 0 0 16px; }
+    h2 { font-size: 18px; margin: 18px 0 8px; }
+    ul { margin: 6px 0 12px 22px; }
+    li { margin: 2px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #f6f8fa; }
+  </style>
+</head>
+<body>
+  <h1>保后管理需求说明（精简版）</h1>
+
+  <h2>1. 建设目标</h2>
+  <ul>
+    <li>基于项圈数据持续监控牲畜存活与位置状态。</li>
+    <li>识别并预警异常场景（如非正常离栏、疑似失联）。</li>
+    <li>记录处置过程与结果，支持轨迹回溯。</li>
+  </ul>
+
+  <h2>2. 范围边界</h2>
+  <ul>
+    <li>本期仅做 Web 端，不包含移动端。</li>
+    <li>本期不做审核流，仅做预警、处置登记、轨迹查看。</li>
+    <li>理赔流程不在本期范围。</li>
+  </ul>
+
+  <h2>3. 角色与权限</h2>
+  <ul>
+    <li>农场用户：仅查看本农场保后监控数据。</li>
+    <li>管理员：查看全部农场数据并可统一下发处置要求。</li>
+  </ul>
+
+  <h2>4. 页面结构</h2>
+  <ul>
+    <li>筛选区：养殖场、预警类型、处置状态、时间范围。</li>
+    <li>统计区：监控总数、预警数、处理中、已处置。</li>
+    <li>列表区：异常预警列表 + 处置操作。</li>
+    <li>详情弹窗：基本信息、预警信息、轨迹信息、处置记录。</li>
+  </ul>
+
+  <h2>5. 核心字段</h2>
+  <table>
+    <thead>
+      <tr><th>字段</th><th>说明</th><th>是否必填</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>farmId</td><td>养殖场ID</td><td>是</td></tr>
+      <tr><td>warningNo</td><td>预警编号</td><td>是（唯一）</td></tr>
+      <tr><td>livestockNo</td><td>牲畜编号</td><td>是</td></tr>
+      <tr><td>collarNo</td><td>项圈编号</td><td>是</td></tr>
+      <tr><td>warningType</td><td>预警类型（存活异常/离栏异常/轨迹异常）</td><td>是</td></tr>
+      <tr><td>warningLevel</td><td>预警等级（低/中/高）</td><td>是</td></tr>
+      <tr><td>warningTime</td><td>触发时间</td><td>是</td></tr>
+      <tr><td>status</td><td>处置状态（待处置/处理中/已处置）</td><td>系统维护</td></tr>
+      <tr><td>locationInfo</td><td>位置描述/GIS点位</td><td>否</td></tr>
+      <tr><td>handleRemark</td><td>处置说明</td><td>处置时必填</td></tr>
+      <tr><td>traceData</td><td>轨迹数据</td><td>否</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. 功能清单</h2>
+  <ul>
+    <li>监控预警分页查询（多条件筛选）。</li>
+    <li>异常详情查看（含轨迹信息）。</li>
+    <li>处置登记（更新状态、记录说明、记录处置人和时间）。</li>
+    <li>轨迹追踪查看（按时间段回放位置点）。</li>
+  </ul>
+
+  <h2>7. 业务规则</h2>
+  <ul>
+    <li>预警记录生成后默认状态为“待处置”。</li>
+    <li>状态流转：待处置 -> 处理中 -> 已处置。</li>
+    <li>已处置记录不可删除，仅允许追加备注。</li>
+    <li>所有处置动作需留痕（操作人、时间、内容）。</li>
+  </ul>
+
+  <h2>8. 接口建议</h2>
+  <ul>
+    <li>GET /biz/insAfter/page：保后预警分页</li>
+    <li>GET /biz/insAfter/detail：预警详情</li>
+    <li>GET /biz/insAfter/trace：轨迹数据</li>
+    <li>POST /biz/insAfter/handle：处置登记</li>
+    <li>GET /biz/insAfter/stats：统计数据</li>
+  </ul>
+
+  <h2>9. 验收标准</h2>
+  <ul>
+    <li>可完成筛选查询、详情查看、处置登记、轨迹查看闭环。</li>
+    <li>权限隔离有效：农场用户不可查看其他农场数据。</li>
+    <li>处置过程留痕完整，轨迹数据可按时间段查询。</li>
+  </ul>
+</body>
+</html>

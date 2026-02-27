@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.claimmanage.mapper.BizClaimManageMapper">
+
+    <resultMap id="BizClaimManagePageResultMap" type="vip.xiaonuo.biz.modular.claimmanage.result.BizClaimManagePageResult">
+        <result column="id" property="id"/>
+        <result column="farmId" property="farmId"/>
+        <result column="claimNo" property="claimNo"/>
+        <result column="policyNo" property="policyNo"/>
+        <result column="insuredName" property="insuredName"/>
+        <result column="claimType" property="claimType"/>
+        <result column="lossCount" property="lossCount"/>
+        <result column="claimAmount" property="claimAmount"/>
+        <result column="occurTime" property="occurTime"/>
+        <result column="applyTime" property="applyTime"/>
+        <result column="status" property="status"/>
+        <result column="resultRemark" property="resultRemark"/>
+    </resultMap>
+
+    <select id="page" resultMap="BizClaimManagePageResultMap">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            a.claim_no as claimNo,
+            a.policy_no as policyNo,
+            a.insured_name as insuredName,
+            a.claim_type as claimType,
+            a.loss_count as lossCount,
+            a.claim_amount as claimAmount,
+            a.occur_time as occurTime,
+            to_char(a.create_time, 'YYYY-MM-DD HH24:MI:SS') as applyTime,
+            a.status as status,
+            a.result_remark as resultRemark
+        from yzx.biz_claim_manage a
+        where a.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.claimNo != null and param.claimNo != ''">
+            and a.claim_no like concat('%', #{param.claimNo}, '%')
+        </if>
+        <if test="param != null and param.policyNo != null and param.policyNo != ''">
+            and a.policy_no like concat('%', #{param.policyNo}, '%')
+        </if>
+        <if test="param != null and param.status != null and param.status != ''">
+            and a.status = #{param.status}
+        </if>
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and a.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and a.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+        order by a.update_time desc
+    </select>
+</mapper>
