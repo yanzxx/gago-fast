@@ -11,10 +11,16 @@ mkdir -p "${LOG_DIR}" "${RUN_DIR}"
 
 export PATH="$HOME/.local/bin:$PATH"
 
-BACKEND_PORT="${BACKEND_PORT:-82}"
-FRONTEND_PORT="${FRONTEND_PORT:-81}"
+BACKEND_PORT="${BACKEND_PORT:-8082}"
+FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 PG_HOST="${PG_HOST:-127.0.0.1}"
 PG_PORT="${PG_PORT:-5432}"
+PG_DB_NAME="${PG_DB_NAME:-liudayu_ks}"
+PG_USER="${PG_USER:-liudayu_ks}"
+PG_PASSWORD="${PG_PASSWORD:-}"
+PG_SCHEMA="${PG_SCHEMA:-yzx}"
+MAVEN_REPO_LOCAL="${MAVEN_REPO_LOCAL:-${ROOT_DIR}/.m2/repository}"
 
 BACKEND_LOG="${LOG_DIR}/backend.log"
 FRONTEND_LOG="${LOG_DIR}/frontend.log"
@@ -40,6 +46,11 @@ is_pid_running() {
 }
 
 start_pg() {
+  if [ "${PG_HOST}" != "127.0.0.1" ] && [ "${PG_HOST}" != "localhost" ]; then
+    info "使用远程 PostgreSQL (${PG_HOST}:${PG_PORT})，跳过本地数据库启动"
+    return 0
+  fi
+
   if command -v pg_isready >/dev/null 2>&1 && pg_isready -h "${PG_HOST}" -p "${PG_PORT}" >/dev/null 2>&1; then
     info "PostgreSQL 已在运行 (${PG_HOST}:${PG_PORT})"
     return 0
@@ -89,9 +100,12 @@ start_backend() {
 
   (
     cd "${ROOT_DIR}"
-    nohup mvn -s settings.xml -pl snowy-web-app -am spring-boot:run \
+    mkdir -p "${MAVEN_REPO_LOCAL}"
+    local db_url="jdbc:p6spy:postgresql://${PG_HOST}:${PG_PORT}/${PG_DB_NAME}?currentSchema=${PG_SCHEMA}&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useInformationSchema=true"
+    nohup mvn -s settings.xml -f snowy-web-app/pom.xml spring-boot:run \
+      -Dmaven.repo.local="${MAVEN_REPO_LOCAL}" \
       -DskipTests \
-      -Dspring-boot.run.jvmArguments="-Dserver.port=${BACKEND_PORT}" \
+      -Dspring-boot.run.arguments="--server.port=${BACKEND_PORT} --spring.datasource.dynamic.datasource.master.driver-class-name=com.p6spy.engine.spy.P6SpyDriver --spring.datasource.dynamic.datasource.master.url=${db_url} --spring.datasource.dynamic.datasource.master.username=${PG_USER} --spring.datasource.dynamic.datasource.master.password=${PG_PASSWORD}" \
       >>"${BACKEND_LOG}" 2>&1 &
     echo $! > "${BACKEND_PID_FILE}"
   )
@@ -112,7 +126,7 @@ start_frontend() {
       info "检测到前端依赖未安装，执行 npm i"
       npm i >>"${FRONTEND_LOG}" 2>&1
     fi
-    nohup npm run dev -- --host 0.0.0.0 --port "${FRONTEND_PORT}" \
+    nohup npm run dev -- --host "${FRONTEND_HOST}" --port "${FRONTEND_PORT}" \
       >>"${FRONTEND_LOG}" 2>&1 &
     echo $! > "${FRONTEND_PID_FILE}"
   )
@@ -163,6 +177,14 @@ main() {
   start_backend
   start_frontend
   check_started
+
+  echo
+  echo "当前后端数据库配置:"
+  echo "  - host     : ${PG_HOST}"
+  echo "  - port     : ${PG_PORT}"
+  echo "  - database : ${PG_DB_NAME}"
+  echo "  - schema   : ${PG_SCHEMA}"
+  echo "  - username : ${PG_USER}"
 }
 
 main "$@"

@@ -30,6 +30,13 @@ const routes = [
 		meta: {
 			title: '三方登录'
 		}
+	},
+	{
+		path: '/comprehensiveSupervision',
+		component: () => import('@/views/home/index.vue'),
+		meta: {
+			title: '首页'
+		}
 	}
 ]
 
