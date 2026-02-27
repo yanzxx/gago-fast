@@ -8,7 +8,16 @@ const routes = [
 		path: '/',
 		component: () => import('@/layout/index.vue'),
 		redirect: tool.data.get('MENU') ? tool.data.get('MENU')[0].children[0].path : config.DASHBOARD_URL,
-		children: []
+		children: [
+			{
+				path: '/productManage',
+				name: 'productManage',
+				component: () => import('@/views/product-manage/index.vue'),
+				meta: {
+					title: '金融产品管理'
+				}
+			}
+		]
 	},
 	{
 		path: '/login',

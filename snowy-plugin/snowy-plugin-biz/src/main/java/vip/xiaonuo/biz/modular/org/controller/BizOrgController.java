@@ -70,6 +70,19 @@ public class BizOrgController {
     }
 
     /**
+     * 获取机构列表
+     *
+     * @author codex
+     * @date 2026/2/27 23:26
+     */
+    @ApiOperationSupport(order = 2)
+    @ApiOperation("获取机构列表")
+    @GetMapping("/biz/org/list")
+    public CommonResult<List<BizOrg>> list(BizOrgSelectorOrgListParam bizOrgSelectorOrgListParam) {
+        return CommonResult.data(bizOrgService.orgListSelector(bizOrgSelectorOrgListParam));
+    }
+
+    /**
      * 添加机构
      *
      * @author xuyuxiang

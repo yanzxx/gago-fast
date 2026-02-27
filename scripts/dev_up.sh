@@ -21,6 +21,7 @@ PG_USER="${PG_USER:-liudayu_ks}"
 PG_PASSWORD="${PG_PASSWORD:-}"
 PG_SCHEMA="${PG_SCHEMA:-yzx}"
 MAVEN_REPO_LOCAL="${MAVEN_REPO_LOCAL:-${ROOT_DIR}/.m2/repository}"
+BACKEND_JAR="${BACKEND_JAR:-${ROOT_DIR}/snowy-web-app/target/snowy-web-app-2.0.0.jar}"
 
 BACKEND_LOG="${LOG_DIR}/backend.log"
 FRONTEND_LOG="${LOG_DIR}/frontend.log"
@@ -47,7 +48,12 @@ is_pid_running() {
 
 start_pg() {
   if [ "${PG_HOST}" != "127.0.0.1" ] && [ "${PG_HOST}" != "localhost" ]; then
-    info "使用远程 PostgreSQL (${PG_HOST}:${PG_PORT})，跳过本地数据库启动"
+    info "使用远程 PostgreSQL (${PG_HOST}:${PG_PORT})，执行连通性检查"
+    if ! pg_isready -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d "${PG_DB_NAME}" >/dev/null 2>&1; then
+      err "远程 PostgreSQL 不可用或网络不可达: ${PG_HOST}:${PG_PORT}/${PG_DB_NAME}"
+      exit 1
+    fi
+    info "远程 PostgreSQL 可用 (${PG_HOST}:${PG_PORT})"
     return 0
   fi
 
@@ -100,12 +106,24 @@ start_backend() {
 
   (
     cd "${ROOT_DIR}"
-    mkdir -p "${MAVEN_REPO_LOCAL}"
+    if [ ! -f "${BACKEND_JAR}" ]; then
+      err "后端 JAR 不存在: ${BACKEND_JAR}"
+      err "请先执行: mvn -s settings.xml -Dmaven.repo.local=.m2/repository -DskipTests package"
+      exit 1
+    fi
+    local java_cmd
+    java_cmd="$(command -v java || true)"
+    if [ -z "${java_cmd}" ]; then
+      err "未找到 java 命令"
+      exit 1
+    fi
     local db_url="jdbc:p6spy:postgresql://${PG_HOST}:${PG_PORT}/${PG_DB_NAME}?currentSchema=${PG_SCHEMA}&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useInformationSchema=true"
-    nohup mvn -s settings.xml -f snowy-web-app/pom.xml spring-boot:run \
-      -Dmaven.repo.local="${MAVEN_REPO_LOCAL}" \
-      -DskipTests \
-      -Dspring-boot.run.arguments="--server.port=${BACKEND_PORT} --spring.datasource.dynamic.datasource.master.driver-class-name=com.p6spy.engine.spy.P6SpyDriver --spring.datasource.dynamic.datasource.master.url=${db_url} --spring.datasource.dynamic.datasource.master.username=${PG_USER} --spring.datasource.dynamic.datasource.master.password=${PG_PASSWORD}" \
+    nohup "${java_cmd}" -jar "${BACKEND_JAR}" \
+      --server.port="${BACKEND_PORT}" \
+      --spring.datasource.dynamic.datasource.master.driver-class-name=com.p6spy.engine.spy.P6SpyDriver \
+      --spring.datasource.dynamic.datasource.master.url="${db_url}" \
+      --spring.datasource.dynamic.datasource.master.username="${PG_USER}" \
+      --spring.datasource.dynamic.datasource.master.password="${PG_PASSWORD}" \
       >>"${BACKEND_LOG}" 2>&1 &
     echo $! > "${BACKEND_PID_FILE}"
   )
@@ -146,10 +164,34 @@ check_started() {
 
   if [ -z "${backend_pid}" ] || ! is_pid_running "${backend_pid}"; then
     err "后端启动失败，日志: ${BACKEND_LOG}"
+    tail -n 80 "${BACKEND_LOG}" || true
     exit 1
   fi
   if [ -z "${frontend_pid}" ] || ! is_pid_running "${frontend_pid}"; then
     err "前端启动失败，日志: ${FRONTEND_LOG}"
+    tail -n 80 "${FRONTEND_LOG}" || true
+    exit 1
+  fi
+
+  # 后端进程存在不代表可用，进一步校验端口与健康接口
+  local backend_ok="0"
+  local i
+  for i in $(seq 1 45); do
+    if ! is_pid_running "${backend_pid}"; then
+      err "后端进程已退出，日志: ${BACKEND_LOG}"
+      tail -n 120 "${BACKEND_LOG}" || true
+      exit 1
+    fi
+    if curl -s "http://127.0.0.1:${BACKEND_PORT}/actuator/health" | grep -q "\"status\":\"UP\""; then
+      backend_ok="1"
+      break
+    fi
+    sleep 2
+  done
+
+  if [ "${backend_ok}" != "1" ]; then
+    err "后端健康检查未通过，请查看日志: ${BACKEND_LOG}"
+    tail -n 120 "${BACKEND_LOG}" || true
     exit 1
   fi
 
@@ -167,7 +209,6 @@ check_started() {
 
 main() {
   require_cmd java
-  require_cmd mvn
   require_cmd node
   require_cmd npm
   require_cmd psql

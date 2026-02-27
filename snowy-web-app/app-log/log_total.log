@@ -1,0 +1,494 @@
+2026-02-28 00:33:47.154  INFO 56311 --- [main] vip.xiaonuo.Application                  : Starting Application using Java 11.0.12 on YanzxMackbookdeMacBook-Pro.local with PID 56311 (/Users/yanzx/考核/gago-fast/snowy-web-app/target/classes started by yanzx in /Users/yanzx/考核/gago-fast/snowy-web-app)
+2026-02-28 00:33:47.155  INFO 56311 --- [main] vip.xiaonuo.Application                  : The following 1 profile is active: "prod"
+2026-02-28 00:33:47.880  INFO 56311 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2026-02-28 00:33:47.881  INFO 56311 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-02-28 00:33:47.909  INFO 56311 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 20 ms. Found 0 Redis repository interfaces.
+2026-02-28 00:33:48.077  INFO 56311 --- [main] ptablePropertiesBeanFactoryPostProcessor : Post-processing PropertySource instances
+2026-02-28 00:33:48.077  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource commandLineArgs [org.springframework.core.env.SimpleCommandLinePropertySource] to EncryptableEnumerablePropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Skipping PropertySource servletContextInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource systemProperties [org.springframework.core.env.PropertiesPropertySource] to EncryptableMapPropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource systemEnvironment [org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor$OriginAwareSystemEnvironmentPropertySource] to EncryptableSystemEnvironmentPropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource random [org.springframework.boot.env.RandomValuePropertySource] to EncryptablePropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource springCloudClientHostInfo [org.springframework.core.env.MapPropertySource] to EncryptableMapPropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource Config resource 'class path resource [application-prod.properties]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2026-02-28 00:33:48.078  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource Config resource 'class path resource [application.properties]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2026-02-28 00:33:48.197  INFO 56311 --- [main] c.u.j.filter.DefaultLazyPropertyFilter   : Property Filter custom Bean not found with name 'encryptablePropertyFilter'. Initializing Default Property Filter
+2026-02-28 00:33:48.201  INFO 56311 --- [main] c.u.j.r.DefaultLazyPropertyResolver      : Property Resolver custom Bean not found with name 'encryptablePropertyResolver'. Initializing Default Property Resolver
+2026-02-28 00:33:48.201  INFO 56311 --- [main] c.u.j.d.DefaultLazyPropertyDetector      : Property Detector custom Bean not found with name 'encryptablePropertyDetector'. Initializing Default Property Detector
+2026-02-28 00:33:48.212  INFO 56311 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'spring.datasource.dynamic-com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceProperties' of type [com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2026-02-28 00:33:48.215  INFO 56311 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration' of type [com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration$$EnhancerBySpringCGLIB$$8ac2bcff] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2026-02-28 00:33:48.223  INFO 56311 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'dsProcessor' of type [com.baomidou.dynamic.datasource.processor.DsHeaderProcessor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2026-02-28 00:33:48.375  INFO 56311 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8082 (http)
+2026-02-28 00:33:48.380  INFO 56311 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-28 00:33:48.381  INFO 56311 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.72]
+2026-02-28 00:33:48.467  INFO 56311 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-28 00:33:48.467  INFO 56311 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1290 ms
+2026-02-28 00:33:48.942  WARN 56311 --- [main] i.n.r.d.DnsServerAddressStreamProviders  : Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS.
+2026-02-28 00:33:50.594  INFO 56311 --- [main] com.alibaba.druid.pool.DruidDataSource   : {dataSource-1,master} inited
+2026-02-28 00:33:50.594  INFO 56311 --- [main] c.b.d.d.DynamicRoutingDataSource         : dynamic-datasource - add a datasource named [master] success
+2026-02-28 00:33:50.594  INFO 56311 --- [main] c.b.d.d.DynamicRoutingDataSource         : dynamic-datasource initial loaded [1] datasource,primary datasource named [master]
+2026-02-28 00:33:51.679  INFO 56311 --- [main] com.fhs.common.spring.SpringContextUtil  : ------SpringContextUtil setApplicationContext-------
+2026-02-28 00:33:52.601  INFO 56311 --- [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-02-28 00:33:52.684  INFO 56311 --- [main] vip.xiaonuo.core.config.GlobalConfigure  : -----------------------redis://39.102.77.233:6379
+2026-02-28 00:33:52.731  INFO 56311 --- [main] org.redisson.Version                     : Redisson 3.9.1
+2026-02-28 00:33:52.830  INFO 56311 --- [redisson-netty-5-11] o.r.c.pool.MasterPubSubConnectionPool    : 1 connections initialized for 39.102.77.233/39.102.77.233:6379
+2026-02-28 00:33:52.841  INFO 56311 --- [redisson-netty-5-5] o.r.c.pool.MasterConnectionPool          : 32 connections initialized for 39.102.77.233/39.102.77.233:6379
+2026-02-28 00:33:52.861  INFO 56311 --- [main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [springfox.documentation.swagger2.web.Swagger2ControllerWebMvc#getDocumentation(String, HttpServletRequest)]
+2026-02-28 00:33:53.312  INFO 56311 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8082 (http) with context path ''
+2026-02-28 00:33:53.313  INFO 56311 --- [main] u.j.c.RefreshScopeRefreshedEventListener : Refreshing cached encryptable property sources on ServletWebServerInitializedEvent
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source commandLineArgs refreshed
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source systemProperties refreshed
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source systemEnvironment refreshed
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source random refreshed
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source springCloudClientHostInfo refreshed
+2026-02-28 00:33:53.313  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source Config resource 'class path resource [application-prod.properties]' via location 'optional:classpath:/' refreshed
+2026-02-28 00:33:53.314  INFO 56311 --- [main] CachingDelegateEncryptablePropertySource : Property Source Config resource 'class path resource [application.properties]' via location 'optional:classpath:/' refreshed
+2026-02-28 00:33:53.314  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource server.ports [org.springframework.core.env.MapPropertySource] to EncryptableMapPropertySourceWrapper
+2026-02-28 00:33:53.314  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2026-02-28 00:33:53.314  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-02-28 00:33:53.314  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource servletContextInitParams [org.springframework.web.context.support.ServletContextPropertySource] to EncryptableEnumerablePropertySourceWrapper
+2026-02-28 00:33:53.314  INFO 56311 --- [main] c.u.j.EncryptablePropertySourceConverter : Converting PropertySource Management Server [org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration$SameManagementContextConfiguration$1] to EncryptablePropertySourceWrapper
+2026-02-28 00:33:53.315  INFO 56311 --- [main] d.s.w.p.DocumentationPluginsBootstrapper : Documentation plugins bootstrapped
+2026-02-28 00:33:53.317  INFO 56311 --- [main] d.s.w.p.DocumentationPluginsBootstrapper : Found 10 custom documentation plugin(s)
+2026-02-28 00:33:53.350  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.462  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.505  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.512  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_1
+2026-02-28 00:33:53.520  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_2
+2026-02-28 00:33:53.522  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_1
+2026-02-28 00:33:53.523  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_1
+2026-02-28 00:33:53.524  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_1
+2026-02-28 00:33:53.540  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_1
+2026-02-28 00:33:53.545  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_3
+2026-02-28 00:33:53.546  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_2
+2026-02-28 00:33:53.547  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_2
+2026-02-28 00:33:53.549  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_2
+2026-02-28 00:33:53.549  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_1
+2026-02-28 00:33:53.553  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_2
+2026-02-28 00:33:53.559  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_4
+2026-02-28 00:33:53.564  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_3
+2026-02-28 00:33:53.566  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_3
+2026-02-28 00:33:53.570  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_3
+2026-02-28 00:33:53.573  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_2
+2026-02-28 00:33:53.580  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: positionSelectorUsingGET_1
+2026-02-28 00:33:53.583  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: userSelectorUsingGET_1
+2026-02-28 00:33:53.588  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_3
+2026-02-28 00:33:53.611  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.625  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_5
+2026-02-28 00:33:53.627  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_4
+2026-02-28 00:33:53.637  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_4
+2026-02-28 00:33:53.639  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_4
+2026-02-28 00:33:53.641  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_4
+2026-02-28 00:33:53.648  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_5
+2026-02-28 00:33:53.649  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_5
+2026-02-28 00:33:53.653  INFO 56311 --- [http-nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-28 00:33:53.653  INFO 56311 --- [http-nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-28 00:33:53.655  INFO 56311 --- [http-nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-02-28 00:33:53.655  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_5
+2026-02-28 00:33:53.678  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.683  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_6
+2026-02-28 00:33:53.684  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_5
+2026-02-28 00:33:53.685  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_6
+2026-02-28 00:33:53.686  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_6
+2026-02-28 00:33:53.690  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_6
+2026-02-28 00:33:53.710  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.716  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_7
+2026-02-28 00:33:53.718  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_6
+2026-02-28 00:33:53.719  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_7
+2026-02-28 00:33:53.720  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_7
+2026-02-28 00:33:53.721  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: tableColumnsUsingGET_1
+2026-02-28 00:33:53.722  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: tablesUsingGET_1
+2026-02-28 00:33:53.723  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_7
+2026-02-28 00:33:53.744  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.750  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_8
+2026-02-28 00:33:53.752  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_7
+2026-02-28 00:33:53.753  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_8
+2026-02-28 00:33:53.753  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_8
+2026-02-28 00:33:53.754  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editBatchUsingPOST_1
+2026-02-28 00:33:53.756  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: listUsingGET_1
+2026-02-28 00:33:53.758  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_8
+2026-02-28 00:33:53.762  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_9
+2026-02-28 00:33:53.763  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_8
+2026-02-28 00:33:53.765  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_9
+2026-02-28 00:33:53.766  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_9
+2026-02-28 00:33:53.770  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: treeUsingGET_1
+2026-02-28 00:33:53.772  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: listUsingGET_2
+2026-02-28 00:33:53.775  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_9
+2026-02-28 00:33:53.781  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_10
+2026-02-28 00:33:53.782  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_10
+2026-02-28 00:33:53.784  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendAliyunUsingPOST_1
+2026-02-28 00:33:53.788  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendAliyunUsingPOST_2
+2026-02-28 00:33:53.791  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendLocalUsingPOST_1
+2026-02-28 00:33:53.793  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendTencentUsingPOST_1
+2026-02-28 00:33:53.793  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendTencentUsingPOST_2
+2026-02-28 00:33:53.795  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_10
+2026-02-28 00:33:53.801  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_11
+2026-02-28 00:33:53.802  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_11
+2026-02-28 00:33:53.808  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: listUsingGET_3
+2026-02-28 00:33:53.809  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_11
+2026-02-28 00:33:53.814  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_12
+2026-02-28 00:33:53.815  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_9
+2026-02-28 00:33:53.816  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_12
+2026-02-28 00:33:53.817  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_10
+2026-02-28 00:33:53.821  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: listUsingGET_4
+2026-02-28 00:33:53.822  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_12
+2026-02-28 00:33:53.827  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_13
+2026-02-28 00:33:53.828  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_13
+2026-02-28 00:33:53.835  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_14
+2026-02-28 00:33:53.836  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_14
+2026-02-28 00:33:53.856  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_13
+2026-02-28 00:33:53.865  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_15
+2026-02-28 00:33:53.866  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_15
+2026-02-28 00:33:53.866  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendAliyunUsingPOST_3
+2026-02-28 00:33:53.867  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: sendTencentUsingPOST_3
+2026-02-28 00:33:53.869  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_14
+2026-02-28 00:33:53.889  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.900  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_16
+2026-02-28 00:33:53.902  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_16
+2026-02-28 00:33:53.908  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: notifyUrlUsingPOST_1
+2026-02-28 00:33:53.911  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: accountQueryUsingGET_1
+2026-02-28 00:33:53.912  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: codePayUsingGET_1
+2026-02-28 00:33:53.914  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: qrPayUsingGET_1
+2026-02-28 00:33:53.937  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:53.950  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: doLoginUsingPOST_1
+2026-02-28 00:33:53.951  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: doLoginByPhoneUsingPOST_1
+2026-02-28 00:33:53.951  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: doLogoutUsingGET_1
+2026-02-28 00:33:53.951  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: getPhoneValidCodeUsingGET_1
+2026-02-28 00:33:53.960  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: getLoginUserUsingGET_1
+2026-02-28 00:33:53.961  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: getPicCaptchaUsingGET_1
+2026-02-28 00:33:53.972  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_17
+2026-02-28 00:33:53.996  INFO 56311 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2026-02-28 00:33:54.004  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_18
+2026-02-28 00:33:54.005  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_10
+2026-02-28 00:33:54.005  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_17
+2026-02-28 00:33:54.006  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_11
+2026-02-28 00:33:54.009  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: treeUsingGET_2
+2026-02-28 00:33:54.011  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_3
+2026-02-28 00:33:54.012  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_15
+2026-02-28 00:33:54.016  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_19
+2026-02-28 00:33:54.017  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_11
+2026-02-28 00:33:54.018  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_18
+2026-02-28 00:33:54.018  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_12
+2026-02-28 00:33:54.019  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_16
+2026-02-28 00:33:54.034  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_20
+2026-02-28 00:33:54.035  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_12
+2026-02-28 00:33:54.037  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_19
+2026-02-28 00:33:54.038  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_13
+2026-02-28 00:33:54.039  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: treeUsingGET_3
+2026-02-28 00:33:54.043  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_17
+2026-02-28 00:33:54.045  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_21
+2026-02-28 00:33:54.046  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_13
+2026-02-28 00:33:54.047  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_20
+2026-02-28 00:33:54.048  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_14
+2026-02-28 00:33:54.049  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_18
+2026-02-28 00:33:54.052  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_22
+2026-02-28 00:33:54.053  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_14
+2026-02-28 00:33:54.054  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_21
+2026-02-28 00:33:54.055  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_15
+2026-02-28 00:33:54.055  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_4
+2026-02-28 00:33:54.056  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: treeUsingGET_4
+2026-02-28 00:33:54.064  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: userSelectorUsingGET_2
+2026-02-28 00:33:54.066  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_19
+2026-02-28 00:33:54.070  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_23
+2026-02-28 00:33:54.071  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_15
+2026-02-28 00:33:54.071  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_22
+2026-02-28 00:33:54.072  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_16
+2026-02-28 00:33:54.073  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_5
+2026-02-28 00:33:54.074  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: positionSelectorUsingGET_2
+2026-02-28 00:33:54.075  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_20
+2026-02-28 00:33:54.081  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_24
+2026-02-28 00:33:54.082  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_16
+2026-02-28 00:33:54.083  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_23
+2026-02-28 00:33:54.084  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_17
+2026-02-28 00:33:54.090  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_6
+2026-02-28 00:33:54.093  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: roleSelectorUsingGET_1
+2026-02-28 00:33:54.094  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: userSelectorUsingGET_3
+2026-02-28 00:33:54.101  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_21
+2026-02-28 00:33:54.110  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_25
+2026-02-28 00:33:54.111  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_17
+2026-02-28 00:33:54.112  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_24
+2026-02-28 00:33:54.113  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_18
+2026-02-28 00:33:54.115  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_22
+2026-02-28 00:33:54.136  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: getPicCaptchaUsingGET_2
+2026-02-28 00:33:54.143  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: pageUsingGET_26
+2026-02-28 00:33:54.147  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: addUsingPOST_18
+2026-02-28 00:33:54.148  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: deleteUsingPOST_25
+2026-02-28 00:33:54.149  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: disableUserUsingPOST_1
+2026-02-28 00:33:54.153  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: editUsingPOST_19
+2026-02-28 00:33:54.154  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: enableUserUsingPOST_1
+2026-02-28 00:33:54.156  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: grantPermissionUsingPOST_1
+2026-02-28 00:33:54.157  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: grantResourceUsingPOST_1
+2026-02-28 00:33:54.158  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: grantRoleUsingPOST_1
+2026-02-28 00:33:54.159  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: resetPasswordUsingPOST_1
+2026-02-28 00:33:54.159  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgTreeSelectorUsingGET_7
+2026-02-28 00:33:54.160  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: ownRoleUsingGET_1
+2026-02-28 00:33:54.162  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: orgListSelectorUsingGET_1
+2026-02-28 00:33:54.163  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: positionSelectorUsingGET_3
+2026-02-28 00:33:54.164  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: roleSelectorUsingGET_2
+2026-02-28 00:33:54.166  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: userSelectorUsingGET_4
+2026-02-28 00:33:54.167  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: detailUsingGET_23
+2026-02-28 00:33:54.168  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: ownPermissionUsingGET_1
+2026-02-28 00:33:54.169  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: ownResourceUsingGET_1
+2026-02-28 00:33:54.170  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: exportUserUsingGET_1
+2026-02-28 00:33:54.171  INFO 56311 --- [main] .d.s.w.r.o.CachingOperationNameGenerator : Generating unique operation named: exportUserInfoUsingGET_1
+2026-02-28 00:33:54.308  INFO 56311 --- [main] vip.xiaonuo.Application                  : Started Application in 7.647 seconds (JVM running for 7.952)
+2026-02-28 00:33:54.447  INFO 56311 --- [main] vip.xiaonuo.Application                  : >>> APPLICATION STARTING SUCCESS  耗时：7.85 秒
+2026-02-28 00:55:09.745 ERROR 56311 --- [http-nio-8082-exec-9] v.x.core.handler.GlobalExceptionUtil     : >>> 服务器未知异常，请求地址：http://127.0.0.1:8082/sys/userCenter/checkPasswordExpire，具体信息：
+
+org.springframework.dao.QueryTimeoutException: Redis command timed out; nested exception is io.lettuce.core.RedisCommandTimeoutException: Command timed out after 10 second(s)
+	at org.springframework.data.redis.connection.lettuce.LettuceExceptionConverter.convert(LettuceExceptionConverter.java:70)
+	at org.springframework.data.redis.connection.lettuce.LettuceExceptionConverter.convert(LettuceExceptionConverter.java:41)
+	at org.springframework.data.redis.PassThroughExceptionTranslationStrategy.translate(PassThroughExceptionTranslationStrategy.java:44)
+	at org.springframework.data.redis.FallbackExceptionTranslationStrategy.translate(FallbackExceptionTranslationStrategy.java:42)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.convertLettuceAccessException(LettuceConnection.java:271)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.await(LettuceConnection.java:1062)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.lambda$doInvoke$4(LettuceConnection.java:919)
+	at org.springframework.data.redis.connection.lettuce.LettuceInvoker$Synchronizer.invoke(LettuceInvoker.java:665)
+	at org.springframework.data.redis.connection.lettuce.LettuceInvoker.just(LettuceInvoker.java:94)
+	at org.springframework.data.redis.connection.lettuce.LettuceStringCommands.get(LettuceStringCommands.java:55)
+	at org.springframework.data.redis.connection.DefaultedRedisConnection.get(DefaultedRedisConnection.java:267)
+	at org.springframework.data.redis.core.DefaultValueOperations$1.inRedis(DefaultValueOperations.java:57)
+	at org.springframework.data.redis.core.AbstractOperations$ValueDeserializingRedisCallback.doInRedis(AbstractOperations.java:60)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:222)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:189)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:96)
+	at org.springframework.data.redis.core.DefaultValueOperations.get(DefaultValueOperations.java:53)
+	at org.springframework.data.redis.core.DefaultBoundValueOperations.get(DefaultBoundValueOperations.java:50)
+	at vip.xiaonuo.common.cache.CommonCacheOperator.get(CommonCacheOperator.java:51)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl.getValueByKey(DevConfigServiceImpl.java:58)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl$$FastClassBySpringCGLIB$$428ec79a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl$$EnhancerBySpringCGLIB$$60e16629.getValueByKey(<generated>)
+	at vip.xiaonuo.dev.modular.config.provider.DevConfigApiProvider.getValueByKey(DevConfigApiProvider.java:24)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl.checkPasswordExpire(SysUserServiceImpl.java:1572)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl$$FastClassBySpringCGLIB$$6649810a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl$$EnhancerBySpringCGLIB$$ea18f879.checkPasswordExpire(<generated>)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController.checkPasswordExpire(SysUserCenterController.java:312)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController$$FastClassBySpringCGLIB$$86a233f.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:793)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.validation.beanvalidation.MethodValidationInterceptor.invoke(MethodValidationInterceptor.java:123)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor.invoke(AfterReturningAdviceInterceptor.java:57)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:175)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor.invoke(MethodBeforeAdviceInterceptor.java:58)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:175)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:708)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController$$EnhancerBySpringCGLIB$$c281aa8b.checkPasswordExpire(<generated>)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1070)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:898)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:502)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:596)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:209)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at com.github.xiaoymin.knife4j.spring.filter.SecurityBasicAuthFilter.doFilter(SecurityBasicAuthFilter.java:87)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at vip.xiaonuo.ten.core.filter.TenResolveFilter.doFilter(TenResolveFilter.java:66)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at cn.dev33.satoken.filter.SaServletFilter.doFilter(SaServletFilter.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter.doFilterInternal(WebMvcMetricsFilter.java:96)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:130)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:360)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:399)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:926)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1791)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.lettuce.core.RedisCommandTimeoutException: Command timed out after 10 second(s)
+	at io.lettuce.core.internal.ExceptionFactory.createTimeoutException(ExceptionFactory.java:59)
+	at io.lettuce.core.internal.Futures.awaitOrCancel(Futures.java:246)
+	at io.lettuce.core.LettuceFutures.awaitOrCancel(LettuceFutures.java:74)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.await(LettuceConnection.java:1060)
+	... 111 common frames omitted
+
+2026-02-28 00:55:17.911  INFO 56311 --- [lettuce-eventExecutorLoop-1-8] i.l.core.protocol.ConnectionWatchdog     : Reconnecting, last destination was /39.102.77.233:6379
+2026-02-28 00:55:17.991  INFO 56311 --- [lettuce-nioEventLoop-4-3] i.l.core.protocol.ReconnectionHandler    : Reconnected to 39.102.77.233:6379
+2026-02-28 01:05:49.653 ERROR 56311 --- [http-nio-8082-exec-10] v.x.core.handler.GlobalExceptionUtil     : >>> 服务器未知异常，请求地址：http://127.0.0.1:8082/sys/userCenter/checkPasswordExpire，具体信息：
+
+org.springframework.dao.QueryTimeoutException: Redis command timed out; nested exception is io.lettuce.core.RedisCommandTimeoutException: Command timed out after 10 second(s)
+	at org.springframework.data.redis.connection.lettuce.LettuceExceptionConverter.convert(LettuceExceptionConverter.java:70)
+	at org.springframework.data.redis.connection.lettuce.LettuceExceptionConverter.convert(LettuceExceptionConverter.java:41)
+	at org.springframework.data.redis.PassThroughExceptionTranslationStrategy.translate(PassThroughExceptionTranslationStrategy.java:44)
+	at org.springframework.data.redis.FallbackExceptionTranslationStrategy.translate(FallbackExceptionTranslationStrategy.java:42)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.convertLettuceAccessException(LettuceConnection.java:271)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.await(LettuceConnection.java:1062)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.lambda$doInvoke$4(LettuceConnection.java:919)
+	at org.springframework.data.redis.connection.lettuce.LettuceInvoker$Synchronizer.invoke(LettuceInvoker.java:665)
+	at org.springframework.data.redis.connection.lettuce.LettuceInvoker.just(LettuceInvoker.java:94)
+	at org.springframework.data.redis.connection.lettuce.LettuceStringCommands.get(LettuceStringCommands.java:55)
+	at org.springframework.data.redis.connection.DefaultedRedisConnection.get(DefaultedRedisConnection.java:267)
+	at org.springframework.data.redis.core.DefaultValueOperations$1.inRedis(DefaultValueOperations.java:57)
+	at org.springframework.data.redis.core.AbstractOperations$ValueDeserializingRedisCallback.doInRedis(AbstractOperations.java:60)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:222)
+	at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:189)
+	at org.springframework.data.redis.core.AbstractOperations.execute(AbstractOperations.java:96)
+	at org.springframework.data.redis.core.DefaultValueOperations.get(DefaultValueOperations.java:53)
+	at org.springframework.data.redis.core.DefaultBoundValueOperations.get(DefaultBoundValueOperations.java:50)
+	at vip.xiaonuo.common.cache.CommonCacheOperator.get(CommonCacheOperator.java:51)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl.getValueByKey(DevConfigServiceImpl.java:58)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl$$FastClassBySpringCGLIB$$428ec79a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at vip.xiaonuo.dev.modular.config.service.impl.DevConfigServiceImpl$$EnhancerBySpringCGLIB$$60e16629.getValueByKey(<generated>)
+	at vip.xiaonuo.dev.modular.config.provider.DevConfigApiProvider.getValueByKey(DevConfigApiProvider.java:24)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl.checkPasswordExpire(SysUserServiceImpl.java:1572)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl$$FastClassBySpringCGLIB$$6649810a.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy.invokeMethod(CglibAopProxy.java:386)
+	at org.springframework.aop.framework.CglibAopProxy.access$000(CglibAopProxy.java:85)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:704)
+	at vip.xiaonuo.sys.modular.user.service.impl.SysUserServiceImpl$$EnhancerBySpringCGLIB$$ea18f879.checkPasswordExpire(<generated>)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController.checkPasswordExpire(SysUserCenterController.java:312)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController$$FastClassBySpringCGLIB$$86a233f.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:793)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.validation.beanvalidation.MethodValidationInterceptor.invoke(MethodValidationInterceptor.java:123)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor.invoke(AfterReturningAdviceInterceptor.java:57)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:175)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor.invoke(MethodBeforeAdviceInterceptor.java:58)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:175)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:763)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:708)
+	at vip.xiaonuo.sys.modular.user.controller.SysUserCenterController$$EnhancerBySpringCGLIB$$c281aa8b.checkPasswordExpire(<generated>)
+	at jdk.internal.reflect.GeneratedMethodAccessor542.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1070)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:898)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:502)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:596)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:209)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at com.github.xiaoymin.knife4j.spring.filter.SecurityBasicAuthFilter.doFilter(SecurityBasicAuthFilter.java:87)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at vip.xiaonuo.ten.core.filter.TenResolveFilter.doFilter(TenResolveFilter.java:66)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at cn.dev33.satoken.filter.SaServletFilter.doFilter(SaServletFilter.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter.doFilterInternal(WebMvcMetricsFilter.java:96)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:130)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:360)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:399)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:926)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1791)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.lettuce.core.RedisCommandTimeoutException: Command timed out after 10 second(s)
+	at io.lettuce.core.internal.ExceptionFactory.createTimeoutException(ExceptionFactory.java:59)
+	at io.lettuce.core.internal.Futures.awaitOrCancel(Futures.java:246)
+	at io.lettuce.core.LettuceFutures.awaitOrCancel(LettuceFutures.java:74)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnection.await(LettuceConnection.java:1060)
+	... 110 common frames omitted
+
+2026-02-28 01:05:57.806  INFO 56311 --- [lettuce-eventExecutorLoop-1-4] i.l.core.protocol.ConnectionWatchdog     : Reconnecting, last destination was /39.102.77.233:6379
+2026-02-28 01:05:57.887  INFO 56311 --- [lettuce-nioEventLoop-4-4] i.l.core.protocol.ReconnectionHandler    : Reconnected to 39.102.77.233:6379

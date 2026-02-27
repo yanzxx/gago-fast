@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>金融产品管理需求说明</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; color: #222; }
+    h1,h2,h3 { color: #111; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #f7f7f7; }
+    .meta { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>金融产品管理需求说明（简版）</h1>
+  <p class="meta">版本：V1.0（最小可用版本）</p>
+  <p class="meta">范围：仅WEB端；不包含移动端、不包含审核流</p>
+
+  <h2>1. 建设目标</h2>
+  <p>建设“金融产品管理”模块，支持银行侧对贷款产品的新增、编辑、上下架、查询与详情查看，满足最小上线能力。</p>
+
+  <h2>2. 功能范围</h2>
+  <ul>
+    <li>产品新增</li>
+    <li>产品编辑</li>
+    <li>产品上架 / 下架</li>
+    <li>产品详情</li>
+    <li>产品分页查询（按名称、状态、农场）</li>
+  </ul>
+
+  <h2>3. 页面设计（单页面）</h2>
+  <h3>3.1 页面结构</h3>
+  <ul>
+    <li>上方：筛选区</li>
+    <li>下方：列表区 + 操作列</li>
+    <li>弹窗：新增/编辑弹窗、详情弹窗</li>
+  </ul>
+
+  <h3>3.2 筛选项</h3>
+  <table>
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td>养殖场</td><td>下拉</td><td>管理员可选；普通用户按自身数据权限自动限制</td></tr>
+    <tr><td>产品名称</td><td>输入框</td><td>支持模糊查询</td></tr>
+    <tr><td>状态</td><td>下拉</td><td>DRAFT / ON_SHELF / OFF_SHELF</td></tr>
+  </table>
+
+  <h3>3.3 列表字段</h3>
+  <table>
+    <tr><th>字段</th><th>说明</th></tr>
+    <tr><td>产品名称</td><td>展示产品名称</td></tr>
+    <tr><td>产品编码</td><td>唯一编码</td></tr>
+    <tr><td>适用畜种</td><td>多值展示（逗号分隔）</td></tr>
+    <tr><td>额度范围</td><td>最小额度 ~ 最大额度</td></tr>
+    <tr><td>年化利率</td><td>如 4.35%</td></tr>
+    <tr><td>期限(月)</td><td>整数</td></tr>
+    <tr><td>还款方式</td><td>字典值转标签</td></tr>
+    <tr><td>状态</td><td>草稿/已上架/已下架</td></tr>
+    <tr><td>更新时间</td><td>最近更新时间</td></tr>
+    <tr><td>操作</td><td>详情、编辑、上架、下架、删除</td></tr>
+  </table>
+
+  <h2>4. 业务规则</h2>
+  <ol>
+    <li>新增产品默认状态为 <b>DRAFT</b>（草稿）。</li>
+    <li>产品编码全局唯一，不允许重复。</li>
+    <li>上架条件：基础必填字段完整。</li>
+    <li>状态流转：DRAFT -> ON_SHELF -> OFF_SHELF -> ON_SHELF。</li>
+    <li>删除限制：仅 DRAFT / OFF_SHELF 可删除。</li>
+  </ol>
+
+  <h2>5. 数据字段定义（最小集）</h2>
+  <table>
+    <tr><th>字段名</th><th>中文名</th><th>必填</th><th>说明</th></tr>
+    <tr><td>productName</td><td>产品名称</td><td>是</td><td>最长100字符</td></tr>
+    <tr><td>productCode</td><td>产品编码</td><td>是</td><td>唯一</td></tr>
+    <tr><td>speciesCodes</td><td>适用畜种</td><td>是</td><td>多选编码，逗号拼接</td></tr>
+    <tr><td>amountMin</td><td>最低额度</td><td>是</td><td>数值，>=0</td></tr>
+    <tr><td>amountMax</td><td>最高额度</td><td>是</td><td>数值，>=amountMin</td></tr>
+    <tr><td>annualRate</td><td>年化利率</td><td>是</td><td>百分比数值</td></tr>
+    <tr><td>termMonths</td><td>期限(月)</td><td>是</td><td>整数</td></tr>
+    <tr><td>repayType</td><td>还款方式</td><td>是</td><td>字典值</td></tr>
+    <tr><td>status</td><td>状态</td><td>是</td><td>DRAFT/ON_SHELF/OFF_SHELF</td></tr>
+    <tr><td>remark</td><td>产品说明</td><td>否</td><td>最长1000字符</td></tr>
+  </table>
+
+  <h2>6. 接口清单（建议）</h2>
+  <table>
+    <tr><th>接口</th><th>方法</th><th>说明</th></tr>
+    <tr><td>/biz/finProduct/add</td><td>POST</td><td>新增产品</td></tr>
+    <tr><td>/biz/finProduct/edit</td><td>POST</td><td>编辑产品</td></tr>
+    <tr><td>/biz/finProduct/detail</td><td>GET</td><td>产品详情</td></tr>
+    <tr><td>/biz/finProduct/page</td><td>GET</td><td>分页查询</td></tr>
+    <tr><td>/biz/finProduct/onShelf</td><td>POST</td><td>产品上架</td></tr>
+    <tr><td>/biz/finProduct/offShelf</td><td>POST</td><td>产品下架</td></tr>
+    <tr><td>/biz/finProduct/delete</td><td>POST</td><td>逻辑删除</td></tr>
+  </table>
+
+  <h2>7. 权限与数据范围</h2>
+  <ol>
+    <li>按农场组织控制数据权限。</li>
+    <li>普通用户仅可见本农场产品。</li>
+    <li>管理员可见全部农场产品。</li>
+    <li>上架/下架/编辑/删除需对应按钮权限。</li>
+  </ol>
+
+  <h2>8. 非本期范围</h2>
+  <ul>
+    <li>产品审核流程</li>
+    <li>贷款申请联动</li>
+    <li>贷后风险监控与预警</li>
+  </ul>
+
+  <h2>9. 验收标准（最小）</h2>
+  <ol>
+    <li>可完成产品新增、编辑、上下架、删除。</li>
+    <li>列表支持按名称和状态查询。</li>
+    <li>不同农场用户看到的数据符合权限范围。</li>
+    <li>状态流转规则生效，非法操作有提示。</li>
+  </ol>
+</body>
+</html>

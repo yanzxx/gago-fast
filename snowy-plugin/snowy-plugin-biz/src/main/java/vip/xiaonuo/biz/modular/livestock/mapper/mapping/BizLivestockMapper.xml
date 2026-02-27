@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.livestock.mapper.BizLivestockMapper">
+
+    <resultMap id="BizLivestockPageResultMap" type="vip.xiaonuo.biz.modular.livestock.result.BizLivestockPageResult">
+        <result column="id" property="id"/>
+        <result column="livestockId" property="livestockId"/>
+        <result column="livestockNo" property="livestockNo"/>
+        <result column="farmId" property="farmId"/>
+        <result column="speciesName" property="speciesName"/>
+        <result column="birthDate" property="birthDate"/>
+        <result column="status" property="status"/>
+        <result column="immunityStatus" property="immunityStatus"/>
+        <result column="lastImmunityDate" property="lastImmunityDate"/>
+        <result column="collarNo" property="collarNo"/>
+        <result column="gender" property="gender"/>
+        <result column="penNo" property="penNo"/>
+        <result column="registerDate" property="registerDate"/>
+    </resultMap>
+
+    <select id="page" resultMap="BizLivestockPageResultMap">
+        select
+            l.id as id,
+            l.id as livestockId,
+            l.livestock_no as livestockNo,
+            l.farm_id as farmId,
+            l.species_name as speciesName,
+            l.birth_date as birthDate,
+            l.status as status,
+            l.immunity_status as immunityStatus,
+            l.last_immunity_date as lastImmunityDate,
+            l.collar_no as collarNo,
+            l.gender as gender,
+            l.pen_no as penNo,
+            l.register_date as registerDate
+        from yzx.biz_livestock l
+        where l.delete_flag = 'NOT_DELETE'
+        <if test="param != null and param.speciesName != null and param.speciesName != ''">
+            and l.species_name = #{param.speciesName}
+        </if>
+        <if test="param != null and param.collarNo != null and param.collarNo != ''">
+            and l.collar_no like concat('%', #{param.collarNo}, '%')
+        </if>
+        <if test="param != null and param.status != null and param.status != ''">
+            and l.status = #{param.status}
+        </if>
+        <if test="param != null and param.immunityStatus != null and param.immunityStatus != ''">
+            and l.immunity_status = #{param.immunityStatus}
+        </if>
+        <if test="param != null and param.registerStartDate != null and param.registerStartDate != ''">
+            and l.register_date &gt;= #{param.registerStartDate}
+        </if>
+        <if test="param != null and param.registerEndDate != null and param.registerEndDate != ''">
+            and l.register_date &lt;= #{param.registerEndDate}
+        </if>
+
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and l.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and l.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+        order by l.register_date desc, l.create_time desc
+    </select>
+
+    <select id="speciesOptions" resultType="vip.xiaonuo.biz.modular.livestock.result.BizLivestockSpeciesOptionResult">
+        select distinct
+            l.species_name as label,
+            l.species_name as value,
+            upper(replace(l.species_name, ' ', '_')) as code
+        from yzx.biz_livestock l
+        where l.delete_flag = 'NOT_DELETE'
+        <if test="farmId != null and farmId != ''">
+            and l.farm_id = #{farmId}
+        </if>
+        <if test="farmId == null or farmId == ''">
+            <if test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and l.farm_id in
+                        <foreach collection="farmIds" item="farmIdItem" open="(" separator="," close=")">
+                            #{farmIdItem}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </if>
+        </if>
+        order by value
+    </select>
+
+</mapper>

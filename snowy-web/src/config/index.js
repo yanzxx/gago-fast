@@ -42,7 +42,7 @@ const DEFAULT_CONFIG = {
 	SNOWY_GO_TO_HOME_PAGE: false,
 
 	// 是否开启多标签
-	SNOWY_LAYOUT_TAGS_OPEN: true,
+	SNOWY_LAYOUT_TAGS_OPEN: false,
 
 	// 是否开启展示面包屑
 	SNOWY_BREADCRUMD_OPEN: false,
