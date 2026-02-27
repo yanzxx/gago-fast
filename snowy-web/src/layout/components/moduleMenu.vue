@@ -74,14 +74,23 @@
 		selectedKeys.value = [tool.data.get('SNOWY_MENU_MODULE_ID')]
 	})
 	const emit = defineEmits({ switchModule: null, switchModuleWithNoChangePage: null })
+	const parseExtJson = (extJson) => {
+		if (!extJson) return {}
+		try {
+			const parsed = JSON.parse(extJson)
+			return parsed && typeof parsed === 'object' ? parsed : {}
+		} catch (e) {
+			return {}
+		}
+	}
 	const menuList = router.getMenu()
-	const spaList = tool.data.get('SPA')
+	const spaList = tool.data.get('SPA') || []
 	const spa = spaList.filter((item) => {
-		item.extJsonObj = JSON.parse(item.extJson)
+		item.extJsonObj = parseExtJson(item.extJson)
 		if (item.menuType === 'IFRAME') {
 			item.path = `/i/${item.name}`
 		}
-		return item.name !== 'userCenter' && item.name !== 'index' && item.extJsonObj.showModuleArea
+		return item.name !== 'userCenter' && item.name !== 'index' && !!item.extJsonObj.showModuleArea
 	})
 	const menu = spa.concat(menuList)
 	menu.sort(function (a, b) {
@@ -113,7 +122,7 @@
 			const extJson = item.extJson
 			let showLeftMenuArea = true
 			if (extJson) {
-				const extJsonObj = JSON.parse(extJson)
+				const extJsonObj = parseExtJson(extJson)
 				showLeftMenuArea = extJsonObj.showLeftMenuArea == null ? true : extJsonObj.showLeftMenuArea
 			}
 			if (item.menuType === 'MENU') {

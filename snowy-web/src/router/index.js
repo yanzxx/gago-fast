@@ -13,14 +13,24 @@ import { globalStore, searchStore } from '@/store'
 import ssoCasApi from '@/api/auth/ssoCasApi'
 import { afterLogin } from '@/views/auth/login/util'
 
+const parseExtJson = (extJson) => {
+	if (!extJson) return {}
+	try {
+		const parsed = JSON.parse(extJson)
+		return parsed && typeof parsed === 'object' ? parsed : {}
+	} catch (e) {
+		return {}
+	}
+}
+
 // 进度条配置
 NProgress.configure({ showSpinner: false, speed: 500 })
 
 let spaList = []
 if (tool.data.get('SPA')) {
 	const spa = tool.data.get('SPA').filter((item) => {
-		item.extJsonObj = JSON.parse(item.extJson)
-		return item.name !== 'userCenter' && item.name !== 'index' && item.extJsonObj.screenFull && item.menuType === 'MENU'
+		item.extJsonObj = parseExtJson(item.extJson)
+		return item.name !== 'userCenter' && item.name !== 'index' && !!item.extJsonObj.screenFull && item.menuType === 'MENU'
 	})
 
 	spaList = spa.map((item) => {
@@ -161,7 +171,7 @@ router.beforeEach(async (to, from, next) => {
 		let showLeftMenuArea = true
 		const extJson = to.meta.extJson
 		if (extJson) {
-			const extJsonObj = JSON.parse(extJson)
+			const extJsonObj = parseExtJson(extJson)
 			showLeftMenuArea = extJsonObj.showLeftMenuArea == null ? true : extJsonObj.showLeftMenuArea
 		}
 		if (extJson) {
@@ -213,7 +223,7 @@ const filterAsyncRouter = (routerMap) => {
 		(item) =>
 			item.category === 'MODULE' ||
 			item.category === 'MENU' ||
-			(item.category === 'SPA' && (!item.meta.extJson || !JSON.parse(item.meta.extJson).showModuleArea))
+			(item.category === 'SPA' && !parseExtJson(item.meta && item.meta.extJson).showModuleArea)
 	)
 	_routerMap.forEach((item) => {
 		item.meta = item.meta ? item.meta : {}
