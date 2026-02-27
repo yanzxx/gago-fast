@@ -80,7 +80,7 @@ const DEFAULT_CONFIG = {
 	// 系统基础配置，这些是数据库中保存起来的
 	SYS_BASE_CONFIG: {
 		// 默认logo
-		SNOWY_SYS_LOGO: '/img/jiage.png',
+		SNOWY_SYS_LOGO: '/img/farm-logo.svg',
 		// 后端接口地址
 		SNOWY_SYS_API_URL: import.meta.env.VITE_API_BASEURL,
 		// 默认跳转路由

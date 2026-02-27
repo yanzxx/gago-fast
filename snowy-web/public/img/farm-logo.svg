@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="120" viewBox="0 0 420 120" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="34" y1="24" x2="118" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F5E4C"/>
+      <stop offset="1" stop-color="#1F8A70"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="48" y1="40" x2="122" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#39B297"/>
+      <stop offset="1" stop-color="#1F8A70"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="420" height="120" rx="20" fill="transparent"/>
+
+  <path d="M44 72C44 44.39 66.39 22 94 22C121.61 22 144 44.39 144 72" stroke="url(#g1)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M60 72C60 53.22 75.22 38 94 38C112.78 38 128 53.22 128 72" stroke="url(#g2)" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+  <circle cx="142" cy="72" r="5" fill="#39B297"/>
+
+  <text x="168" y="80" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="50" font-weight="700" fill="#0F2F27">牧格</text>
+  <text x="170" y="102" font-family="Arial, sans-serif" font-size="18" letter-spacing="4" fill="#3F6B5F">LIVESTOCK PLATFORM</text>
+</svg>
