@@ -37,10 +37,20 @@
 		<a-card :bordered="false" class="list-card">
 			<div class="section-title">产品列表</div>
 			<div class="toolbar">
-				<a-button type="primary" @click="openAddModal">新增产品</a-button>
+				<a-space>
+					<a-button type="primary" @click="openAddModal">新增产品</a-button>
+					<!-- 暂时隐藏批量删除（仅前端隐藏） -->
+					<!-- <a-button danger :disabled="!selectedRows.length" @click="doBatchDelete">批量删除</a-button> -->
+				</a-space>
 			</div>
 
-			<a-table row-key="productCode" :data-source="tableData" :columns="columns" :pagination="false" :loading="tableLoading">
+			<a-table
+				row-key="productCode"
+				:data-source="tableData"
+				:columns="columns"
+				:pagination="false"
+				:loading="tableLoading"
+			>
 				<template #bodyCell="{ column, record }">
 					<template v-if="column.dataIndex === 'speciesCodes'">
 						{{ getSpeciesLabel(record.speciesCodes) }}
@@ -529,6 +539,29 @@ const doDelete = (record) => {
 		onOk: async () => {
 			await finProductApi.delete({ id: record.id, productCode: record.productCode })
 			message.success('删除成功')
+			fetchTableData()
+		}
+	})
+}
+
+const doBatchDelete = () => {
+	const rows = []
+	if (!rows.length) return
+	const blocked = rows.filter((item) => item.status === 'ON_SHELF')
+	if (blocked.length) {
+		message.warning('已上架产品不允许删除，请先下架后再批量删除')
+		return
+	}
+	Modal.confirm({
+		title: `确认批量删除 ${rows.length} 条产品？`,
+		onOk: async () => {
+			await finProductApi.batchDelete(
+				rows.map((item) => ({
+					id: item.id,
+					productCode: item.productCode
+				}))
+			)
+			message.success('批量删除成功')
 			fetchTableData()
 		}
 	})

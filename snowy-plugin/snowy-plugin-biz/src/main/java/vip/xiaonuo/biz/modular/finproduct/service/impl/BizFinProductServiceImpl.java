@@ -140,6 +140,12 @@ public class BizFinProductServiceImpl implements BizFinProductService {
         bizFinProductMapper.updateById(entity);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void batchDelete(List<BizFinProductIdParam> idParamList) {
+        idParamList.forEach(this::delete);
+    }
+
     private void checkAmountRange(java.math.BigDecimal amountMin, java.math.BigDecimal amountMax) {
         if (ObjectUtil.isEmpty(amountMin) || ObjectUtil.isEmpty(amountMax) || amountMin.compareTo(amountMax) > 0) {
             throw new CommonException("额度范围不正确，最低额度不能大于最高额度");

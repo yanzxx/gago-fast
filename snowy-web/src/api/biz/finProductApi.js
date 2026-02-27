@@ -23,5 +23,8 @@ export default {
 	},
 	delete(data) {
 		return request('delete', data)
+	},
+	batchDelete(data) {
+		return request('batchDelete', data)
 	}
 }

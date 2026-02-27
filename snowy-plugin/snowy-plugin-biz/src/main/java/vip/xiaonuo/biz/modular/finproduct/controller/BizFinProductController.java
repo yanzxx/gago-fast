@@ -19,9 +19,11 @@ import vip.xiaonuo.biz.modular.finproduct.result.BizFinProductPageResult;
 import vip.xiaonuo.biz.modular.finproduct.service.BizFinProductService;
 import vip.xiaonuo.common.annotation.CommonLog;
 import vip.xiaonuo.common.pojo.CommonResult;
+import vip.xiaonuo.common.pojo.CommonValidList;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 金融产品控制器
@@ -91,6 +93,16 @@ public class BizFinProductController {
     @PostMapping("/biz/finProduct/delete")
     public CommonResult<String> delete(@RequestBody @Valid BizFinProductIdParam idParam) {
         bizFinProductService.delete(idParam);
+        return CommonResult.ok();
+    }
+
+    @ApiOperationSupport(order = 8)
+    @ApiOperation("批量删除金融产品")
+    @CommonLog("批量删除金融产品")
+    @PostMapping("/biz/finProduct/batchDelete")
+    public CommonResult<String> batchDelete(@RequestBody @Valid @NotEmpty(message = "集合不能为空")
+                                            CommonValidList<BizFinProductIdParam> idParamList) {
+        bizFinProductService.batchDelete(idParamList);
         return CommonResult.ok();
     }
 }

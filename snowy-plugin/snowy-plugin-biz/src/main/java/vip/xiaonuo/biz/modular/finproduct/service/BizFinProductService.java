@@ -8,6 +8,8 @@ import vip.xiaonuo.biz.modular.finproduct.param.BizFinProductIdParam;
 import vip.xiaonuo.biz.modular.finproduct.param.BizFinProductPageParam;
 import vip.xiaonuo.biz.modular.finproduct.result.BizFinProductPageResult;
 
+import java.util.List;
+
 /**
  * 金融产品服务
  */
@@ -26,4 +28,6 @@ public interface BizFinProductService {
     void offShelf(BizFinProductIdParam idParam);
 
     void delete(BizFinProductIdParam idParam);
+
+    void batchDelete(List<BizFinProductIdParam> idParamList);
 }
