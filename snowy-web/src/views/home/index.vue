@@ -121,6 +121,31 @@
 		<a-spin v-else class="board-spin" />
 
 		<a-modal
+			v-model:visible="farmStatsModalOpen"
+			title="农场经营健康与贷款情况"
+			:footer="null"
+			width="980px"
+			@cancel="onFarmStatsModalClose"
+		>
+			<a-spin :spinning="farmStatsLoading">
+				<div class="farm-stats-header">
+					<div class="farm-stats-name">{{ farmStatsData.farmName || '-' }}</div>
+					<div class="farm-stats-meta">农场ID：{{ farmStatsData.farmId || '-' }}</div>
+				</div>
+				<div class="farm-stats-charts">
+					<div class="farm-chart-card">
+						<div class="farm-chart-title">经营健康数据</div>
+						<div ref="healthChartRef" class="farm-chart"></div>
+					</div>
+					<div class="farm-chart-card">
+						<div class="farm-chart-title">贷款情况</div>
+						<div ref="loanChartRef" class="farm-chart"></div>
+					</div>
+				</div>
+			</a-spin>
+		</a-modal>
+
+		<a-modal
 			v-model:visible="riskThresholdModalOpen"
 			title="设置风险阈值"
 			ok-text="保存"
@@ -180,6 +205,12 @@ let mapChart = null
 let clockTimer = null
 const quickMenuOpen = ref(false)
 const quickEntryRef = ref(null)
+const farmStatsModalOpen = ref(false)
+const farmStatsLoading = ref(false)
+const healthChartRef = ref()
+const loanChartRef = ref()
+let healthChart = null
+let loanChart = null
 const riskThresholdModalOpen = ref(false)
 const riskThresholdLoading = ref(false)
 const riskThresholdSubmitting = ref(false)
@@ -275,6 +306,23 @@ const homeData = reactive({
 	mapPoints: [],
 	alerts: [],
 	anomalies: []
+})
+
+const farmStatsData = reactive({
+	farmId: '',
+	farmName: '',
+	inStockCount: 0,
+	outStockCount: 0,
+	deadCount: 0,
+	immunizedCount: 0,
+	notImmunizedCount: 0,
+	expiredCount: 0,
+	loanApplyCount: 0,
+	loanApprovedCount: 0,
+	loanProcessingCount: 0,
+	loanPendingCount: 0,
+	loanAmountTotal: 0,
+	loanAmountApproved: 0
 })
 
 const localNow = ref('')
@@ -483,6 +531,7 @@ const renderChinaMap = () => {
 	}
 
 	const scatterData = (homeData.mapPoints || []).map((item) => ({
+		farmId: item.farmId,
 		name: item.farmName || farmLabel(item.farmId),
 		value: [item.longitude, item.latitude, item.healthScore || 0],
 		level: item.riskLevel,
@@ -566,6 +615,14 @@ const renderChinaMap = () => {
 				zlevel: 4
 			}
 		]
+	})
+
+	mapChart.off('click')
+	mapChart.on('click', (params) => {
+		if (params?.seriesName !== '养殖场分布') return
+		const farmId = params?.data?.farmId
+		if (!farmId) return
+		openFarmStatsModal(farmId)
 	})
 }
 
@@ -664,7 +721,106 @@ const loadHomeData = async () => {
 	}
 }
 
+const renderFarmStatsCharts = async () => {
+	await nextTick()
+	if (healthChartRef.value) {
+		if (!healthChart) healthChart = echarts.init(healthChartRef.value)
+		healthChart.setOption({
+			tooltip: { trigger: 'item' },
+			legend: { bottom: 0, textStyle: { color: '#dffcf3' } },
+			series: [
+				{
+					name: '经营健康',
+					type: 'pie',
+					radius: ['35%', '62%'],
+					center: ['50%', '44%'],
+					label: { color: '#dffcf3' },
+					data: [
+						{ name: '存栏', value: Number(farmStatsData.inStockCount || 0) },
+						{ name: '出栏', value: Number(farmStatsData.outStockCount || 0) },
+						{ name: '死亡', value: Number(farmStatsData.deadCount || 0) },
+						{ name: '已接种', value: Number(farmStatsData.immunizedCount || 0) },
+						{ name: '未接种', value: Number(farmStatsData.notImmunizedCount || 0) },
+						{ name: '已过期', value: Number(farmStatsData.expiredCount || 0) }
+					]
+				}
+			]
+		})
+	}
+	if (loanChartRef.value) {
+		if (!loanChart) loanChart = echarts.init(loanChartRef.value)
+		loanChart.setOption({
+			tooltip: { trigger: 'axis' },
+			xAxis: {
+				type: 'category',
+				data: ['申请总数', '审批通过', '处理中', '待提交'],
+				axisLabel: { color: '#dffcf3' }
+			},
+			yAxis: {
+				type: 'value',
+				axisLabel: { color: '#dffcf3' },
+				splitLine: { lineStyle: { color: 'rgba(200,255,236,0.15)' } }
+			},
+			series: [
+				{
+					type: 'bar',
+					data: [
+						Number(farmStatsData.loanApplyCount || 0),
+						Number(farmStatsData.loanApprovedCount || 0),
+						Number(farmStatsData.loanProcessingCount || 0),
+						Number(farmStatsData.loanPendingCount || 0)
+					],
+					itemStyle: {
+						color: '#4fd2a8'
+					},
+					label: { show: true, position: 'top', color: '#dffcf3' }
+				}
+			],
+			grid: { left: 40, right: 18, top: 18, bottom: 40 }
+		})
+	}
+}
+
+const openFarmStatsModal = async (farmId) => {
+	farmStatsModalOpen.value = true
+	farmStatsLoading.value = true
+	try {
+		const data = await supervisionApi.farmStats({ farmId })
+		Object.assign(farmStatsData, {
+			farmId: data?.farmId || farmId,
+			farmName: data?.farmName || farmLabel(farmId),
+			inStockCount: Number(data?.inStockCount || 0),
+			outStockCount: Number(data?.outStockCount || 0),
+			deadCount: Number(data?.deadCount || 0),
+			immunizedCount: Number(data?.immunizedCount || 0),
+			notImmunizedCount: Number(data?.notImmunizedCount || 0),
+			expiredCount: Number(data?.expiredCount || 0),
+			loanApplyCount: Number(data?.loanApplyCount || 0),
+			loanApprovedCount: Number(data?.loanApprovedCount || 0),
+			loanProcessingCount: Number(data?.loanProcessingCount || 0),
+			loanPendingCount: Number(data?.loanPendingCount || 0),
+			loanAmountTotal: Number(data?.loanAmountTotal || 0),
+			loanAmountApproved: Number(data?.loanAmountApproved || 0)
+		})
+		await renderFarmStatsCharts()
+	} catch (e) {
+		message.error('加载农场经营健康与贷款数据失败')
+	} finally {
+		farmStatsLoading.value = false
+	}
+}
+
+const onFarmStatsModalClose = () => {
+	healthChart?.resize()
+	loanChart?.resize()
+}
+
 const onResize = () => mapChart?.resize()
+const onAllChartResize = () => {
+	onResize()
+	healthChart?.resize()
+	loanChart?.resize()
+}
 
 watch(
 	() => homeData.mapPoints,
@@ -682,7 +838,7 @@ onMounted(async () => {
 	document.addEventListener('mousedown', handleClickOutside)
 	await Promise.all([loadFarmTree(), loadHomeData()])
 	await initChinaMap()
-	window.addEventListener('resize', onResize)
+	window.addEventListener('resize', onAllChartResize)
 })
 
 onUnmounted(() => {
@@ -691,10 +847,18 @@ onUnmounted(() => {
 		clockTimer = null
 	}
 	document.removeEventListener('mousedown', handleClickOutside)
-	window.removeEventListener('resize', onResize)
+	window.removeEventListener('resize', onAllChartResize)
 	if (mapChart) {
 		mapChart.dispose()
 		mapChart = null
+	}
+	if (healthChart) {
+		healthChart.dispose()
+		healthChart = null
+	}
+	if (loanChart) {
+		loanChart.dispose()
+		loanChart = null
 	}
 })
 </script>
@@ -1054,6 +1218,48 @@ onUnmounted(() => {
 .board-spin {
 	width: 100%;
 	padding-top: 80px;
+}
+
+.farm-stats-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.farm-stats-name {
+	font-size: 16px;
+	font-weight: 700;
+	color: #dffcf3;
+}
+
+.farm-stats-meta {
+	font-size: 12px;
+	color: #a7d9c9;
+}
+
+.farm-stats-charts {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
+.farm-chart-card {
+	background: rgba(8, 28, 24, 0.8);
+	border: 1px solid rgba(124, 201, 176, 0.2);
+	border-radius: 10px;
+	padding: 10px;
+}
+
+.farm-chart-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: #dffcf3;
+	margin-bottom: 6px;
+}
+
+.farm-chart {
+	height: 300px;
 }
 
 @media (max-width: 1600px) {

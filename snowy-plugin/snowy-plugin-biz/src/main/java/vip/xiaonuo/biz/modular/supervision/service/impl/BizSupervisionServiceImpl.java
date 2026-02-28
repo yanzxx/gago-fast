@@ -12,11 +12,13 @@ import vip.xiaonuo.auth.core.util.StpLoginUserUtil;
 import vip.xiaonuo.biz.modular.org.entity.BizOrg;
 import vip.xiaonuo.biz.modular.org.mapper.BizOrgMapper;
 import vip.xiaonuo.biz.modular.supervision.mapper.BizSupervisionMapper;
+import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionFarmStatsParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionHomeParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionRiskThresholdParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionRiskThresholdSaveParam;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAlertResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAnomalyResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionFarmStatsResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionHomeResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMapPointResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult;
@@ -64,6 +66,20 @@ public class BizSupervisionServiceImpl implements BizSupervisionService {
 
         List<BizSupervisionAnomalyResult> anomalies = bizSupervisionMapper.anomalies(scopedParam, allFarm, visibleFarmIds);
         result.setAnomalies(anomalies);
+        return result;
+    }
+
+    @Override
+    public BizSupervisionFarmStatsResult farmStats(BizSupervisionFarmStatsParam inputParam) {
+        boolean allFarm = isAllFarmVisible();
+        List<String> visibleFarmIds = getVisibleFarmIds(allFarm);
+        String farmId = resolveFarmId(inputParam != null ? inputParam.getFarmId() : null, allFarm, visibleFarmIds);
+        BizSupervisionFarmStatsResult result = bizSupervisionMapper.farmStats(farmId);
+        if (ObjectUtil.isEmpty(result)) {
+            result = new BizSupervisionFarmStatsResult();
+            result.setFarmId(farmId);
+            result.setFarmName(queryFarm(farmId).getName());
+        }
         return result;
     }
 

@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionFarmStatsParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionHomeParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionRiskThresholdParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionRiskThresholdSaveParam;
+import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionFarmStatsResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionHomeResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionRiskThresholdResult;
 import vip.xiaonuo.biz.modular.supervision.service.BizSupervisionService;
@@ -41,13 +43,20 @@ public class BizSupervisionController {
     }
 
     @ApiOperationSupport(order = 2)
+    @ApiOperation("农场经营健康与贷款统计")
+    @GetMapping("/biz/supervision/farmStats")
+    public CommonResult<BizSupervisionFarmStatsResult> farmStats(BizSupervisionFarmStatsParam param) {
+        return CommonResult.data(bizSupervisionService.farmStats(param));
+    }
+
+    @ApiOperationSupport(order = 3)
     @ApiOperation("风险阈值详情")
     @GetMapping("/biz/supervision/riskThreshold/detail")
     public CommonResult<BizSupervisionRiskThresholdResult> riskThreshold(BizSupervisionRiskThresholdParam param) {
         return CommonResult.data(bizSupervisionService.riskThreshold(param));
     }
 
-    @ApiOperationSupport(order = 3)
+    @ApiOperationSupport(order = 4)
     @ApiOperation("保存风险阈值")
     @CommonLog("保存风险阈值")
     @PostMapping("/biz/supervision/riskThreshold/save")

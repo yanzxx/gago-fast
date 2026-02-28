@@ -135,76 +135,94 @@
     </sql>
 
     <select id="overview" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult">
-        with livestock_stats as (
-            select
-                count(distinct l.farm_id)::bigint as farm_count,
-                coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0)::bigint as in_stock_count,
-                coalesce(sum(case when l.status = 'OUT_STOCK' then 1 else 0 end), 0)::bigint as out_stock_count,
-                coalesce(sum(case when l.status = 'DEAD' then 1 else 0 end), 0)::bigint as dead_count,
-                coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0)::bigint as immunized_count,
-                coalesce(sum(case when l.immunity_status = 'NOT_IMMUNIZED' then 1 else 0 end), 0)::bigint as not_immunized_count,
-                coalesce(sum(case when l.immunity_status = 'EXPIRED' then 1 else 0 end), 0)::bigint as expired_count
-            from yzx.biz_livestock l
-            <include refid="LivestockScopeWhere"/>
-        ),
-        loan_stats as (
-            select coalesce(sum(la.apply_amount), 0) as loan_amount
-            from yzx.biz_loan_apply la
-            <include refid="LoanScopeWhere"/>
-            and la.loan_status in ('PROCESSING', 'APPROVED')
-        ),
-        ins_stats as (
-            select coalesce(sum(ia.insured_amount), 0) as insured_amount
-            from yzx.biz_ins_apply ia
-            <include refid="InsScopeWhere"/>
-            and ia.status in ('SUBMITTED', 'POLICY_ISSUED')
-        ),
-        claim_stats as (
-            select
-                count(1)::bigint as claim_total,
-                coalesce(sum(case when cm.status = 'CLOSED' then 1 else 0 end), 0)::bigint as claim_closed
-            from yzx.biz_claim_manage cm
-            <include refid="ClaimScopeWhere"/>
-        ),
-        anomaly_stats as (
-            select
-                count(1)::bigint as anomaly_total,
-                coalesce(sum(case when a.status = '处理中' then 1 else 0 end), 0)::bigint as anomaly_processing,
-                coalesce(sum(case when a.status = '已处置' then 1 else 0 end), 0)::bigint as anomaly_finished,
-                coalesce(sum(case when a.status != '已处置' and a.trigger_time &lt; now() - interval '3 day' then 1 else 0 end), 0)::bigint as overdue_anomaly_count,
-                coalesce(sum(case when a.status = '已处置' and a.update_time is not null and a.update_time &lt;= a.trigger_time + interval '3 day' then 1 else 0 end), 0)::bigint as resolved_in_three_days_count
-            from yzx.biz_after_loan_anomaly a
-            <include refid="AnomalyScopeWhere"/>
-        ),
-        notice_stats as (
-            select count(1)::bigint as sent_notice_count
-            from yzx.biz_after_loan_notice n
-            <include refid="NoticeScopeWhere"/>
-        )
         select
-            ls.farm_count as farmCount,
-            ls.in_stock_count as inStockCount,
-            ls.out_stock_count as outStockCount,
-            ls.dead_count as deadCount,
-            ls.immunized_count as immunizedCount,
-            ls.not_immunized_count as notImmunizedCount,
-            ls.expired_count as expiredCount,
-            ln.loan_amount as loanAmount,
-            ins.insured_amount as insuredAmount,
-            cs.claim_total as claimTotal,
-            cs.claim_closed as claimClosed,
-            as1.anomaly_total as anomalyTotal,
-            as1.anomaly_processing as anomalyProcessing,
-            as1.anomaly_finished as anomalyFinished,
-            ns.sent_notice_count as sentNoticeCount,
-            as1.overdue_anomaly_count as overdueAnomalyCount,
-            as1.resolved_in_three_days_count as resolvedInThreeDaysCount
-        from livestock_stats ls
-                 cross join loan_stats ln
-                 cross join ins_stats ins
-                 cross join claim_stats cs
-                 cross join anomaly_stats as1
-                 cross join notice_stats ns
+            cast((
+                select count(distinct l.farm_id)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as farmCount,
+            cast((
+                select coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as inStockCount,
+            cast((
+                select coalesce(sum(case when l.status = 'OUT_STOCK' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as outStockCount,
+            cast((
+                select coalesce(sum(case when l.status = 'DEAD' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as deadCount,
+            cast((
+                select coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as immunizedCount,
+            cast((
+                select coalesce(sum(case when l.immunity_status = 'NOT_IMMUNIZED' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as notImmunizedCount,
+            cast((
+                select coalesce(sum(case when l.immunity_status = 'EXPIRED' then 1 else 0 end), 0)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+            ) as bigint) as expiredCount,
+            coalesce((
+                select sum(la.apply_amount)
+                from yzx.biz_loan_apply la
+                <include refid="LoanScopeWhere"/>
+                and la.loan_status in ('PROCESSING', 'APPROVED')
+            ), 0) as loanAmount,
+            coalesce((
+                select sum(ia.insured_amount)
+                from yzx.biz_ins_apply ia
+                <include refid="InsScopeWhere"/>
+                and ia.status in ('SUBMITTED', 'POLICY_ISSUED')
+            ), 0) as insuredAmount,
+            cast((
+                select count(1)
+                from yzx.biz_claim_manage cm
+                <include refid="ClaimScopeWhere"/>
+            ) as bigint) as claimTotal,
+            cast((
+                select coalesce(sum(case when cm.status = 'CLOSED' then 1 else 0 end), 0)
+                from yzx.biz_claim_manage cm
+                <include refid="ClaimScopeWhere"/>
+            ) as bigint) as claimClosed,
+            cast((
+                select count(1)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+            ) as bigint) as anomalyTotal,
+            cast((
+                select coalesce(sum(case when a.status = '处理中' then 1 else 0 end), 0)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+            ) as bigint) as anomalyProcessing,
+            cast((
+                select coalesce(sum(case when a.status = '已处置' then 1 else 0 end), 0)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+            ) as bigint) as anomalyFinished,
+            cast((
+                select count(1)
+                from yzx.biz_after_loan_notice n
+                <include refid="NoticeScopeWhere"/>
+            ) as bigint) as sentNoticeCount,
+            cast((
+                select coalesce(sum(case when a.status != '已处置' and a.trigger_time &lt; now() - interval '3 day' then 1 else 0 end), 0)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+            ) as bigint) as overdueAnomalyCount,
+            cast((
+                select coalesce(sum(case when a.status = '已处置' and a.update_time is not null and a.update_time &lt;= a.trigger_time + interval '3 day' then 1 else 0 end), 0)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+            ) as bigint) as resolvedInThreeDaysCount
     </select>
 
     <select id="mapPoints" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMapPointResult">
@@ -224,14 +242,16 @@
             l.farm_id as farmId,
             coalesce(o.name, l.farm_id) as farmName,
             o.ext_json as extJson,
-            coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0)::bigint as inStockCount,
-            round(
-                    (
-                        (coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0)::numeric)
-                            / nullif(count(1)::numeric, 0)
-                        * 100
-                    ), 0
-            )::int as healthScore,
+            cast(coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) as bigint) as inStockCount,
+            cast(
+                round(
+                        (
+                            (cast(coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0) as numeric))
+                                / nullif(cast(count(1) as numeric), 0)
+                            * 100
+                        ), 0
+                ) as int
+            ) as healthScore,
             case fr.risk_rank
                 when 3 then 'danger'
                 when 2 then 'warning'
@@ -273,5 +293,52 @@
         <include refid="AnomalyScopeWhere"/>
         order by a.trigger_time desc
         limit 10
+    </select>
+
+    <select id="farmStats" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionFarmStatsResult">
+        with livestock_stats as (
+            select
+                cast(coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) as bigint) as in_stock_count,
+                cast(coalesce(sum(case when l.status = 'OUT_STOCK' then 1 else 0 end), 0) as bigint) as out_stock_count,
+                cast(coalesce(sum(case when l.status = 'DEAD' then 1 else 0 end), 0) as bigint) as dead_count,
+                cast(coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0) as bigint) as immunized_count,
+                cast(coalesce(sum(case when l.immunity_status = 'NOT_IMMUNIZED' then 1 else 0 end), 0) as bigint) as not_immunized_count,
+                cast(coalesce(sum(case when l.immunity_status = 'EXPIRED' then 1 else 0 end), 0) as bigint) as expired_count
+            from yzx.biz_livestock l
+            where l.delete_flag = 'NOT_DELETE'
+              and l.farm_id = #{farmId}
+        ),
+        loan_stats as (
+            select
+                cast(count(1) as bigint) as loan_apply_count,
+                cast(coalesce(sum(case when la.loan_status = 'APPROVED' then 1 else 0 end), 0) as bigint) as loan_approved_count,
+                cast(coalesce(sum(case when la.loan_status = 'PROCESSING' then 1 else 0 end), 0) as bigint) as loan_processing_count,
+                cast(coalesce(sum(case when la.loan_status = 'PENDING_SUBMIT' then 1 else 0 end), 0) as bigint) as loan_pending_count,
+                coalesce(sum(la.apply_amount), 0) as loan_amount_total,
+                coalesce(sum(case when la.loan_status = 'APPROVED' then la.apply_amount else 0 end), 0) as loan_amount_approved
+            from yzx.biz_loan_apply la
+            where la.delete_flag = 'NOT_DELETE'
+              and la.farm_id = #{farmId}
+        )
+        select
+            o.id as farmId,
+            o.name as farmName,
+            ls.in_stock_count as inStockCount,
+            ls.out_stock_count as outStockCount,
+            ls.dead_count as deadCount,
+            ls.immunized_count as immunizedCount,
+            ls.not_immunized_count as notImmunizedCount,
+            ls.expired_count as expiredCount,
+            los.loan_apply_count as loanApplyCount,
+            los.loan_approved_count as loanApprovedCount,
+            los.loan_processing_count as loanProcessingCount,
+            los.loan_pending_count as loanPendingCount,
+            los.loan_amount_total as loanAmountTotal,
+            los.loan_amount_approved as loanAmountApproved
+        from sys_org o
+                 cross join livestock_stats ls
+                 cross join loan_stats los
+        where o.id = #{farmId}
+        limit 1
     </select>
 </mapper>
