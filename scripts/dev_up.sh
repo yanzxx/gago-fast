@@ -87,9 +87,50 @@ stop_port_listener_if_exists() {
   fi
 }
 
+is_ipv4_host() {
+  local host="$1"
+  [[ "${host}" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
+}
+
+resolve_remote_host() {
+  local host="$1"
+  if is_ipv4_host "${host}"; then
+    return 0
+  fi
+
+  # 优先用最通用的工具做 DNS 解析检查
+  if command -v getent >/dev/null 2>&1; then
+    getent hosts "${host}" >/dev/null 2>&1 && return 0
+  fi
+  if command -v host >/dev/null 2>&1; then
+    host "${host}" >/dev/null 2>&1 && return 0
+  fi
+  if command -v nslookup >/dev/null 2>&1; then
+    nslookup "${host}" >/dev/null 2>&1 && return 0
+  fi
+  if command -v ping >/dev/null 2>&1; then
+    ping -c 1 "${host}" >/dev/null 2>&1 && return 0
+  fi
+
+  return 1
+}
+
 start_pg() {
   if [ "${PG_HOST}" != "127.0.0.1" ] && [ "${PG_HOST}" != "localhost" ]; then
     info "使用远程 PostgreSQL (${PG_HOST}:${PG_PORT})，执行连通性检查"
+
+    if ! resolve_remote_host "${PG_HOST}"; then
+      if [ "${PG_REMOTE_CHECK_STRICT}" = "true" ]; then
+        err "远程 PostgreSQL 域名无法解析: ${PG_HOST}"
+        err "可先执行（macOS）:"
+        err "  echo '121.89.251.251 ${PG_HOST}' | sudo tee -a /etc/hosts"
+        err "  sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
+        exit 1
+      fi
+      info "远程 PostgreSQL 域名解析失败，继续尝试启动后端（strict=false）"
+      return 0
+    fi
+
     local ok="0"
     local i
     for i in 1 2 3; do

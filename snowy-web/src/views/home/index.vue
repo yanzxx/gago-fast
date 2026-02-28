@@ -5,10 +5,15 @@
 				<div class="quick-icon" @click.stop="toggleQuickMenu">☰</div>
 				<div class="quick-menu">
 					<div class="quick-menu-title">模块导航</div>
-					<div class="quick-group" v-for="group in visibleQuickModuleGroups" :key="group.title">
-						<div class="quick-group-title">{{ group.title }}</div>
-						<div class="quick-menu-item" v-for="item in group.items" :key="item.path" @click="navigateTo(item.path)">
-							{{ item.title }}
+					<div class="quick-group" v-for="group in visibleQuickModuleGroups" :key="group.key">
+						<div class="quick-group-title" @click="toggleQuickGroup(group.key)">
+							<span>{{ group.title }}</span>
+							<span class="quick-group-arrow" :class="{ collapsed: isQuickGroupCollapsed(group.key) }">▾</span>
+						</div>
+						<div v-show="!isQuickGroupCollapsed(group.key)">
+							<div class="quick-menu-item" v-for="item in group.items" :key="item.path" @click="navigateTo(item.path)">
+								{{ item.title }}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -205,6 +210,7 @@ let mapChart = null
 let clockTimer = null
 const quickMenuOpen = ref(false)
 const quickEntryRef = ref(null)
+const quickGroupCollapsedMap = ref({})
 const farmStatsModalOpen = ref(false)
 const farmStatsLoading = ref(false)
 const healthChartRef = ref()
@@ -215,37 +221,6 @@ const riskThresholdModalOpen = ref(false)
 const riskThresholdLoading = ref(false)
 const riskThresholdSubmitting = ref(false)
 const riskThresholdFormRef = ref()
-
-const quickModuleGroups = [
-	{
-		title: '监管总览',
-		items: [{ title: '综合监管视图', path: '/comprehensiveSupervision' }]
-	},
-	{
-		title: '畜牧管理',
-		items: [
-			{ title: '畜牧登记列表', path: '/livestockList' },
-			{ title: '畜牧统计看板', path: '/livestockBoard' }
-		]
-	},
-	{
-		title: '银行金融管理',
-		items: [
-			{ title: '金融产品管理', path: '/productManage' },
-			{ title: '贷款管理', path: '/loanAdministration' },
-			{ title: '贷后管理', path: '/afterLoanAdministration' }
-		]
-	},
-	{
-		title: '保险管理',
-		items: [
-			{ title: '保险产品管理', path: '/bxProductManage' },
-			{ title: '投保管理', path: '/tbManage' },
-			{ title: '保后管理', path: '/bhManage' },
-			{ title: '理赔管理', path: '/lpManage' }
-		]
-	}
-]
 
 const normalizePath = (path) => {
 	if (!path) return ''
@@ -290,18 +265,65 @@ const allowedMenuTitles = computed(() => {
 	return collectMenuTitles(menus)
 })
 
+const buildQuickItems = (nodes = [], collector = []) => {
+	;(nodes || []).forEach((node) => {
+		if (!node) return
+		const title = (node?.meta?.title || node?.title || node?.name || '').toString().trim()
+		const path = normalizePath(node?.path || node?.url || node?.route)
+		const hidden = node?.meta?.hidden === true
+		const hasChildren = Array.isArray(node?.children) && node.children.length > 0
+		if (!hidden && title && path) {
+			collector.push({ title, path })
+		}
+		if (hasChildren) {
+			buildQuickItems(node.children, collector)
+		}
+	})
+	return collector
+}
+
 const visibleQuickModuleGroups = computed(() => {
 	const allowed = allowedMenuPaths.value
 	const allowedTitles = allowedMenuTitles.value
-	return quickModuleGroups
-		.map((group) => ({
-			...group,
-			items: group.items.filter((item) => {
-				return allowed.has(normalizePath(item.path)) || allowedTitles.has(item.title)
-			})
-		}))
-		.filter((group) => group.items.length > 0)
+	const dynamicGroups = (menuSnapshot.value || [])
+		.map((group, index) => {
+			const title = (group?.meta?.title || group?.title || group?.name || '').toString().trim()
+			const items = buildQuickItems(group?.children || [], [])
+				.filter((item) => allowed.has(item.path) || allowedTitles.has(item.title))
+				.filter((item, index, arr) => arr.findIndex((x) => x.path === item.path) === index)
+			return { key: `${title}-${index}`, title, items }
+		})
+		.filter((group) => group.title && group.items.length > 0)
+
+	const hasCurrentPage = dynamicGroups.some((group) => group.items.some((item) => item.path === '/comprehensiveSupervision'))
+	if (!hasCurrentPage) {
+		dynamicGroups.unshift({
+			key: '监管总览-0',
+			title: '监管总览',
+			items: [{ title: '综合监管视图', path: '/comprehensiveSupervision' }]
+		})
+	}
+	return dynamicGroups
 })
+
+const isQuickGroupCollapsed = (groupKey) => !!quickGroupCollapsedMap.value[groupKey]
+
+const toggleQuickGroup = (groupKey) => {
+	quickGroupCollapsedMap.value[groupKey] = !quickGroupCollapsedMap.value[groupKey]
+}
+
+watch(
+	() => visibleQuickModuleGroups.value.map((group) => group.key),
+	(keys) => {
+		const nextState = {}
+		keys.forEach((key) => {
+			const hasSavedState = Object.prototype.hasOwnProperty.call(quickGroupCollapsedMap.value, key)
+			nextState[key] = hasSavedState ? quickGroupCollapsedMap.value[key] : true
+		})
+		quickGroupCollapsedMap.value = nextState
+	},
+	{ immediate: true }
+)
 
 const navigateTo = (path) => {
 	if (!path) return
@@ -913,7 +935,11 @@ onUnmounted(() => {
 <style scoped lang="less">
 .regulation-board-page {
 	padding: 12px;
-	min-height: 100%;
+	height: 100%;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
 	background:
 		radial-gradient(circle at 20% 12%, rgba(38, 160, 125, 0.12), rgba(6, 25, 21, 0.98) 46%),
 		linear-gradient(180deg, #08261f 0%, #051a15 100%);
@@ -921,12 +947,13 @@ onUnmounted(() => {
 }
 
 .board-header {
-	height: 72px;
+	height: 58px;
+	flex: 0 0 58px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	position: relative;
-	margin-bottom: 14px;
+	margin-bottom: 8px;
 	overflow: visible;
 }
 
@@ -990,6 +1017,21 @@ onUnmounted(() => {
 	font-size: 12px;
 	color: #8ecbb8;
 	padding: 2px 8px 4px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+.quick-group-arrow {
+	font-size: 12px;
+	color: #8ecbb8;
+	transition: transform 0.18s ease;
+}
+
+.quick-group-arrow.collapsed {
+	transform: rotate(-90deg);
 }
 
 .quick-menu-item {
@@ -1076,19 +1118,31 @@ onUnmounted(() => {
 .board-main {
 	display: grid;
 	grid-template-columns: 400px 1fr 400px;
-	gap: 12px;
-	height: calc(100vh - 185px);
-	min-height: 680px;
+	gap: 10px;
+	height: calc(100vh - 90px);
+	min-height: 620px;
+	flex: none;
 }
 
 .board-side {
-	display: grid;
-	gap: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	align-content: start;
+	min-height: 0;
 }
 
 .side-left,
 .side-right {
-	grid-template-rows: repeat(3, minmax(0, 1fr));
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-height: 0;
+}
+
+.side-block {
+	flex: 1;
+	min-height: 0;
 }
 
 .panel-card {
@@ -1104,50 +1158,50 @@ onUnmounted(() => {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 14px;
+	padding: 12px;
 }
 
 .panel-title {
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: 700;
 	color: #ddfff1;
-	margin-bottom: 12px;
+	margin-bottom: 6px;
 }
 
 .metric-item {
-	margin-bottom: 10px;
+	margin-bottom: 6px;
 }
 
 .metric-text {
 	display: flex;
 	justify-content: space-between;
-	font-size: 13px;
-	margin-bottom: 6px;
+	font-size: 12px;
+	margin-bottom: 4px;
 }
 
 .mini-chart {
 	flex: 1;
-	padding: 10px;
+	padding: 7px;
 	border: 1px solid rgba(93, 181, 155, 0.3);
 	border-radius: 8px;
-	margin-bottom: 8px;
+	margin-bottom: 5px;
 	background: rgba(10, 39, 33, 0.55);
 }
 
 .mini-title {
-	font-size: 13px;
+	font-size: 12px;
 	color: #bfffe7;
 }
 
 .mini-value {
-	font-size: 28px;
+	font-size: 20px;
 	font-weight: 700;
-	margin-top: 4px;
+	margin-top: 2px;
 }
 
 .mini-desc {
 	margin-top: 2px;
-	font-size: 12px;
+	font-size: 11px;
 	color: rgba(200, 255, 234, 0.82);
 }
 
@@ -1163,14 +1217,14 @@ onUnmounted(() => {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 }
 
 .center-stats {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 8px;
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 }
 
 .stat-chip {
@@ -1187,14 +1241,14 @@ onUnmounted(() => {
 
 .chip-value {
 	margin-top: 6px;
-	font-size: 30px;
+	font-size: 26px;
 	font-weight: 700;
 }
 
 .map-placeholder {
 	position: relative;
 	flex: 1;
-	min-height: 420px;
+	min-height: 0;
 	border: 1px dashed rgba(93, 181, 155, 0.35);
 	border-radius: 12px;
 	overflow: hidden;
@@ -1224,8 +1278,8 @@ onUnmounted(() => {
 }
 
 .alert-item {
-	padding: 8px;
-	margin-bottom: 8px;
+	padding: 6px;
+	margin-bottom: 6px;
 	border: 1px solid rgba(93, 181, 155, 0.35);
 	border-radius: 8px;
 	background: rgba(9, 35, 29, 0.5);
@@ -1322,10 +1376,16 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1380px) {
+	.regulation-board-page {
+		height: auto;
+		min-height: 100%;
+		overflow: auto;
+	}
 	.board-main {
 		grid-template-columns: 1fr;
 		height: auto;
 		min-height: auto;
+		flex: none;
 	}
 	.side-left,
 	.side-right {
