@@ -93,7 +93,7 @@
 							<div class="alert-content">{{ alert.content }}</div>
 						</div>
 					</div>
-					<a-button block type="primary">设置风险阈值</a-button>
+					<a-button block type="primary" @click="openRiskThresholdModal">设置风险阈值</a-button>
 				</a-card>
 				<a-card :bordered="false" class="panel-card side-block side-middle">
 					<div class="panel-title">整改处理进度</div>
@@ -119,6 +119,47 @@
 			</div>
 		</div>
 		<a-spin v-else class="board-spin" />
+
+		<a-modal
+			v-model:visible="riskThresholdModalOpen"
+			title="设置风险阈值"
+			ok-text="保存"
+			cancel-text="取消"
+			:confirm-loading="riskThresholdSubmitting"
+			@ok="submitRiskThreshold"
+		>
+			<a-spin :spinning="riskThresholdLoading">
+				<a-form ref="riskThresholdFormRef" :model="riskThresholdForm" :rules="riskThresholdRules" layout="vertical">
+					<a-form-item label="养殖场" name="farmId">
+						<a-select
+							v-model:value="riskThresholdForm.farmId"
+							:options="farmSelectOptions"
+							placeholder="请选择养殖场"
+							show-search
+							:filter-option="(input, option) => (option?.label || '').includes(input)"
+							@change="loadRiskThresholdDetail"
+						/>
+					</a-form-item>
+					<a-form-item label="即将过期预警天数" name="expiringDays">
+						<a-input-number v-model:value="riskThresholdForm.expiringDays" :min="1" :max="60" style="width: 100%" />
+					</a-form-item>
+					<a-form-item label="7天死亡预警阈值（头）" name="deathCountThreshold">
+						<a-input-number
+							v-model:value="riskThresholdForm.deathCountThreshold"
+							:min="1"
+							:max="9999"
+							style="width: 100%"
+						/>
+					</a-form-item>
+					<a-form-item label="中风险阈值（分）" name="mediumRiskScore">
+						<a-input-number v-model:value="riskThresholdForm.mediumRiskScore" :min="1" :max="100" style="width: 100%" />
+					</a-form-item>
+					<a-form-item label="高风险阈值（分）" name="highRiskScore">
+						<a-input-number v-model:value="riskThresholdForm.highRiskScore" :min="1" :max="100" style="width: 100%" />
+					</a-form-item>
+				</a-form>
+			</a-spin>
+		</a-modal>
 	</div>
 </template>
 
@@ -139,6 +180,10 @@ let mapChart = null
 let clockTimer = null
 const quickMenuOpen = ref(false)
 const quickEntryRef = ref(null)
+const riskThresholdModalOpen = ref(false)
+const riskThresholdLoading = ref(false)
+const riskThresholdSubmitting = ref(false)
+const riskThresholdFormRef = ref()
 
 const quickModuleGroups = [
 	{
@@ -233,6 +278,21 @@ const homeData = reactive({
 })
 
 const localNow = ref('')
+const riskThresholdForm = reactive({
+	farmId: undefined,
+	expiringDays: 7,
+	deathCountThreshold: 10,
+	mediumRiskScore: 60,
+	highRiskScore: 80
+})
+
+const riskThresholdRules = {
+	farmId: [{ required: true, message: '请选择养殖场', trigger: 'change' }],
+	expiringDays: [{ required: true, type: 'number', message: '请输入即将过期预警天数', trigger: 'change' }],
+	deathCountThreshold: [{ required: true, type: 'number', message: '请输入7天死亡预警阈值', trigger: 'change' }],
+	mediumRiskScore: [{ required: true, type: 'number', message: '请输入中风险阈值', trigger: 'change' }],
+	highRiskScore: [{ required: true, type: 'number', message: '请输入高风险阈值', trigger: 'change' }]
+}
 
 const formatNow = () => {
 	const d = new Date()
@@ -385,6 +445,20 @@ const farmLabel = (farmId) => {
 	return node?.title || farmId
 }
 
+const flattenFarmOptions = (tree = [], collector = []) => {
+	;(tree || []).forEach((node) => {
+		if (node?.value) {
+			collector.push({ label: node.title, value: node.value })
+		}
+		if (node?.children?.length) {
+			flattenFarmOptions(node.children, collector)
+		}
+	})
+	return collector
+}
+
+const farmSelectOptions = computed(() => flattenFarmOptions(farmTree.value, []))
+
 const chinaMapLoaded = ref(false)
 const chinaMapSources = ['/maps/china.json', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json']
 
@@ -523,8 +597,53 @@ const loadFarmTree = async () => {
 	try {
 		const tree = await sysOrgApi.orgTree()
 		farmTree.value = toFarmTreeSelectData(tree || [])
+		if (!selectedFarmId.value && farmSelectOptions.value.length) {
+			selectedFarmId.value = farmSelectOptions.value[0].value
+		}
 	} catch (e) {
 		farmTree.value = []
+	}
+}
+
+const loadRiskThresholdDetail = async () => {
+	if (!riskThresholdForm.farmId) return
+	riskThresholdLoading.value = true
+	try {
+		const data = await supervisionApi.riskThresholdDetail({ farmId: riskThresholdForm.farmId })
+		riskThresholdForm.expiringDays = Number(data?.expiringDays || 7)
+		riskThresholdForm.deathCountThreshold = Number(data?.deathCountThreshold || 10)
+		riskThresholdForm.mediumRiskScore = Number(data?.mediumRiskScore || 60)
+		riskThresholdForm.highRiskScore = Number(data?.highRiskScore || 80)
+	} finally {
+		riskThresholdLoading.value = false
+	}
+}
+
+const openRiskThresholdModal = async () => {
+	riskThresholdModalOpen.value = true
+	riskThresholdForm.farmId = selectedFarmId.value || farmSelectOptions.value?.[0]?.value
+	await loadRiskThresholdDetail()
+}
+
+const submitRiskThreshold = async () => {
+	try {
+		await riskThresholdFormRef.value?.validate()
+		if (riskThresholdForm.highRiskScore <= riskThresholdForm.mediumRiskScore) {
+			message.warning('高风险阈值必须大于中风险阈值')
+			return
+		}
+		riskThresholdSubmitting.value = true
+		await supervisionApi.saveRiskThreshold({
+			farmId: riskThresholdForm.farmId,
+			expiringDays: riskThresholdForm.expiringDays,
+			deathCountThreshold: riskThresholdForm.deathCountThreshold,
+			mediumRiskScore: riskThresholdForm.mediumRiskScore,
+			highRiskScore: riskThresholdForm.highRiskScore
+		})
+		message.success('风险阈值保存成功')
+		riskThresholdModalOpen.value = false
+	} finally {
+		riskThresholdSubmitting.value = false
 	}
 }
 
