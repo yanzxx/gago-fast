@@ -106,15 +106,52 @@ public class BizSupervisionServiceImpl implements BizSupervisionService {
         if (StrUtil.isBlank(point.getFarmName())) {
             point.setFarmName(point.getFarmId());
         }
-        String seed = StrUtil.blankToDefault(point.getFarmId(), point.getFarmName());
-        int hash = Math.abs(seed.hashCode());
-        double longitude = 80 + (hash % 5000) / 100.0;
-        double latitude = 20 + ((hash / 100) % 3000) / 100.0;
-        point.setLongitude(round2(longitude));
-        point.setLatitude(round2(latitude));
+        Double longitude = tryGetCoordinate(point.getExtJson(), "longitude", "lng", "lon");
+        Double latitude = tryGetCoordinate(point.getExtJson(), "latitude", "lat");
+        if (ObjectUtil.isNotEmpty(longitude) && ObjectUtil.isNotEmpty(latitude)) {
+            point.setLongitude(round2(longitude));
+            point.setLatitude(round2(latitude));
+        } else {
+            String seed = StrUtil.blankToDefault(point.getFarmId(), point.getFarmName());
+            int hash = Math.abs(seed.hashCode());
+            double fallbackLongitude = 80 + (hash % 5000) / 100.0;
+            double fallbackLatitude = 20 + ((hash / 100) % 3000) / 100.0;
+            point.setLongitude(round2(fallbackLongitude));
+            point.setLatitude(round2(fallbackLatitude));
+        }
         point.setHealthScore(ObjectUtil.defaultIfNull(point.getHealthScore(), 0));
         point.setInStockCount(ObjectUtil.defaultIfNull(point.getInStockCount(), 0L));
         point.setRiskLevel(StrUtil.blankToDefault(point.getRiskLevel(), "normal"));
+    }
+
+    private Double tryGetCoordinate(String extJsonStr, String... keys) {
+        JSONObject extJson = parseExtJson(extJsonStr);
+        for (String key : keys) {
+            Object val = extJson.get(key);
+            if (ObjectUtil.isEmpty(val)) {
+                continue;
+            }
+            try {
+                return Double.parseDouble(val.toString());
+            } catch (Exception ignored) {
+                // continue next key
+            }
+        }
+        JSONObject location = extJson.getJSONObject("location");
+        if (ObjectUtil.isNotEmpty(location)) {
+            for (String key : keys) {
+                Object val = location.get(key);
+                if (ObjectUtil.isEmpty(val)) {
+                    continue;
+                }
+                try {
+                    return Double.parseDouble(val.toString());
+                } catch (Exception ignored) {
+                    // continue next key
+                }
+            }
+        }
+        return null;
     }
 
     private double round2(double value) {

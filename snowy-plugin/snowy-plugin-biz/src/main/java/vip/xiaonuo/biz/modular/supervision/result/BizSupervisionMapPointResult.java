@@ -31,4 +31,7 @@ public class BizSupervisionMapPointResult {
 
     @ApiModelProperty("风险等级")
     private String riskLevel;
+
+    @ApiModelProperty("扩展信息")
+    private String extJson;
 }

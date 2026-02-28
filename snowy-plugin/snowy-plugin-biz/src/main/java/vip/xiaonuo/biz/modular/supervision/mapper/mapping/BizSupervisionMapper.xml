@@ -223,6 +223,7 @@
         select
             l.farm_id as farmId,
             coalesce(o.name, l.farm_id) as farmName,
+            o.ext_json as extJson,
             coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0)::bigint as inStockCount,
             round(
                     (
@@ -240,7 +241,7 @@
                  left join farm_risk fr on fr.farm_id = l.farm_id
                  left join sys_org o on o.id = l.farm_id and o.delete_flag = 'NOT_DELETE'
         <include refid="LivestockScopeWhere"/>
-        group by l.farm_id, fr.risk_rank, o.name
+        group by l.farm_id, fr.risk_rank, o.name, o.ext_json
         order by coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) desc, l.farm_id
         limit 50
     </select>
