@@ -265,17 +265,40 @@ const collectMenuPaths = (menus = [], collector = new Set()) => {
 	return collector
 }
 
+const collectMenuTitles = (menus = [], collector = new Set()) => {
+	;(menus || []).forEach((item) => {
+		const rawTitle = item?.meta?.title || item?.title || item?.name
+		const title = typeof rawTitle === 'string' ? rawTitle.trim() : ''
+		if (title) {
+			collector.add(title)
+		}
+		if (item?.children?.length) {
+			collectMenuTitles(item.children, collector)
+		}
+	})
+	return collector
+}
+
+const menuSnapshot = computed(() => tool.data.get('MENU') || [])
+
 const allowedMenuPaths = computed(() => {
+	return collectMenuPaths(menuSnapshot.value)
+})
+
+const allowedMenuTitles = computed(() => {
 	const menus = tool.data.get('MENU') || []
-	return collectMenuPaths(menus)
+	return collectMenuTitles(menus)
 })
 
 const visibleQuickModuleGroups = computed(() => {
 	const allowed = allowedMenuPaths.value
+	const allowedTitles = allowedMenuTitles.value
 	return quickModuleGroups
 		.map((group) => ({
 			...group,
-			items: group.items.filter((item) => allowed.has(normalizePath(item.path)))
+			items: group.items.filter((item) => {
+				return allowed.has(normalizePath(item.path)) || allowedTitles.has(item.title)
+			})
 		}))
 		.filter((group) => group.items.length > 0)
 })
@@ -507,6 +530,23 @@ const flattenFarmOptions = (tree = [], collector = []) => {
 
 const farmSelectOptions = computed(() => flattenFarmOptions(farmTree.value, []))
 
+const collectLeafFarmIds = (nodes = [], collector = new Set()) => {
+	nodes.forEach((node) => {
+		if (!node) return
+		if (node?.children?.length) {
+			collectLeafFarmIds(node.children, collector)
+			return
+		}
+		const id = node?.value || node?.key
+		if (id !== undefined && id !== null && id !== '') {
+			collector.add(String(id))
+		}
+	})
+	return collector
+}
+
+const leafFarmIdSet = computed(() => collectLeafFarmIds(farmTree.value, new Set()))
+
 const chinaMapLoaded = ref(false)
 const chinaMapSources = ['/maps/china.json', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json']
 
@@ -530,13 +570,21 @@ const renderChinaMap = () => {
 		return
 	}
 
-	const scatterData = (homeData.mapPoints || []).map((item) => ({
-		farmId: item.farmId,
-		name: item.farmName || farmLabel(item.farmId),
-		value: [item.longitude, item.latitude, item.healthScore || 0],
-		level: item.riskLevel,
-		stock: item.inStockCount || 0
-	}))
+	const currentLeafFarmIds = leafFarmIdSet.value
+	const scatterData = (homeData.mapPoints || [])
+		.filter((item) => {
+			const farmId = item?.farmId
+			if (!farmId) return false
+			if (!currentLeafFarmIds.size) return true
+			return currentLeafFarmIds.has(String(farmId))
+		})
+		.map((item) => ({
+			farmId: item.farmId,
+			name: item.farmName || farmLabel(item.farmId),
+			value: [item.longitude, item.latitude, item.healthScore || 0],
+			level: item.riskLevel,
+			stock: item.inStockCount || 0
+		}))
 
 	mapChart.setOption({
 		tooltip: {
@@ -566,8 +614,7 @@ const renderChinaMap = () => {
 				name: '中国底图',
 				type: 'map',
 				map: 'china',
-				roam: true,
-				zoom: 1.1,
+				silent: true,
 				itemStyle: {
 					areaColor: '#143a31',
 					borderColor: '#6ec8ab',

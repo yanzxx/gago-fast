@@ -134,12 +134,34 @@
         </choose>
     </sql>
 
+    <sql id="OrgScopeWhere">
+        where o.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and o.id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and o.id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
     <select id="overview" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult">
         select
             cast((
-                select count(distinct l.farm_id)
-                from yzx.biz_livestock l
-                <include refid="LivestockScopeWhere"/>
+                select count(1)
+                from sys_org o
+                <include refid="OrgScopeWhere"/>
             ) as bigint) as farmCount,
             cast((
                 select coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0)
@@ -237,33 +259,42 @@
             from yzx.biz_after_loan_anomaly a
             <include refid="AnomalyScopeWhere"/>
             group by a.farm_id
+        ),
+        livestock_stats as (
+            select
+                l.farm_id,
+                cast(coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) as bigint) as in_stock_count,
+                cast(coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0) as bigint) as immunized_count,
+                cast(count(1) as bigint) as total_count
+            from yzx.biz_livestock l
+            where l.delete_flag = 'NOT_DELETE'
+            group by l.farm_id
         )
         select
-            l.farm_id as farmId,
-            coalesce(o.name, l.farm_id) as farmName,
+            o.id as farmId,
+            coalesce(o.name, o.id) as farmName,
             o.ext_json as extJson,
-            cast(coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) as bigint) as inStockCount,
+            coalesce(ls.in_stock_count, 0) as inStockCount,
             cast(
-                round(
-                        (
-                            (cast(coalesce(sum(case when l.immunity_status = 'IMMUNIZED' then 1 else 0 end), 0) as numeric))
-                                / nullif(cast(count(1) as numeric), 0)
-                            * 100
-                        ), 0
-                ) as int
+                coalesce(round((cast(coalesce(ls.immunized_count, 0) as numeric) / nullif(cast(coalesce(ls.total_count, 0) as numeric), 0)) * 100, 0), 0)
+                as int
             ) as healthScore,
             case fr.risk_rank
                 when 3 then 'danger'
                 when 2 then 'warning'
                 else 'normal'
                 end as riskLevel
-        from yzx.biz_livestock l
-                 left join farm_risk fr on fr.farm_id = l.farm_id
-                 left join sys_org o on o.id = l.farm_id and o.delete_flag = 'NOT_DELETE'
-        <include refid="LivestockScopeWhere"/>
-        group by l.farm_id, fr.risk_rank, o.name, o.ext_json
-        order by coalesce(sum(case when l.status = 'IN_STOCK' then 1 else 0 end), 0) desc, l.farm_id
-        limit 50
+        from sys_org o
+                 left join livestock_stats ls on ls.farm_id = o.id
+                 left join farm_risk fr on fr.farm_id = o.id
+        <include refid="OrgScopeWhere"/>
+          and not exists (
+            select 1
+            from sys_org c
+            where c.parent_id = o.id
+              and c.delete_flag = 'NOT_DELETE'
+          )
+        order by coalesce(ls.in_stock_count, 0) desc, o.name asc, o.id asc
     </select>
 
     <select id="alerts" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAlertResult">

@@ -27,7 +27,7 @@ const constRouters = [
 	{
 		path: '/comprehensiveSupervision',
 		name: 'comprehensiveSupervision',
-		component: () => import('@/views/livestock-board/index.vue'),
+		component: () => import('@/views/home/index.vue'),
 		meta: {
 			title: '综合监管视图'
 		}
