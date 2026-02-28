@@ -4,13 +4,16 @@
 			<div class="section-title">筛选条件</div>
 			<a-form layout="inline" :model="filters">
 				<a-form-item label="养殖场">
-					<a-select
+					<a-tree-select
 						v-model:value="filters.farmId"
 						allow-clear
 						placeholder="请选择养殖场"
 						style="width: 220px"
-						:options="farmOptions"
+						:tree-data="farmTreeData"
 						:disabled="!isAdminUser()"
+						tree-default-expand-all
+						show-search
+						tree-node-filter-prop="title"
 					/>
 				</a-form-item>
 				<a-form-item label="理赔单号">
@@ -197,7 +200,8 @@
 <script setup>
 import { message } from 'ant-design-vue'
 import tool from '@/utils/tool'
-import bizOrgApi from '@/api/biz/bizOrgApi'
+import sysOrgApi from '@/api/sys/orgApi'
+import { toFarmTreeSelectData, flattenFarmTreeOptions, findFarmTreeNode } from '@/utils/farmTree'
 import fileApi from '@/api/dev/fileApi'
 import claimManageApi from '@/api/biz/claimManageApi'
 
@@ -223,6 +227,7 @@ const statusColorMap = { PENDING: 'default', PROCESSING: 'blue', CLOSED: 'green'
 
 const filters = reactive({ farmId: undefined, claimNo: '', policyNo: '', status: undefined })
 const farmOptions = ref([])
+const farmTreeData = ref([])
 const tableData = ref([])
 const tableLoading = ref(false)
 const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
@@ -351,14 +356,19 @@ const normalizeFiles = (files) => {
 
 const loadFarmOptions = async () => {
 	try {
-		const list = await bizOrgApi.orgList()
-		let options = (list || []).map((item) => ({ label: item.name, value: item.id }))
+		const tree = toFarmTreeSelectData(await sysOrgApi.orgTree())
+		let scopedTree = tree
 		if (!isAdminUser()) {
 			const currentFarmId = resolveFarmId()
-			options = options.filter((item) => item.value === currentFarmId)
+			const currentNode = findFarmTreeNode(tree, currentFarmId)
+			if (currentNode) {
+				scopedTree = [currentNode]
+			}
 		}
-		farmOptions.value = options
+		farmTreeData.value = scopedTree
+		farmOptions.value = flattenFarmTreeOptions(scopedTree)
 	} catch (e) {
+		farmTreeData.value = []
 		farmOptions.value = []
 	}
 }

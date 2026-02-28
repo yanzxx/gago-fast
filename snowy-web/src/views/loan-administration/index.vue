@@ -4,13 +4,16 @@
 			<div class="section-title">筛选条件</div>
 			<a-form layout="inline" :model="filters" class="filter-form">
 				<a-form-item label="养殖场">
-					<a-select
+					<a-tree-select
 						v-model:value="filters.farmId"
 						allow-clear
 						placeholder="请选择养殖场"
 						style="width: 220px"
-						:options="farmOptions"
+						:tree-data="farmTreeData"
 						:disabled="!isAdminUser()"
+						tree-default-expand-all
+						show-search
+						tree-node-filter-prop="title"
 					/>
 				</a-form-item>
 				<a-form-item label="申请单号">
@@ -150,7 +153,8 @@
 <script setup>
 import { message, Modal } from 'ant-design-vue'
 import tool from '@/utils/tool'
-import bizOrgApi from '@/api/biz/bizOrgApi'
+import sysOrgApi from '@/api/sys/orgApi'
+import { toFarmTreeSelectData, flattenFarmTreeOptions, findFarmTreeNode } from '@/utils/farmTree'
 import finProductApi from '@/api/biz/finProductApi'
 import loanAdministrationApi from '@/api/biz/loanAdministrationApi'
 
@@ -171,6 +175,7 @@ const fallbackLoanStatusOptions = [
 
 const loanStatusOptions = ref([...fallbackLoanStatusOptions])
 const farmOptions = ref([])
+const farmTreeData = ref([])
 const productOptions = ref([])
 const tableData = ref([])
 const tableLoading = ref(false)
@@ -306,14 +311,19 @@ const formatAmount = (value) => {
 
 const loadFarmOptions = async () => {
 	try {
-		const list = await bizOrgApi.orgList()
-		let options = (list || []).map((item) => ({ label: item.name, value: item.id }))
+		const tree = toFarmTreeSelectData(await sysOrgApi.orgTree())
+		let scopedTree = tree
 		if (!isAdminUser()) {
 			const currentFarmId = resolveFarmId()
-			options = options.filter((item) => item.value === currentFarmId)
+			const currentNode = findFarmTreeNode(tree, currentFarmId)
+			if (currentNode) {
+				scopedTree = [currentNode]
+			}
 		}
-		farmOptions.value = options
+		farmTreeData.value = scopedTree
+		farmOptions.value = flattenFarmTreeOptions(scopedTree)
 	} catch (e) {
+		farmTreeData.value = []
 		farmOptions.value = []
 	}
 }

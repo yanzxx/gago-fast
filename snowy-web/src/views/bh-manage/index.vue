@@ -4,13 +4,16 @@
 			<div class="section-title">筛选条件</div>
 			<a-form layout="inline" :model="filters">
 				<a-form-item label="养殖场">
-					<a-select
+					<a-tree-select
 						v-model:value="filters.farmId"
 						allow-clear
 						placeholder="请选择养殖场"
 						style="width: 220px"
-						:options="farmOptions"
+						:tree-data="farmTreeData"
 						:disabled="!isAdminUser()"
+						tree-default-expand-all
+						show-search
+						tree-node-filter-prop="title"
 					/>
 				</a-form-item>
 				<a-form-item label="风险等级">
@@ -130,7 +133,8 @@ import * as echarts from 'echarts'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { message } from 'ant-design-vue'
 import tool from '@/utils/tool'
-import bizOrgApi from '@/api/biz/bizOrgApi'
+import sysOrgApi from '@/api/sys/orgApi'
+import { toFarmTreeSelectData, flattenFarmTreeOptions, findFarmTreeNode } from '@/utils/farmTree'
 import bhManageApi from '@/api/biz/bhManageApi'
 
 const userInfo = tool.data.get('USER_INFO') || {}
@@ -149,6 +153,7 @@ const riskColorMap = { LOW: 'green', MEDIUM: 'orange', HIGH: 'red' }
 
 const filters = reactive({ farmId: undefined, riskLevel: undefined, anomalyType: undefined })
 const farmOptions = ref([])
+const farmTreeData = ref([])
 const tableData = ref([])
 const detailData = ref({})
 const detailModalOpen = ref(false)
@@ -292,14 +297,19 @@ const renderCharts = (stats) => {
 
 const loadFarmOptions = async () => {
 	try {
-		const list = await bizOrgApi.orgList()
-		let options = (list || []).map((item) => ({ label: item.name, value: item.id }))
+		const tree = toFarmTreeSelectData(await sysOrgApi.orgTree())
+		let scopedTree = tree
 		if (!isAdminUser()) {
-			const farmId = resolveFarmId()
-			options = options.filter((item) => item.value === farmId)
+			const currentFarmId = resolveFarmId()
+			const currentNode = findFarmTreeNode(tree, currentFarmId)
+			if (currentNode) {
+				scopedTree = [currentNode]
+			}
 		}
-		farmOptions.value = options
+		farmTreeData.value = scopedTree
+		farmOptions.value = flattenFarmTreeOptions(scopedTree)
 	} catch (e) {
+		farmTreeData.value = []
 		farmOptions.value = []
 	}
 }
