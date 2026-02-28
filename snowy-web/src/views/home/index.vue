@@ -1,6 +1,18 @@
 <template>
 	<div class="regulation-board-page">
 		<div class="board-header">
+			<div v-if="visibleQuickModuleGroups.length" class="quick-entry" :class="{ open: quickMenuOpen }" ref="quickEntryRef">
+				<div class="quick-icon" @click.stop="toggleQuickMenu">☰</div>
+				<div class="quick-menu">
+					<div class="quick-menu-title">模块导航</div>
+					<div class="quick-group" v-for="group in visibleQuickModuleGroups" :key="group.title">
+						<div class="quick-group-title">{{ group.title }}</div>
+						<div class="quick-menu-item" v-for="item in group.items" :key="item.path" @click="navigateTo(item.path)">
+							{{ item.title }}
+						</div>
+					</div>
+				</div>
+			</div>
 			<div class="title-neon-line"></div>
 			<div class="board-title-wrap">
 				<div class="board-title">综合监管视图</div>
@@ -113,14 +125,102 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import supervisionApi from '@/api/biz/supervisionApi'
 import sysOrgApi from '@/api/sys/orgApi'
 import { toFarmTreeSelectData, findFarmTreeNode } from '@/utils/farmTree'
+import tool from '@/utils/tool'
 
+const router = useRouter()
 const loading = ref(false)
 const mapChartRef = ref()
 let mapChart = null
+let clockTimer = null
+const quickMenuOpen = ref(false)
+const quickEntryRef = ref(null)
+
+const quickModuleGroups = [
+	{
+		title: '监管总览',
+		items: [{ title: '综合监管视图', path: '/comprehensiveSupervision' }]
+	},
+	{
+		title: '畜牧管理',
+		items: [
+			{ title: '畜牧登记列表', path: '/livestockList' },
+			{ title: '畜牧统计看板', path: '/livestockBoard' }
+		]
+	},
+	{
+		title: '银行金融管理',
+		items: [
+			{ title: '金融产品管理', path: '/productManage' },
+			{ title: '贷款管理', path: '/loanAdministration' },
+			{ title: '贷后管理', path: '/afterLoanAdministration' }
+		]
+	},
+	{
+		title: '保险管理',
+		items: [
+			{ title: '保险产品管理', path: '/bxProductManage' },
+			{ title: '投保管理', path: '/tbManage' },
+			{ title: '保后管理', path: '/bhManage' },
+			{ title: '理赔管理', path: '/lpManage' }
+		]
+	}
+]
+
+const normalizePath = (path) => {
+	if (!path) return ''
+	return path.startsWith('/') ? path : `/${path}`
+}
+
+const collectMenuPaths = (menus = [], collector = new Set()) => {
+	;(menus || []).forEach((item) => {
+		const path = normalizePath(item?.path || item?.url || item?.route)
+		if (path) {
+			collector.add(path)
+		}
+		if (item?.children?.length) {
+			collectMenuPaths(item.children, collector)
+		}
+	})
+	return collector
+}
+
+const allowedMenuPaths = computed(() => {
+	const menus = tool.data.get('MENU') || []
+	return collectMenuPaths(menus)
+})
+
+const visibleQuickModuleGroups = computed(() => {
+	const allowed = allowedMenuPaths.value
+	return quickModuleGroups
+		.map((group) => ({
+			...group,
+			items: group.items.filter((item) => allowed.has(normalizePath(item.path)))
+		}))
+		.filter((group) => group.items.length > 0)
+})
+
+const navigateTo = (path) => {
+	if (!path) return
+	quickMenuOpen.value = false
+	router.push(path)
+}
+
+const toggleQuickMenu = () => {
+	quickMenuOpen.value = !quickMenuOpen.value
+}
+
+const handleClickOutside = (event) => {
+	const root = quickEntryRef.value
+	if (!root) return
+	if (!root.contains(event.target)) {
+		quickMenuOpen.value = false
+	}
+}
 
 const selectedFarmId = ref(undefined)
 const farmTree = ref([])
@@ -132,7 +232,17 @@ const homeData = reactive({
 	anomalies: []
 })
 
-const boardTimeText = computed(() => `${homeData.refreshTime || '-'} | 实时刷新`)
+const localNow = ref('')
+
+const formatNow = () => {
+	const d = new Date()
+	const pad = (n) => String(n).padStart(2, '0')
+	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(
+		d.getSeconds()
+	)}`
+}
+
+const boardTimeText = computed(() => `${homeData.refreshTime || localNow.value || '-'}`)
 
 const overview = computed(() => homeData.overview || {})
 
@@ -446,12 +556,22 @@ watch(
 )
 
 onMounted(async () => {
+	localNow.value = formatNow()
+	clockTimer = window.setInterval(() => {
+		localNow.value = formatNow()
+	}, 1000)
+	document.addEventListener('mousedown', handleClickOutside)
 	await Promise.all([loadFarmTree(), loadHomeData()])
 	await initChinaMap()
 	window.addEventListener('resize', onResize)
 })
 
 onUnmounted(() => {
+	if (clockTimer) {
+		window.clearInterval(clockTimer)
+		clockTimer = null
+	}
+	document.removeEventListener('mousedown', handleClickOutside)
 	window.removeEventListener('resize', onResize)
 	if (mapChart) {
 		mapChart.dispose()
@@ -478,6 +598,80 @@ onUnmounted(() => {
 	position: relative;
 	margin-bottom: 14px;
 	overflow: visible;
+}
+
+.quick-entry {
+	position: absolute;
+	left: 0;
+	top: 4px;
+	z-index: 30;
+	padding-bottom: 6px;
+}
+
+.quick-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	border: 1px solid rgba(126, 212, 186, 0.45);
+	background: rgba(12, 45, 37, 0.88);
+	color: #d9fff4;
+	font-size: 20px;
+	line-height: 34px;
+	text-align: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+.quick-menu {
+	position: absolute;
+	left: 0;
+	top: 36px;
+	width: 230px;
+	padding: 8px;
+	border-radius: 10px;
+	border: 1px solid rgba(126, 212, 186, 0.32);
+	background: rgba(8, 30, 25, 0.96);
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+	opacity: 0;
+	transform: translateY(8px);
+	pointer-events: none;
+	transition: all 0.2s ease;
+}
+
+.quick-entry.open .quick-menu {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.quick-menu-title {
+	font-size: 12px;
+	color: #9fd9c7;
+	padding: 4px 8px 8px;
+}
+
+.quick-group + .quick-group {
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px dashed rgba(126, 212, 186, 0.2);
+}
+
+.quick-group-title {
+	font-size: 12px;
+	color: #8ecbb8;
+	padding: 2px 8px 4px;
+}
+
+.quick-menu-item {
+	padding: 8px 10px;
+	color: #dcfff3;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.quick-menu-item:hover {
+	background: rgba(62, 161, 131, 0.24);
 }
 
 .board-title-wrap {

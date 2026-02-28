@@ -14,12 +14,15 @@ export PATH="$HOME/.local/bin:$PATH"
 BACKEND_PORT="${BACKEND_PORT:-8082}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
+START_BACKEND="${START_BACKEND:-true}"
+START_FRONTEND="${START_FRONTEND:-true}"
 PG_HOST="${PG_HOST:-127.0.0.1}"
 PG_PORT="${PG_PORT:-5432}"
 PG_DB_NAME="${PG_DB_NAME:-liudayu_ks}"
 PG_USER="${PG_USER:-liudayu_ks}"
 PG_PASSWORD="${PG_PASSWORD:-}"
 PG_SCHEMA="${PG_SCHEMA:-yzx}"
+PG_REMOTE_CHECK_STRICT="${PG_REMOTE_CHECK_STRICT:-false}"
 MAVEN_REPO_LOCAL="${MAVEN_REPO_LOCAL:-${ROOT_DIR}/.m2/repository}"
 BACKEND_JAR="${BACKEND_JAR:-${ROOT_DIR}/snowy-web-app/target/snowy-web-app-2.0.0.jar}"
 
@@ -43,15 +46,66 @@ require_cmd() {
 
 is_pid_running() {
   local pid="$1"
+  if [ -z "${pid}" ] || ! [[ "${pid}" =~ ^[0-9]+$ ]]; then
+    return 1
+  fi
   kill -0 "${pid}" >/dev/null 2>&1
+}
+
+pid_listening_on_port() {
+  local port="$1"
+  lsof -tiTCP:"${port}" -sTCP:LISTEN -n -P 2>/dev/null | head -n 1 || true
+}
+
+cleanup_pid_file_if_invalid() {
+  local pid_file="$1"
+  if [ ! -f "${pid_file}" ]; then
+    return 0
+  fi
+  local pid
+  pid="$(cat "${pid_file}" 2>/dev/null || true)"
+  if ! is_pid_running "${pid}"; then
+    rm -f "${pid_file}"
+  fi
+}
+
+stop_port_listener_if_exists() {
+  local port="$1"
+  local name="$2"
+  local pid
+  pid="$(pid_listening_on_port "${port}")"
+  if [ -z "${pid}" ]; then
+    return 0
+  fi
+
+  info "${name} 端口 ${port} 已被占用，清理旧进程 PID ${pid}"
+  kill "${pid}" >/dev/null 2>&1 || true
+  sleep 1
+  if is_pid_running "${pid}"; then
+    kill -9 "${pid}" >/dev/null 2>&1 || true
+    sleep 1
+  fi
 }
 
 start_pg() {
   if [ "${PG_HOST}" != "127.0.0.1" ] && [ "${PG_HOST}" != "localhost" ]; then
     info "使用远程 PostgreSQL (${PG_HOST}:${PG_PORT})，执行连通性检查"
-    if ! pg_isready -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d "${PG_DB_NAME}" >/dev/null 2>&1; then
-      err "远程 PostgreSQL 不可用或网络不可达: ${PG_HOST}:${PG_PORT}/${PG_DB_NAME}"
-      exit 1
+    local ok="0"
+    local i
+    for i in 1 2 3; do
+      if pg_isready -h "${PG_HOST}" -p "${PG_PORT}" -U "${PG_USER}" -d "${PG_DB_NAME}" >/dev/null 2>&1; then
+        ok="1"
+        break
+      fi
+      sleep 1
+    done
+    if [ "${ok}" != "1" ]; then
+      if [ "${PG_REMOTE_CHECK_STRICT}" = "true" ]; then
+        err "远程 PostgreSQL 不可用或网络不可达: ${PG_HOST}:${PG_PORT}/${PG_DB_NAME}"
+        exit 1
+      fi
+      info "远程 PostgreSQL 预检失败，继续尝试启动后端（strict=false）"
+      return 0
     fi
     info "远程 PostgreSQL 可用 (${PG_HOST}:${PG_PORT})"
     return 0
@@ -96,10 +150,19 @@ start_pg() {
 }
 
 start_backend() {
-  if [ -f "${BACKEND_PID_FILE}" ] && is_pid_running "$(cat "${BACKEND_PID_FILE}")"; then
-    info "后端已在运行 (PID: $(cat "${BACKEND_PID_FILE}"))"
-    return 0
+  cleanup_pid_file_if_invalid "${BACKEND_PID_FILE}"
+
+  if [ -f "${BACKEND_PID_FILE}" ]; then
+    local old_pid
+    old_pid="$(cat "${BACKEND_PID_FILE}")"
+    if is_pid_running "${old_pid}" && [ "$(pid_listening_on_port "${BACKEND_PORT}")" = "${old_pid}" ]; then
+      info "后端已在运行 (PID: ${old_pid})"
+      return 0
+    fi
+    rm -f "${BACKEND_PID_FILE}"
   fi
+
+  stop_port_listener_if_exists "${BACKEND_PORT}" "后端"
 
   : > "${BACKEND_LOG}"
   info "启动后端 (端口 ${BACKEND_PORT})"
@@ -130,10 +193,19 @@ start_backend() {
 }
 
 start_frontend() {
-  if [ -f "${FRONTEND_PID_FILE}" ] && is_pid_running "$(cat "${FRONTEND_PID_FILE}")"; then
-    info "前端已在运行 (PID: $(cat "${FRONTEND_PID_FILE}"))"
-    return 0
+  cleanup_pid_file_if_invalid "${FRONTEND_PID_FILE}"
+
+  if [ -f "${FRONTEND_PID_FILE}" ]; then
+    local old_pid
+    old_pid="$(cat "${FRONTEND_PID_FILE}")"
+    if is_pid_running "${old_pid}" && [ "$(pid_listening_on_port "${FRONTEND_PORT}")" = "${old_pid}" ]; then
+      info "前端已在运行 (PID: ${old_pid})"
+      return 0
+    fi
+    rm -f "${FRONTEND_PID_FILE}"
   fi
+
+  stop_port_listener_if_exists "${FRONTEND_PORT}" "前端"
 
   : > "${FRONTEND_LOG}"
   info "启动前端 (端口 ${FRONTEND_PORT})"
@@ -162,43 +234,60 @@ check_started() {
     frontend_pid="$(cat "${FRONTEND_PID_FILE}")"
   fi
 
-  if [ -z "${backend_pid}" ] || ! is_pid_running "${backend_pid}"; then
-    err "后端启动失败，日志: ${BACKEND_LOG}"
-    tail -n 80 "${BACKEND_LOG}" || true
-    exit 1
+  if [ "${START_BACKEND}" = "true" ]; then
+    if [ -z "${backend_pid}" ] || ! is_pid_running "${backend_pid}"; then
+      err "后端启动失败，日志: ${BACKEND_LOG}"
+      tail -n 80 "${BACKEND_LOG}" || true
+      exit 1
+    fi
   fi
-  if [ -z "${frontend_pid}" ] || ! is_pid_running "${frontend_pid}"; then
-    err "前端启动失败，日志: ${FRONTEND_LOG}"
-    tail -n 80 "${FRONTEND_LOG}" || true
-    exit 1
+  if [ "${START_FRONTEND}" = "true" ]; then
+    if [ -z "${frontend_pid}" ] || ! is_pid_running "${frontend_pid}"; then
+      err "前端启动失败，日志: ${FRONTEND_LOG}"
+      tail -n 80 "${FRONTEND_LOG}" || true
+      exit 1
+    fi
   fi
 
   # 后端进程存在不代表可用，进一步校验端口与健康接口
-  local backend_ok="0"
-  local i
-  for i in $(seq 1 45); do
-    if ! is_pid_running "${backend_pid}"; then
-      err "后端进程已退出，日志: ${BACKEND_LOG}"
+  if [ "${START_BACKEND}" = "true" ]; then
+    local backend_ok="0"
+    local i
+    for i in $(seq 1 45); do
+      if ! is_pid_running "${backend_pid}"; then
+        err "后端进程已退出，日志: ${BACKEND_LOG}"
+        tail -n 120 "${BACKEND_LOG}" || true
+        exit 1
+      fi
+      local listening_pid
+      listening_pid="$(pid_listening_on_port "${BACKEND_PORT}")"
+      if [ -n "${listening_pid}" ] && [ "${listening_pid}" != "${backend_pid}" ]; then
+        err "后端端口 ${BACKEND_PORT} 被其他进程占用 (PID ${listening_pid})"
+        tail -n 120 "${BACKEND_LOG}" || true
+        exit 1
+      fi
+      if curl -s "http://127.0.0.1:${BACKEND_PORT}/actuator/health" | grep -q "\"status\":\"UP\""; then
+        backend_ok="1"
+        break
+      fi
+      sleep 2
+    done
+
+    if [ "${backend_ok}" != "1" ]; then
+      err "后端健康检查未通过，请查看日志: ${BACKEND_LOG}"
       tail -n 120 "${BACKEND_LOG}" || true
       exit 1
     fi
-    if curl -s "http://127.0.0.1:${BACKEND_PORT}/actuator/health" | grep -q "\"status\":\"UP\""; then
-      backend_ok="1"
-      break
-    fi
-    sleep 2
-  done
-
-  if [ "${backend_ok}" != "1" ]; then
-    err "后端健康检查未通过，请查看日志: ${BACKEND_LOG}"
-    tail -n 120 "${BACKEND_LOG}" || true
-    exit 1
   fi
 
   info "启动完成"
   echo "  - PostgreSQL: ${PG_HOST}:${PG_PORT}"
-  echo "  - Backend   : http://localhost:${BACKEND_PORT}"
-  echo "  - Frontend  : http://localhost:${FRONTEND_PORT}"
+  if [ "${START_BACKEND}" = "true" ]; then
+    echo "  - Backend   : http://localhost:${BACKEND_PORT}"
+  fi
+  if [ "${START_FRONTEND}" = "true" ]; then
+    echo "  - Frontend  : http://localhost:${FRONTEND_PORT}"
+  fi
   echo
   echo "日志文件:"
   echo "  - ${BACKEND_LOG}"
@@ -215,8 +304,12 @@ main() {
   require_cmd pg_isready
 
   start_pg
-  start_backend
-  start_frontend
+  if [ "${START_BACKEND}" = "true" ]; then
+    start_backend
+  fi
+  if [ "${START_FRONTEND}" = "true" ]; then
+    start_frontend
+  fi
   check_started
 
   echo
