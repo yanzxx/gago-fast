@@ -62,35 +62,7 @@
 					</div>
 					<div class="map-placeholder">
 						<div ref="mapChartRef" class="china-map-chart"></div>
-						<div class="map-dot normal">正常 27</div>
-						<div class="map-dot warning">预警 6</div>
-						<div class="map-dot danger">高风险 2</div>
 						<div class="map-hint">点击农场点位可钻取到存栏、贷款、投保、理赔详情</div>
-						<div class="map-legend">
-							<div class="legend-title">图例</div>
-							<div class="legend-group" v-if="selectedLayers.includes('FARM_DISTRIBUTION')">
-								<div class="legend-sub-title">养殖场分布</div>
-								<div class="legend-item"><span class="legend-dot normal"></span><span>正常农场</span></div>
-								<div class="legend-item"><span class="legend-dot warning"></span><span>预警农场</span></div>
-								<div class="legend-item"><span class="legend-dot danger"></span><span>高风险农场</span></div>
-							</div>
-							<div class="legend-group" v-if="selectedLayers.includes('HEALTH_HEAT')">
-								<div class="legend-sub-title">经营健康热力</div>
-								<div class="legend-item"><span class="legend-bar health-low"></span><span>低</span></div>
-								<div class="legend-item"><span class="legend-bar health-mid"></span><span>中</span></div>
-								<div class="legend-item"><span class="legend-bar health-high"></span><span>高</span></div>
-							</div>
-							<div class="legend-group" v-if="selectedLayers.includes('LOAN_HEAT')">
-								<div class="legend-sub-title">贷款金额热力</div>
-								<div class="legend-item"><span class="legend-bar loan-low"></span><span>低额度</span></div>
-								<div class="legend-item"><span class="legend-bar loan-mid"></span><span>中额度</span></div>
-								<div class="legend-item"><span class="legend-bar loan-high"></span><span>高额度</span></div>
-							</div>
-						</div>
-						<div class="map-layer-switch">
-							<div class="legend-title">图层选择</div>
-							<a-checkbox-group v-model:value="selectedLayers" :options="layerOptions" class="layer-checkbox-group" />
-						</div>
 					</div>
 				</a-card>
 			</div>
@@ -107,7 +79,7 @@
 							<div class="alert-content">{{ alert.content }}</div>
 						</div>
 					</div>
-					<a-button block type="primary">批量发送整改通知</a-button>
+					<a-button block type="primary">设置风险阈值</a-button>
 				</a-card>
 				<a-card :bordered="false" class="panel-card side-block side-middle">
 					<div class="panel-title">整改处理进度</div>
@@ -153,12 +125,6 @@ const farmTree = [
 ]
 
 const selectedFarmId = ref()
-const selectedLayers = ref(['FARM_DISTRIBUTION', 'HEALTH_HEAT', 'LOAN_HEAT'])
-const layerOptions = [
-	{ label: '养殖场分布', value: 'FARM_DISTRIBUTION' },
-	{ label: '经营健康热力图', value: 'HEALTH_HEAT' },
-	{ label: '贷款金额热力图', value: 'LOAN_HEAT' }
-]
 
 const panoramaMetrics = [
 	{ label: '存栏健康率', value: '92%', percent: 92, color: '#34d399' },
@@ -196,26 +162,6 @@ const farmScatterData = [
 	{ name: '张北二号养殖场', value: [114.80, 41.20, 63], level: 'warning' },
 	{ name: '康保一号养殖场', value: [114.60, 41.85, 37], level: 'danger' },
 	{ name: '沽源三号养殖场', value: [115.68, 41.67, 88], level: 'normal' }
-]
-
-const healthHeatData = [
-	{ name: '河北', value: 82 },
-	{ name: '北京', value: 76 },
-	{ name: '天津', value: 73 },
-	{ name: '内蒙古', value: 68 },
-	{ name: '山西', value: 71 },
-	{ name: '山东', value: 79 },
-	{ name: '河南', value: 74 }
-]
-
-const loanHeatData = [
-	{ name: '河北', value: 1280 },
-	{ name: '北京', value: 620 },
-	{ name: '天津', value: 540 },
-	{ name: '内蒙古', value: 860 },
-	{ name: '山西', value: 720 },
-	{ name: '山东', value: 980 },
-	{ name: '河南', value: 910 }
 ]
 
 const alerts = [
@@ -286,85 +232,39 @@ const renderChinaMap = () => {
 		}
 	]
 
-	const visualMap = []
-
-	if (selectedLayers.value.includes('HEALTH_HEAT')) {
-		const idx = series.length
-		series.push({
-			name: '经营健康热力',
-			type: 'map',
-			map: 'china',
-			roam: true,
-			silent: true,
-			itemStyle: { borderColor: '#6ec8ab', borderWidth: 0.5, opacity: 0.7 },
-			data: healthHeatData
-		})
-		visualMap.push({
-			type: 'continuous',
-			seriesIndex: idx,
-			min: 50,
-			max: 100,
-			show: false,
-			inRange: { color: ['#f59e0b', '#22c55e', '#10b981'] }
-		})
-	}
-
-	if (selectedLayers.value.includes('LOAN_HEAT')) {
-		const idx = series.length
-		series.push({
-			name: '贷款金额热力',
-			type: 'map',
-			map: 'china',
-			roam: true,
-			silent: true,
-			itemStyle: { borderColor: '#6ec8ab', borderWidth: 0.5, opacity: 0.42 },
-			data: loanHeatData
-		})
-		visualMap.push({
-			type: 'continuous',
-			seriesIndex: idx,
-			min: 300,
-			max: 1500,
-			show: false,
-			inRange: { color: ['#60a5fa', '#2563eb', '#1e3a8a'] }
-		})
-	}
-
-	if (selectedLayers.value.includes('FARM_DISTRIBUTION')) {
-		series.push({
-			name: '养殖场分布',
-			type: 'effectScatter',
-			coordinateSystem: 'geo',
-			data: farmScatterData,
-			symbolSize: (val) => Math.max(8, Math.min(16, val[2] / 6)),
-			rippleEffect: { scale: 3, brushType: 'stroke' },
-			itemStyle: {
-				color: (params) => {
-					const level = params.data?.level
-					if (level === 'danger') return '#f87171'
-					if (level === 'warning') return '#fbbf24'
-					return '#34d399'
-				}
-			},
-			zlevel: 3
-		})
-		series.push({
-			name: '养殖场标签',
-			type: 'scatter',
-			coordinateSystem: 'geo',
-			data: farmScatterData,
-			symbolSize: 1,
-			label: {
-				show: true,
-				formatter: '{b}',
-				position: 'right',
-				color: '#d9fff4',
-				fontSize: 12
-			},
-			itemStyle: { color: 'transparent' },
-			zlevel: 4
-		})
-	}
+	series.push({
+		name: '养殖场分布',
+		type: 'effectScatter',
+		coordinateSystem: 'geo',
+		data: farmScatterData,
+		symbolSize: (val) => Math.max(8, Math.min(16, val[2] / 6)),
+		rippleEffect: { scale: 3, brushType: 'stroke' },
+		itemStyle: {
+			color: (params) => {
+				const level = params.data?.level
+				if (level === 'danger') return '#f87171'
+				if (level === 'warning') return '#fbbf24'
+				return '#34d399'
+			}
+		},
+		zlevel: 3
+	})
+	series.push({
+		name: '养殖场标签',
+		type: 'scatter',
+		coordinateSystem: 'geo',
+		data: farmScatterData,
+		symbolSize: 1,
+		label: {
+			show: true,
+			formatter: '{b}',
+			position: 'right',
+			color: '#d9fff4',
+			fontSize: 12
+		},
+		itemStyle: { color: 'transparent' },
+		zlevel: 4
+	})
 
 	mapChart.setOption({
 		tooltip: {
@@ -375,12 +275,6 @@ const renderChinaMap = () => {
 			formatter: (params) => {
 				if (params.seriesName === '养殖场分布') {
 					return `${params.name}<br/>健康指数：${params.value?.[2] ?? '-'}`
-				}
-				if (params.seriesName === '经营健康热力') {
-					return `${params.name}<br/>健康评分：${params.value ?? '-'}`
-				}
-				if (params.seriesName === '贷款金额热力') {
-					return `${params.name}<br/>贷款金额：${params.value ?? '-'} 万`
 				}
 				return params.name
 			}
@@ -395,7 +289,6 @@ const renderChinaMap = () => {
 				borderColor: 'transparent'
 			}
 		},
-		visualMap,
 		series
 	})
 }
@@ -439,9 +332,6 @@ onUnmounted(() => {
 	}
 })
 
-watch(selectedLayers, () => {
-	renderChinaMap()
-})
 </script>
 
 <style scoped lang="less">
@@ -637,22 +527,6 @@ watch(selectedLayers, () => {
 	align-items: center;
 }
 
-.layer-checkbox-group {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-}
-
-.layer-checkbox-group :deep(.ant-checkbox-wrapper) {
-	color: #caece1;
-	margin-right: 0;
-	padding: 2px 5px;
-	border: 1px solid rgba(103, 183, 159, 0.22);
-	border-radius: 6px;
-	background: rgba(17, 47, 40, 0.72);
-	font-size: 12px;
-}
-
 .metric-text {
 	display: flex;
 	justify-content: space-between;
@@ -709,152 +583,13 @@ watch(selectedLayers, () => {
 	font-weight: 700;
 }
 
-.map-dot {
-	display: inline-block;
-	padding: 4px 10px;
-	border-radius: 999px;
-	font-size: 12px;
-	position: absolute;
-	top: 10px;
-	z-index: 4;
-}
-
-.map-dot.normal {
-	left: 10px;
-}
-
-.map-dot.warning {
-	left: 88px;
-}
-
-.map-dot.danger {
-	left: 160px;
-}
-
-.map-dot.normal {
-	background: rgba(52, 211, 153, 0.2);
-	color: #34d399;
-}
-
-.map-dot.warning {
-	background: rgba(251, 191, 36, 0.2);
-	color: #fbbf24;
-}
-
-.map-dot.danger {
-	background: rgba(248, 113, 113, 0.2);
-	color: #f87171;
-}
-
 .map-hint {
 	position: absolute;
 	left: 12px;
-	bottom: 130px;
+	bottom: 12px;
 	color: #9ec9bb;
 	font-size: 12px;
-	z-index: 2;
-}
-
-.map-legend {
-	position: absolute;
-	left: 12px;
-	bottom: 12px;
-	width: 190px;
-	padding: 8px;
-	background: rgba(9, 32, 27, 0.84);
-	border: 1px solid rgba(103, 183, 159, 0.32);
-	border-radius: 8px;
-	color: #caece1;
-	font-size: 12px;
 	z-index: 3;
-}
-
-.map-layer-switch {
-	position: absolute;
-	right: 12px;
-	bottom: 12px;
-	width: 176px;
-	padding: 6px;
-	background: rgba(9, 32, 27, 0.84);
-	border: 1px solid rgba(103, 183, 159, 0.32);
-	border-radius: 8px;
-	color: #caece1;
-	font-size: 12px;
-	z-index: 3;
-}
-
-.legend-title {
-	font-weight: 700;
-	color: #e7fff6;
-	margin-bottom: 6px;
-}
-
-.legend-group + .legend-group {
-	margin-top: 6px;
-	padding-top: 6px;
-	border-top: 1px solid rgba(103, 183, 159, 0.24);
-}
-
-.legend-sub-title {
-	color: #a2d2c3;
-	margin-bottom: 4px;
-}
-
-.legend-item {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin-bottom: 3px;
-}
-
-.legend-dot {
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	display: inline-block;
-}
-
-.legend-dot.normal {
-	background: #34d399;
-}
-
-.legend-dot.warning {
-	background: #fbbf24;
-}
-
-.legend-dot.danger {
-	background: #f87171;
-}
-
-.legend-bar {
-	width: 18px;
-	height: 8px;
-	border-radius: 4px;
-	display: inline-block;
-}
-
-.legend-bar.health-low {
-	background: #f59e0b;
-}
-
-.legend-bar.health-mid {
-	background: #22c55e;
-}
-
-.legend-bar.health-high {
-	background: #10b981;
-}
-
-.legend-bar.loan-low {
-	background: #60a5fa;
-}
-
-.legend-bar.loan-mid {
-	background: #2563eb;
-}
-
-.legend-bar.loan-high {
-	background: #1e3a8a;
 }
 
 .alert-list {

@@ -23,6 +23,14 @@ const constRouters = [
 		meta: {
 			title: '微信JSAPI支付'
 		}
+	},
+	{
+		path: '/comprehensiveSupervision',
+		name: 'comprehensiveSupervision',
+		component: () => import('@/views/home/index.vue'),
+		meta: {
+			title: '综合监管视图'
+		}
 	}
 ]
 /**

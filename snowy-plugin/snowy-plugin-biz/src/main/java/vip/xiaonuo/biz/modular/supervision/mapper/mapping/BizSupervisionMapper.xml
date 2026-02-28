@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vip.xiaonuo.biz.modular.supervision.mapper.BizSupervisionMapper">
+
+    <sql id="LivestockScopeWhere">
+        where l.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and l.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and l.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="LoanScopeWhere">
+        where la.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and la.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and la.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="InsScopeWhere">
+        where ia.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and ia.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and ia.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="ClaimScopeWhere">
+        where cm.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and cm.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and cm.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="AnomalyScopeWhere">
+        where a.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and a.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and a.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="NoticeScopeWhere">
+        where n.delete_flag = 'NOT_DELETE'
+        <choose>
+            <when test="param != null and param.farmId != null and param.farmId != ''">
+                and n.farm_id = #{param.farmId}
+            </when>
+            <when test="!allFarm">
+                <choose>
+                    <when test="farmIds != null and farmIds.size() &gt; 0">
+                        and n.farm_id in
+                        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                            #{farmId}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </sql>
+
+    <select id="overview" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult">
+        with livestock_stats as (
+            select
+                count(distinct l.farm_id)::bigint as farm_count,
+                count(1) filter (where l.status = 'IN_STOCK')::bigint as in_stock_count,
+                count(1) filter (where l.status = 'OUT_STOCK')::bigint as out_stock_count,
+                count(1) filter (where l.status = 'DEAD')::bigint as dead_count,
+                count(1) filter (where l.immunity_status = 'IMMUNIZED')::bigint as immunized_count,
+                count(1) filter (where l.immunity_status = 'NOT_IMMUNIZED')::bigint as not_immunized_count,
+                count(1) filter (where l.immunity_status = 'EXPIRED')::bigint as expired_count
+            from yzx.biz_livestock l
+            <include refid="LivestockScopeWhere"/>
+        ),
+        loan_stats as (
+            select coalesce(sum(la.apply_amount), 0) as loan_amount
+            from yzx.biz_loan_apply la
+            <include refid="LoanScopeWhere"/>
+            and la.loan_status in ('PROCESSING', 'APPROVED')
+        ),
+        ins_stats as (
+            select coalesce(sum(ia.insured_amount), 0) as insured_amount
+            from yzx.biz_ins_apply ia
+            <include refid="InsScopeWhere"/>
+            and ia.status in ('SUBMITTED', 'POLICY_ISSUED')
+        ),
+        claim_stats as (
+            select
+                count(1)::bigint as claim_total,
+                count(1) filter (where cm.status = 'CLOSED')::bigint as claim_closed
+            from yzx.biz_claim_manage cm
+            <include refid="ClaimScopeWhere"/>
+        ),
+        anomaly_stats as (
+            select
+                count(1)::bigint as anomaly_total,
+                count(1) filter (where a.status = '处理中')::bigint as anomaly_processing,
+                count(1) filter (where a.status = '已处置')::bigint as anomaly_finished,
+                count(1) filter (where a.status != '已处置' and a.trigger_time &lt; now() - interval '3 day')::bigint as overdue_anomaly_count,
+                count(1) filter (where a.status = '已处置' and a.update_time is not null and a.update_time &lt;= a.trigger_time + interval '3 day')::bigint as resolved_in_three_days_count
+            from yzx.biz_after_loan_anomaly a
+            <include refid="AnomalyScopeWhere"/>
+        ),
+        notice_stats as (
+            select count(1)::bigint as sent_notice_count
+            from yzx.biz_after_loan_notice n
+            <include refid="NoticeScopeWhere"/>
+        )
+        select
+            ls.farm_count as farmCount,
+            ls.in_stock_count as inStockCount,
+            ls.out_stock_count as outStockCount,
+            ls.dead_count as deadCount,
+            ls.immunized_count as immunizedCount,
+            ls.not_immunized_count as notImmunizedCount,
+            ls.expired_count as expiredCount,
+            ln.loan_amount as loanAmount,
+            ins.insured_amount as insuredAmount,
+            cs.claim_total as claimTotal,
+            cs.claim_closed as claimClosed,
+            as1.anomaly_total as anomalyTotal,
+            as1.anomaly_processing as anomalyProcessing,
+            as1.anomaly_finished as anomalyFinished,
+            ns.sent_notice_count as sentNoticeCount,
+            as1.overdue_anomaly_count as overdueAnomalyCount,
+            as1.resolved_in_three_days_count as resolvedInThreeDaysCount
+        from livestock_stats ls
+                 cross join loan_stats ln
+                 cross join ins_stats ins
+                 cross join claim_stats cs
+                 cross join anomaly_stats as1
+                 cross join notice_stats ns
+    </select>
+
+    <select id="mapPoints" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMapPointResult">
+        with farm_risk as (
+            select
+                a.farm_id,
+                max(case a.risk_level
+                        when 'HIGH' then 3
+                        when 'MEDIUM' then 2
+                        when 'LOW' then 1
+                        else 0 end) as risk_rank
+            from yzx.biz_after_loan_anomaly a
+            <include refid="AnomalyScopeWhere"/>
+            group by a.farm_id
+        )
+        select
+            l.farm_id as farmId,
+            coalesce(o.name, l.farm_id) as farmName,
+            count(1) filter (where l.status = 'IN_STOCK')::bigint as inStockCount,
+            round(
+                    (
+                        (count(1) filter (where l.immunity_status = 'IMMUNIZED')::numeric)
+                            / nullif(count(1)::numeric, 0)
+                        * 100
+                    ), 0
+            )::int as healthScore,
+            case fr.risk_rank
+                when 3 then 'danger'
+                when 2 then 'warning'
+                else 'normal'
+                end as riskLevel
+        from yzx.biz_livestock l
+                 left join farm_risk fr on fr.farm_id = l.farm_id
+                 left join sys_org o on o.id = l.farm_id and o.delete_flag = 'NOT_DELETE'
+        <include refid="LivestockScopeWhere"/>
+        group by l.farm_id, fr.risk_rank
+        order by count(1) filter (where l.status = 'IN_STOCK') desc, l.farm_id
+        limit 50
+    </select>
+
+    <select id="alerts" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAlertResult">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            a.risk_level as riskLevel,
+            to_char(a.trigger_time, 'HH24:MI') as triggerTime,
+            concat(a.anomaly_type, '：', coalesce(a.description, a.target_no)) as content
+        from yzx.biz_after_loan_anomaly a
+        <include refid="AnomalyScopeWhere"/>
+        order by a.trigger_time desc
+        limit 5
+    </select>
+
+    <select id="anomalies" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAnomalyResult">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            a.anomaly_type as anomalyType,
+            a.risk_level as riskLevel,
+            to_char(a.trigger_time, 'YYYY-MM-DD HH24:MI:SS') as triggerTime,
+            a.status as status,
+            case when n.id is null then '未发送' else '已发送' end as noticeStatus
+        from yzx.biz_after_loan_anomaly a
+                 left join yzx.biz_after_loan_notice n on n.anomaly_id = a.id and n.delete_flag = 'NOT_DELETE'
+        <include refid="AnomalyScopeWhere"/>
+        order by a.trigger_time desc
+        limit 10
+    </select>
+</mapper>
