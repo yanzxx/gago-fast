@@ -10,6 +10,22 @@ const routes = [
 		redirect: tool.data.get('MENU') ? tool.data.get('MENU')[0].children[0].path : config.DASHBOARD_URL,
 		children: [
 			{
+				path: '/comprehensiveSupervision',
+				name: 'comprehensiveSupervision',
+				component: () => import('@/views/livestock-board/index.vue'),
+				meta: {
+					title: '综合监管视图'
+				}
+			},
+			{
+				path: '/livestockBoard',
+				name: 'livestockBoard',
+				component: () => import('@/views/livestock-board/index.vue'),
+				meta: {
+					title: '综合监管视图'
+				}
+			},
+			{
 				path: '/productManage',
 				name: 'productManage',
 				component: () => import('@/views/product-manage/index.vue'),
@@ -86,13 +102,6 @@ const routes = [
 		component: () => import('@/views/auth/login/callback.vue'),
 		meta: {
 			title: '三方登录'
-		}
-	},
-	{
-		path: '/comprehensiveSupervision',
-		component: () => import('@/views/home/index.vue'),
-		meta: {
-			title: '首页'
 		}
 	}
 ]
