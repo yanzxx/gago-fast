@@ -173,10 +173,14 @@ public class DevMessageServiceImpl extends ServiceImpl<DevMessageMapper, DevMess
         List<DevMessageResult.DevReceiveInfo> receiveInfoList = devRelationService.getRelationListByObjectIdAndCategory(devMessage.getId(),
                 DevRelationCategoryEnum.MSG_TO_USER.getValue()).stream().map(devRelation -> {
             DevMessageResult.DevReceiveInfo devReceiveInfo = new DevMessageResult.DevReceiveInfo();
-            JSONObject userObj = sysUserApi.getUserByIdWithException(devRelation.getTargetId());
             String userName = "未知用户";
-            if(ObjectUtil.isNotEmpty(userObj)) {
-                userName = userObj.getStr("name");
+            try {
+                JSONObject userObj = sysUserApi.getUserByIdWithException(devRelation.getTargetId());
+                if(ObjectUtil.isNotEmpty(userObj)) {
+                    userName = userObj.getStr("name");
+                }
+            } catch (Exception ignored) {
+                // 用户信息查询失败时不影响消息详情主流程，降级展示为“未知用户”
             }
             devReceiveInfo.setReceiveUserId(devRelation.getTargetId());
             devReceiveInfo.setReceiveUserName(userName);

@@ -38,28 +38,6 @@
         </van-row>
 			</div>
 		</div>
-		
-		<div class="container">
-
-      <van-row>
-        <van-col span="24">
-          <label class="item-row-title">查收情况</label>
-        </van-col>
-      </van-row>
-			<view class="table-list">
-        <el-table :data="receiveInfoList" style="width: 100%">
-          <el-table-column prop="receiveUserName" label="姓名" width="180" />
-          <el-table-column prop="name" label="是否已读">
-            <template #default="scope">
-              <div style="display: flex; align-items: center">
-                <van-tag v-if="!!scope.row.read" type="success">已读</van-tag>
-                <van-tag v-if="!scope.row.read" type="primary">未读</van-tag>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-			</view>
-		</div>
 	</div>
 </template>
 
@@ -69,7 +47,6 @@
   import router from '@/router'
 
 	const record = ref({})
-	const receiveInfoList = ref([])
 
   onMounted(() => {
     const option = router.currentRoute.value.query
@@ -81,7 +58,6 @@
     }).then((res) => {
       record.value = res.data
       record.value.createTime = option?.createTime
-      receiveInfoList.value = res.data.receiveInfoList
     })
   })
 

@@ -1,20 +1,7 @@
 <template>
 	<div style="margin-top: 6px;">
     <div class="action-area">
-      <div class="notice-overview">
-        <div
-          v-for="item in noticeTypeOptions.filter((item) => item.value !== 'ALL')"
-          :key="item.value"
-          class="notice-card"
-          :class="`notice-${item.value.toLowerCase()}`"
-          @click="noticeType = item.value"
-        >
-          <div class="notice-title">{{ item.label }}</div>
-          <div class="notice-value">{{ getNoticeCount(item.value) }}</div>
-        </div>
-      </div>
-
-      <div class="notice-filter">
+      <div class="type-filter">
         <van-button
           v-for="item in noticeTypeOptions"
           :key="item.value"
@@ -37,25 +24,42 @@
           {{ item.label }}
         </van-button>
       </div>
+
+      <div class="op-row">
+        <van-button size="small" plain type="success" @click="handleExport">导出</van-button>
+      </div>
     </div>
 
 		<div class="msg-list">
       <template v-for="(item, index) in filteredMsgData" :key="index">
-        <van-cell size="large" @click="clickMsg(item)">
-          <template #title>
-            <span class="custom-title">
-              <div class="header">
-                <span>{{ item.subject }}</span>
-                <van-tag :type="getNoticeTypeMeta(item).tagType" plain>
-                  {{ getNoticeTypeMeta(item).label }}
-                </van-tag>
+        <van-swipe-cell>
+          <van-cell size="large" @click="clickMsg(item)">
+            <template #title>
+              <div class="cell-wrap">
+                <span class="custom-title">
+                  <div class="header">
+                    <span>{{ item.subject }}</span>
+                    <van-tag :type="getNoticeTypeMeta(item).tagType" plain>
+                      {{ getNoticeTypeMeta(item).label }}
+                    </van-tag>
+                  </div>
+                  <div class="content">{{ item.content }}</div>
+                  <div class="time">{{ item.createTime }}</div>
+                  <div class="noReadTip" v-show="!item.read"></div>
+                </span>
               </div>
-              <div class="content">{{ item.content }}</div>
-              <div class="time">{{ item.createTime }}</div>
-              <div class="noReadTip" v-show="!item.read"></div>
-            </span>
+            </template>
+          </van-cell>
+          <template #right>
+            <van-button
+              square
+              type="danger"
+              text="删除"
+              class="delete-button"
+              @click.stop="handleSwipeDelete(item)"
+            />
           </template>
-        </van-cell>
+        </van-swipe-cell>
       </template>
 
 			<snowy-empty v-if="filteredMsgData.length === 0" />
@@ -66,18 +70,21 @@
 <script setup>
 	import { reactive, ref, onMounted, computed } from "vue"
 	import XEUtils from 'xe-utils'
-	import { userLoginUnreadMessagePage } from '@/api/sys/userCenterApi.js'
+	import { userDeleteMessage, userLoginUnreadMessagePage } from '@/api/sys/userCenterApi.js'
 	import SnowyEmpty from "@/components/snowy-empty.vue"
   import router from '@/router'
+  import modal from '@/plugins/modal'
+  import { showFailToast, showSuccessToast } from 'vant'
 	
-  const readStatus = ref('ALL')
   const noticeType = ref('ALL')
   const noticeTypeOptions = [
-    { label: '全部通知', value: 'ALL' },
+    { label: '全部类型', value: 'ALL' },
     { label: '审核通知', value: 'AUDIT' },
     { label: '政策通知', value: 'POLICY' },
     { label: '预警通知', value: 'WARNING' }
   ]
+
+  const readStatus = ref('ALL')
   const readFilterOptions = [
     { label: '全部', value: 'ALL' },
     { label: '未读', value: 'UNREAD' },
@@ -126,8 +133,59 @@
     })
 	}
 
-  const getNoticeCount = (type) => {
-    return msgData.value.filter(item => getNoticeTypeMeta(item).value === type).length
+  const handleSwipeDelete = (item) => {
+    modal.confirm('确认删除该消息吗？删除后不可恢复。').then(() => {
+      userDeleteMessage([{ id: item.id }]).then(() => {
+        msgData.value = msgData.value.filter(v => v.id !== item.id)
+        showSuccessToast('删除成功')
+      }).catch(() => {
+        showFailToast('删除失败，请确认当前账号是否有删除权限')
+      })
+    })
+  }
+
+  const handleExport = () => {
+    if (filteredMsgData.value.length === 0) {
+      showFailToast('当前没有可导出的消息')
+      return
+    }
+    const csvHeader = ['主题', '内容', '消息类型', '分类', '状态', '时间']
+    const csvBody = filteredMsgData.value.map(item => ([
+      item.subject || '',
+      item.content || '',
+      getNoticeTypeMeta(item).label,
+      item.category || '',
+      item.read ? '已读' : '未读',
+      item.createTime || ''
+    ].map(escapeCsvField).join(',')))
+    const csvContent = `\uFEFF${csvHeader.join(',')}\n${csvBody.join('\n')}`
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const filename = `消息管理_${formatDateForFileName(new Date())}.csv`
+    if (typeof window !== 'undefined' && window.URL) {
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(link.href)
+      showSuccessToast('导出成功')
+    }
+  }
+
+  const escapeCsvField = (value) => {
+    const text = String(value).replace(/"/g, '""')
+    return `"${text}"`
+  }
+
+  const formatDateForFileName = (date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    const h = String(date.getHours()).padStart(2, '0')
+    const mm = String(date.getMinutes()).padStart(2, '0')
+    const s = String(date.getSeconds()).padStart(2, '0')
+    return `${y}${m}${d}_${h}${mm}${s}`
   }
 
   const getNoticeTypeMeta = (item) => {
@@ -153,44 +211,7 @@
     border-radius: 10px;
     padding: 10px 12px;
 
-    .notice-overview {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 10px;
-
-      .notice-card {
-        border-radius: 8px;
-        padding: 8px 10px;
-        color: #fff;
-        text-align: left;
-
-        .notice-title {
-          font-size: 12px;
-          opacity: 0.95;
-        }
-
-        .notice-value {
-          margin-top: 4px;
-          font-size: 18px;
-          font-weight: 700;
-        }
-      }
-
-      .notice-audit {
-        background: linear-gradient(135deg, #1f8a70, #26a083);
-      }
-
-      .notice-policy {
-        background: linear-gradient(135deg, #2f9b7f, #36b28f);
-      }
-
-      .notice-warning {
-        background: linear-gradient(135deg, #e67e22, #f39c12);
-      }
-    }
-
-    .notice-filter {
+    .type-filter {
       display: flex;
       gap: 8px;
       margin-bottom: 10px;
@@ -200,7 +221,14 @@
     .read-filter {
       display: flex;
       gap: 8px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
+    }
+
+    .op-row {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
     }
   }
 
@@ -208,11 +236,23 @@
 		margin: 6px;
 		border-radius: 10px;
 
+    .delete-button {
+      height: 100%;
+      min-height: 86px;
+    }
+
     .van-cell {
       .van-cell__title {
         padding-bottom: 40px;
 
+        .cell-wrap {
+          display: flex;
+          align-items: flex-start;
+        }
+
         .custom-title {
+          flex: 1;
+
           .header {
             color: #3a3a3a;
             margin: 5px 0;

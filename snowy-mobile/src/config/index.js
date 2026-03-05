@@ -92,6 +92,7 @@ export default {
     // 显示头部导航栏的路由
     SHOWTOPBARROUTERLIST: [
         "/message",
+        "/messageManage",
         "/org",
         "/orgForm",
         "/position",

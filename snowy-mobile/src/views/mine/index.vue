@@ -74,6 +74,13 @@
 
       <van-cell value="" is-link @click="handleToMessageManage">
         <template #title>
+          <van-icon name="chat-o" color="rgb(41, 121, 255)" size="19" />
+          <span class="custom-title">消息通知</span>
+        </template>
+      </van-cell>
+
+      <van-cell value="" is-link @click="handleToMessageCenter">
+        <template #title>
           <van-icon name="envelop-o" color="rgb(41, 121, 255)" size="19" />
           <span class="custom-title">消息管理</span>
         </template>
@@ -120,6 +127,11 @@
   const handleToMessageManage = () => {
     router.push({
       path: '/message'
+    })
+  }
+  const handleToMessageCenter = () => {
+    router.push({
+      path: '/messageManage'
     })
   }
 	const handleToAvatar = () => {
