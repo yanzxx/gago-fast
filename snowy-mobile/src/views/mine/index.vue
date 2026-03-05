@@ -71,6 +71,13 @@
           <span class="custom-title">修改密码</span>
         </template>
       </van-cell>
+
+      <van-cell value="" is-link @click="handleToMessageManage">
+        <template #title>
+          <van-icon name="envelop-o" color="rgb(41, 121, 255)" size="19" />
+          <span class="custom-title">消息管理</span>
+        </template>
+      </van-cell>
 		</div>
     <van-button type="primary" @click="handleLogout" v-if="name" style="width: 100%;margin-top: 10px;font-size: 18px;">退出登录</van-button>
 	</div>
@@ -110,6 +117,11 @@
       path: '/editPwd'
     })
 	}
+  const handleToMessageManage = () => {
+    router.push({
+      path: '/message'
+    })
+  }
 	const handleToAvatar = () => {
     showSuccessToast('模块建设中');
 	}

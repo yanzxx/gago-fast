@@ -32,7 +32,7 @@ const routes = [
                 path: '/message',
                 name: 'message',
                 meta: {
-                    title: '消息'
+                    title: '消息管理'
                 },
                 component: () => import('@/views/msg/index.vue'),
             },

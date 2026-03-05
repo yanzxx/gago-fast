@@ -54,6 +54,14 @@ export function userLoginUnreadMessageDetail(data) {
 	})
 }
 
+// 删除站内信（批量）
+export function userDeleteMessage(data) {
+	return request({
+		url: '/dev/message/delete',
+		method: 'post',
+		data: data
+	})
+}
 
 // 根据id集合获取职位集合
 export function getPositionListByIdList(data) {

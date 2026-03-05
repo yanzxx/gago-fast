@@ -1,60 +1,109 @@
 <template>
 	<div style="margin-top: 6px;">
-		<div class="sticky">
-      <van-tabs v-model:active="curView" type="card" @change="(e) => {
-          curView = e
-          loadData(true)
-        }">
-        <van-tab :title="item" v-for="(item, index) of segmentedList" :key="index"></van-tab>
-      </van-tabs>
-		</div>
+    <div class="action-area">
+      <div class="read-filter">
+        <van-button
+          v-for="item in readFilterOptions"
+          :key="item.value"
+          size="small"
+          :type="readStatus === item.value ? 'success' : 'default'"
+          @click="readStatus = item.value"
+        >
+          {{ item.label }}
+        </van-button>
+      </div>
+
+      <div class="op-row">
+        <van-button size="small" plain type="success" @click="handleExport">导出</van-button>
+        <van-button size="small" plain type="success" @click="toggleManage">
+          {{ manageMode ? '完成' : '管理' }}
+        </van-button>
+        <template v-if="manageMode">
+          <van-button size="small" plain type="success" @click="toggleSelectAll">
+            {{ allVisibleSelected ? '取消全选' : '全选' }}
+          </van-button>
+          <van-button size="small" type="danger" @click="handleDeleteSelected">删除</van-button>
+        </template>
+      </div>
+    </div>
+
 		<div class="msg-list">
-
-      <template v-for="(item, index) in msgData"
-                :key="index">
-
-        <van-cell size="large" @click="clickMsg(item, index)">
+      <template v-for="(item, index) in filteredMsgData" :key="index">
+        <van-cell size="large" @click="clickMsg(item)">
           <template #title>
-            <span class="custom-title">
-              <div class="header">{{item.subject}}</div>
-              <div class="content">{{item.content}}</div>
-              <div class="time">{{item.createTime}}</div>
-              <div class="noReadTip" v-show="!item.read"></div>
-            </span>
+            <div class="cell-wrap">
+              <van-checkbox
+                v-if="manageMode"
+                class="item-check"
+                :model-value="isSelected(item.id)"
+                @click.stop
+                @update:model-value="(val) => toggleSelect(item.id, val)"
+              />
+              <span class="custom-title">
+                <div class="header">{{ item.subject }}</div>
+                <div class="content">{{ item.content }}</div>
+                <div class="time">{{ item.createTime }}</div>
+                <div class="noReadTip" v-show="!item.read"></div>
+              </span>
+            </div>
           </template>
         </van-cell>
       </template>
 
-			<snowy-empty v-if="!msgData || msgData.length === 0" />
+			<snowy-empty v-if="filteredMsgData.length === 0" />
 		</div>
 	</div>
 </template>
 
 <script setup>
-	import { reactive, ref, onMounted } from "vue"
-	import tool from '@/plugins/tool.js'
+	import { reactive, ref, onMounted, computed, watch } from "vue"
 	import XEUtils from 'xe-utils'
-	import { userLoginUnreadMessagePage } from '@/api/sys/userCenterApi.js'
+	import { userDeleteMessage, userLoginUnreadMessagePage } from '@/api/sys/userCenterApi.js'
 	import SnowyEmpty from "@/components/snowy-empty.vue"
   import router from '@/router'
+  import modal from '@/plugins/modal'
+  import { showFailToast, showSuccessToast } from 'vant'
 	
-	const curView = ref(0)
-	const segmentedList = ref([])
-	const messageCategoryList = tool.dictList('MESSAGE_CATEGORY')
-	if(!XEUtils.isEmpty(messageCategoryList)){
-		messageCategoryList.forEach(item => {
-			segmentedList.value.push(item.text)
-		})
-	}
+  const readStatus = ref('ALL')
+  const readFilterOptions = [
+    { label: '全部', value: 'ALL' },
+    { label: '未读', value: 'UNREAD' },
+    { label: '已读', value: 'READ' }
+  ]
+  const manageMode = ref(false)
+  const selectedIds = ref([])
+
 	const searchFormState = reactive({})
-	let parameter = reactive({
+	const parameter = reactive({
 		current: 1,
 		size: 10
 	})
 	const msgData = ref([])
 
+  const filteredMsgData = computed(() => {
+    if (readStatus.value === 'UNREAD') {
+      return msgData.value.filter(item => !item.read)
+    }
+    if (readStatus.value === 'READ') {
+      return msgData.value.filter(item => !!item.read)
+    }
+    return msgData.value
+  })
+
+  const allVisibleSelected = computed(() => {
+    if (filteredMsgData.value.length === 0) {
+      return false
+    }
+    return filteredMsgData.value.every(item => selectedIds.value.includes(item.id))
+  })
+
   onMounted(() => {
     loadData()
+  })
+
+  watch(readStatus, () => {
+    const visibleIdSet = new Set(filteredMsgData.value.map(item => item.id))
+    selectedIds.value = selectedIds.value.filter(id => visibleIdSet.has(id))
   })
 
 	// 加载数据
@@ -62,22 +111,24 @@
 		if (isReset) {
 			parameter.current = 1
 			msgData.value = []
+      selectedIds.value = []
+      manageMode.value = false
 		}
-		searchFormState.category = XEUtils.isEmpty(messageCategoryList) ? '' : messageCategoryList[curView.value]?.value
-    console.log('searchFormState', searchFormState)
-    parameter = Object.assign(parameter, searchFormState)
+    Object.assign(parameter, searchFormState)
 		userLoginUnreadMessagePage(parameter).then(res => {
 			if (XEUtils.isEmpty(res?.data?.records)) {
 				return
 			}
 			msgData.value = msgData.value.concat(res.data.records)
 			parameter.current++
-		}).finally(()=>{
-			// uni.stopPullDownRefresh()
 		})
 	}
 	
 	const clickMsg = (item) => {
+    if (manageMode.value) {
+      toggleSelect(item.id, !isSelected(item.id))
+      return
+    }
     router.push({
       path: '/editMessage',
       query: {
@@ -86,9 +137,114 @@
       }
     })
 	}
+
+  const isSelected = (id) => selectedIds.value.includes(id)
+
+  const toggleSelect = (id, checked) => {
+    if (checked) {
+      if (!selectedIds.value.includes(id)) {
+        selectedIds.value.push(id)
+      }
+      return
+    }
+    selectedIds.value = selectedIds.value.filter(item => item !== id)
+  }
+
+  const toggleManage = () => {
+    manageMode.value = !manageMode.value
+    if (!manageMode.value) {
+      selectedIds.value = []
+    }
+  }
+
+  const toggleSelectAll = () => {
+    if (allVisibleSelected.value) {
+      selectedIds.value = []
+      return
+    }
+    selectedIds.value = filteredMsgData.value.map(item => item.id)
+  }
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.value.length === 0) {
+      showFailToast('请先选择消息')
+      return
+    }
+    modal.confirm(`确认删除已选 ${selectedIds.value.length} 条消息吗？`).then(() => {
+      userDeleteMessage(selectedIds.value.map(id => ({ id }))).then(() => {
+        msgData.value = msgData.value.filter(item => !selectedIds.value.includes(item.id))
+        selectedIds.value = []
+        showSuccessToast('删除成功')
+      }).catch(() => {
+        showFailToast('删除失败，请确认当前账号是否有删除权限')
+      })
+    })
+  }
+
+  const handleExport = () => {
+    if (filteredMsgData.value.length === 0) {
+      showFailToast('当前没有可导出的消息')
+      return
+    }
+    const csvHeader = ['主题', '内容', '分类', '状态', '时间']
+    const csvBody = filteredMsgData.value.map(item => ([
+      item.subject || '',
+      item.content || '',
+      item.category || '',
+      item.read ? '已读' : '未读',
+      item.createTime || ''
+    ].map(escapeCsvField).join(',')))
+    const csvContent = `\uFEFF${csvHeader.join(',')}\n${csvBody.join('\n')}`
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const filename = `消息管理_${formatDateForFileName(new Date())}.csv`
+    if (typeof window !== 'undefined' && window.URL) {
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(link.href)
+      showSuccessToast('导出成功')
+    }
+  }
+
+  const escapeCsvField = (value) => {
+    const text = String(value).replace(/"/g, '""')
+    return `"${text}"`
+  }
+
+  const formatDateForFileName = (date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    const h = String(date.getHours()).padStart(2, '0')
+    const mm = String(date.getMinutes()).padStart(2, '0')
+    const s = String(date.getSeconds()).padStart(2, '0')
+    return `${y}${m}${d}_${h}${mm}${s}`
+  }
 </script>
 
 <style lang="scss">
+  .action-area {
+    margin: 6px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+
+    .read-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .op-row {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  }
+
 	.msg-list {
 		margin: 6px;
 		border-radius: 10px;
@@ -97,7 +253,19 @@
       .van-cell__title {
         padding-bottom: 40px;
 
+        .cell-wrap {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+
+          .item-check {
+            margin-top: 8px;
+          }
+        }
+
         .custom-title {
+          flex: 1;
+
           .header {
             color: #3a3a3a;
             margin: 5px 0;

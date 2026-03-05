@@ -91,6 +91,7 @@ export default {
     SHOWNAVIGATIONBARROUTERLIST: ["/home", "/work", "/message", "/mine"],
     // 显示头部导航栏的路由
     SHOWTOPBARROUTERLIST: [
+        "/message",
         "/org",
         "/orgForm",
         "/position",
