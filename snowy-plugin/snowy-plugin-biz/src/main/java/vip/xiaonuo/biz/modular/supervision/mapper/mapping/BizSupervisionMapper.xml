@@ -417,4 +417,92 @@
           )
         order by a.trigger_time desc
     </select>
+
+    <select id="weeklyStats" resultType="vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeWeeklyStatResult">
+        with days as (
+            select generate_series(current_date - interval '6 day', current_date, interval '1 day')::date as d
+        )
+        select
+            to_char(days.d, 'MM-DD') as dayLabel,
+            cast((
+                select count(1)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+                  and l.create_time is not null
+                  and l.create_time::date &lt;= days.d
+            ) as bigint) as totalStockCount,
+            cast((
+                select count(1)
+                from yzx.biz_livestock l
+                <include refid="LivestockScopeWhere"/>
+                  and l.status = 'IN_STOCK'
+                  and l.create_time is not null
+                  and l.create_time::date &lt;= days.d
+            ) as bigint) as inStockCount,
+            cast((
+                select count(1)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+                  and a.trigger_time is not null
+                  and a.trigger_time::date = days.d
+                  and coalesce(a.status, '') not in ('已处置', '已完成', 'FINISHED', 'CLOSED')
+                  and a.anomaly_type like '%设备%'
+            ) as bigint) as deviceAnomalyCount,
+            cast((
+                select count(1)
+                from yzx.biz_after_loan_anomaly a
+                <include refid="AnomalyScopeWhere"/>
+                  and a.trigger_time is not null
+                  and a.trigger_time::date = days.d
+                  and coalesce(a.status, '') not in ('已处置', '已完成', 'FINISHED', 'CLOSED')
+                  and a.anomaly_type like '%项圈%'
+            ) as bigint) as collarAnomalyCount
+        from days
+        order by days.d
+    </select>
+
+    <select id="livestockMetricDetails" resultType="vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricDetailResult">
+        select
+            l.id as id,
+            case when #{inStockOnly} then 'inStockCount' else 'totalStockCount' end as metricType,
+            coalesce(l.livestock_no, l.id) as title,
+            concat('品种：', coalesce(l.species_name, '-'), '，耳标：', coalesce(l.collar_no, '-')) as content,
+            coalesce(l.status, '-') as status,
+            to_char(l.create_time, 'YYYY-MM-DD HH24:MI:SS') as eventTime
+        from yzx.biz_livestock l
+        <include refid="LivestockScopeWhere"/>
+        <if test="inStockOnly">
+            and l.status = 'IN_STOCK'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and l.create_time::date &gt;= #{startDate}::date
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and l.create_time::date &lt;= #{endDate}::date
+        </if>
+        order by l.create_time desc
+        limit 300
+    </select>
+
+    <select id="anomalyMetricDetails" resultType="vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricDetailResult">
+        select
+            a.id as id,
+            case when #{keyword} = '设备' then 'deviceAnomalyCount' else 'collarAnomalyCount' end as metricType,
+            coalesce(a.anomaly_type, a.id) as title,
+            coalesce(a.description, a.target_no, '-') as content,
+            coalesce(a.status, '-') as status,
+            to_char(a.trigger_time, 'YYYY-MM-DD HH24:MI:SS') as eventTime
+        from yzx.biz_after_loan_anomaly a
+        <include refid="AnomalyScopeWhere"/>
+          and coalesce(a.status, '') not in ('已处置', '已完成', 'FINISHED', 'CLOSED')
+          and a.anomaly_type like concat('%', #{keyword}, '%')
+        <if test="startDate != null and startDate != ''">
+            and a.trigger_time::date &gt;= #{startDate}::date
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and a.trigger_time::date &lt;= #{endDate}::date
+        </if>
+        order by a.trigger_time desc
+        limit 300
+    </select>
 </mapper>

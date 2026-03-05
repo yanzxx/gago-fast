@@ -184,6 +184,14 @@ const routes = [
                 },
                 component: () => import('@/views/home/todo-list.vue'),
             },
+            {
+                path: '/homeMetricList',
+                name: 'homeMetricList',
+                meta: {
+                    title: '指标详情'
+                },
+                component: () => import('@/views/home/metric-list.vue'),
+            },
         ]
     },
     {

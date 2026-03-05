@@ -1,16 +1,40 @@
 :root {
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #1f2d2a;
+  background-color: #f2faf8;
   font-family: Helvetica Neue, Helvetica, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --brand-primary: #1f8a70;
+  --brand-primary-hover: #16745f;
+  --brand-bg: #f2faf8;
+  --brand-bg-soft: #ecf7f3;
+  --brand-text: #1f2d2a;
+  --brand-text-soft: #4a6f64;
+  --brand-border: rgba(31, 138, 112, 0.24);
+
+  --van-primary-color: var(--brand-primary);
+  --van-success-color: #52c41a;
+  --van-danger-color: #f5222d;
+  --van-warning-color: #faad14;
+  --van-button-primary-background: var(--brand-primary);
+  --van-button-primary-border-color: var(--brand-primary);
+  --van-nav-bar-icon-color: #ffffff;
+  --van-nav-bar-title-text-color: #ffffff;
+  --van-nav-bar-text-color: #ffffff;
+
+  --el-color-primary: var(--brand-primary);
+  --el-color-primary-light-3: #53bba0;
+  --el-color-primary-light-5: #7fcdb8;
+  --el-color-primary-light-7: #a8decf;
+  --el-color-primary-light-8: #d0efe6;
+  --el-color-primary-light-9: #e9f7f3;
+  --el-color-primary-dark-2: #16745f;
 }
 
 *,
@@ -30,18 +54,12 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
-  background: #F1F1F1;
-  color: #ccc;
+  background: var(--brand-bg);
+  color: var(--brand-text);
 }
 
 #app {
   margin: 0 auto;
   width: 100%;
-  text-align: center;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    background-color: #ffffff;
-  }
+  text-align: left;
 }

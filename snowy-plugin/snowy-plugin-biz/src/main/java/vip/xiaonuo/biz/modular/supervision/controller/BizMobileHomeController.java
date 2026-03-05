@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vip.xiaonuo.biz.modular.supervision.param.BizMobileHomeParam;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeHeaderResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricDetailResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricsResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeTodoItemResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeTodoSummaryResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeWeeklyStatResult;
 import vip.xiaonuo.biz.modular.supervision.service.BizMobileHomeService;
 import vip.xiaonuo.common.pojo.CommonResult;
 
@@ -56,5 +58,19 @@ public class BizMobileHomeController {
     @GetMapping("/biz/mobile/home/todoDetails")
     public CommonResult<List<BizMobileHomeTodoItemResult>> todoDetails(BizMobileHomeParam param, String todoType) {
         return CommonResult.data(bizMobileHomeService.todoDetails(param, todoType));
+    }
+
+    @ApiOperationSupport(order = 5)
+    @ApiOperation("移动端首页近7天统计")
+    @GetMapping("/biz/mobile/home/weeklyStats")
+    public CommonResult<List<BizMobileHomeWeeklyStatResult>> weeklyStats(BizMobileHomeParam param) {
+        return CommonResult.data(bizMobileHomeService.weeklyStats(param));
+    }
+
+    @ApiOperationSupport(order = 6)
+    @ApiOperation("移动端首页核心指标详情")
+    @GetMapping("/biz/mobile/home/metricDetails")
+    public CommonResult<List<BizMobileHomeMetricDetailResult>> metricDetails(BizMobileHomeParam param) {
+        return CommonResult.data(bizMobileHomeService.metricDetails(param));
     }
 }

@@ -35,3 +35,21 @@ export function mobileHomeTodoDetails(data) {
 		data
 	})
 }
+
+// 移动端首页近7天统计
+export function mobileHomeWeeklyStats(data) {
+	return request({
+		url: '/biz/mobile/home/weeklyStats',
+		method: 'get',
+		data
+	})
+}
+
+// 移动端首页核心指标详情
+export function mobileHomeMetricDetails(data) {
+	return request({
+		url: '/biz/mobile/home/metricDetails',
+		method: 'get',
+		data
+	})
+}

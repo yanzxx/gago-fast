@@ -11,7 +11,12 @@
     <div class="layout-content">
       <router-view></router-view>
     </div>
-    <van-tabbar route v-if="SHOWNAVIGATIONBARROUTERLIST.includes(currentRoute)">
+    <van-tabbar
+      route
+      :active-color="'#1f8a70'"
+      :inactive-color="'#6b8f84'"
+      v-if="SHOWNAVIGATIONBARROUTERLIST.includes(currentRoute)"
+    >
       <van-tabbar-item replace :to="item.path" v-for="(item, index) of BOTTOMNAVIGATIONBAR" :key="index">
         {{item.name}}
         <template #icon="props">
@@ -58,10 +63,10 @@ const onClickLeft = () => {
 
 .layout {
   height: 100%;
-  background: #F1F1F1;
+  background: #f2faf8;
 
   .van-nav-bar__content {
-    background: #4187F2;
+    background: #1f8a70;
 
     .van-nav-bar__left {
       i {
@@ -75,6 +80,20 @@ const onClickLeft = () => {
   }
 
   .layout-content {
+  }
+
+  .van-tabbar {
+    border-top: 1px solid rgba(31, 138, 112, 0.2);
+    background: #ffffff;
+  }
+
+  .van-tabbar-item__text {
+    color: #6b8f84;
+  }
+
+  .van-tabbar-item--active .van-tabbar-item__text {
+    color: #1f8a70;
+    font-weight: 600;
   }
 }
 

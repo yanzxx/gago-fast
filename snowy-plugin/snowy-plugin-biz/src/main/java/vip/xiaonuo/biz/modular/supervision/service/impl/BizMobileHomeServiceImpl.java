@@ -13,9 +13,11 @@ import vip.xiaonuo.biz.modular.supervision.mapper.BizSupervisionMapper;
 import vip.xiaonuo.biz.modular.supervision.param.BizMobileHomeParam;
 import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionHomeParam;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeHeaderResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricDetailResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricsResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeTodoItemResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeTodoSummaryResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeWeeklyStatResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMobileTodoRowResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult;
 import vip.xiaonuo.biz.modular.supervision.service.BizMobileHomeService;
@@ -39,6 +41,10 @@ public class BizMobileHomeServiceImpl implements BizMobileHomeService {
     private static final String TODO_TYPE_ESTRUS = "ESTRUS";
     private static final String TODO_TYPE_BREED = "BREED";
     private static final String TODO_TYPE_ILLEGAL_OUT = "ILLEGAL_OUT";
+    private static final String METRIC_TOTAL_STOCK = "totalStockCount";
+    private static final String METRIC_IN_STOCK = "inStockCount";
+    private static final String METRIC_DEVICE_ANOMALY = "deviceAnomalyCount";
+    private static final String METRIC_COLLAR_ANOMALY = "collarAnomalyCount";
 
     @Resource
     private BizSupervisionMapper bizSupervisionMapper;
@@ -118,6 +124,51 @@ public class BizMobileHomeServiceImpl implements BizMobileHomeService {
                 .filter(row -> StrUtil.equalsIgnoreCase(todoType, row.getTodoType()))
                 .map(this::toTodoItem)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BizMobileHomeWeeklyStatResult> weeklyStats(BizMobileHomeParam param) {
+        ScopeContext scopeContext = resolveScopeContext(param);
+        List<BizMobileHomeWeeklyStatResult> rows = bizSupervisionMapper.weeklyStats(
+                scopeContext.getHomeParam(), scopeContext.isAllFarm(), scopeContext.getVisibleFarmIds()
+        );
+        return ObjectUtil.defaultIfNull(rows, Collections.emptyList());
+    }
+
+    @Override
+    public List<BizMobileHomeMetricDetailResult> metricDetails(BizMobileHomeParam param) {
+        ScopeContext scopeContext = resolveScopeContext(param);
+        String metricType = param == null ? null : param.getMetricType();
+        String startDate = param == null ? null : param.getStartDate();
+        String endDate = param == null ? null : param.getEndDate();
+        if (StrUtil.isBlank(metricType)) {
+            return Collections.emptyList();
+        }
+        if (StrUtil.equalsIgnoreCase(metricType, METRIC_TOTAL_STOCK)) {
+            return bizSupervisionMapper.livestockMetricDetails(
+                    scopeContext.getHomeParam(), scopeContext.isAllFarm(), scopeContext.getVisibleFarmIds(),
+                    startDate, endDate, false
+            );
+        }
+        if (StrUtil.equalsIgnoreCase(metricType, METRIC_IN_STOCK)) {
+            return bizSupervisionMapper.livestockMetricDetails(
+                    scopeContext.getHomeParam(), scopeContext.isAllFarm(), scopeContext.getVisibleFarmIds(),
+                    startDate, endDate, true
+            );
+        }
+        if (StrUtil.equalsIgnoreCase(metricType, METRIC_DEVICE_ANOMALY)) {
+            return bizSupervisionMapper.anomalyMetricDetails(
+                    scopeContext.getHomeParam(), scopeContext.isAllFarm(), scopeContext.getVisibleFarmIds(),
+                    startDate, endDate, "设备"
+            );
+        }
+        if (StrUtil.equalsIgnoreCase(metricType, METRIC_COLLAR_ANOMALY)) {
+            return bizSupervisionMapper.anomalyMetricDetails(
+                    scopeContext.getHomeParam(), scopeContext.isAllFarm(), scopeContext.getVisibleFarmIds(),
+                    startDate, endDate, "项圈"
+            );
+        }
+        return Collections.emptyList();
     }
 
     private long safeCountByKeywords(ScopeContext scopeContext, List<String> keywords) {

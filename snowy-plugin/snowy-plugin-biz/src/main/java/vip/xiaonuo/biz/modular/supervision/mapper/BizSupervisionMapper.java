@@ -9,6 +9,8 @@ import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionFarmStatsResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMobileTodoRowResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMapPointResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeWeeklyStatResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizMobileHomeMetricDetailResult;
 
 import java.util.List;
 
@@ -50,4 +52,25 @@ public interface BizSupervisionMapper {
     List<BizSupervisionMobileTodoRowResult> pendingTodoRows(@Param("param") BizSupervisionHomeParam param,
                                                             @Param("allFarm") boolean allFarm,
                                                             @Param("farmIds") List<String> farmIds);
+
+    @InterceptorIgnore(tenantLine = "1")
+    List<BizMobileHomeWeeklyStatResult> weeklyStats(@Param("param") BizSupervisionHomeParam param,
+                                                    @Param("allFarm") boolean allFarm,
+                                                    @Param("farmIds") List<String> farmIds);
+
+    @InterceptorIgnore(tenantLine = "1")
+    List<BizMobileHomeMetricDetailResult> livestockMetricDetails(@Param("param") BizSupervisionHomeParam param,
+                                                                 @Param("allFarm") boolean allFarm,
+                                                                 @Param("farmIds") List<String> farmIds,
+                                                                 @Param("startDate") String startDate,
+                                                                 @Param("endDate") String endDate,
+                                                                 @Param("inStockOnly") boolean inStockOnly);
+
+    @InterceptorIgnore(tenantLine = "1")
+    List<BizMobileHomeMetricDetailResult> anomalyMetricDetails(@Param("param") BizSupervisionHomeParam param,
+                                                               @Param("allFarm") boolean allFarm,
+                                                               @Param("farmIds") List<String> farmIds,
+                                                               @Param("startDate") String startDate,
+                                                               @Param("endDate") String endDate,
+                                                               @Param("keyword") String keyword);
 }

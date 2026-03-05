@@ -2,8 +2,11 @@
   <div class="home-dashboard">
     <div class="section header-section">
       <div class="header-top">
-        <div class="org">{{ header.orgName || '-' }}</div>
+        <!-- <div class="org">{{ header.orgName || '-' }}</div> -->
       </div>
+      <van-dropdown-menu>
+        <van-dropdown-item v-model="selectedFarmId" :options="farmOptions" @change="onFarmChange" />
+      </van-dropdown-menu>
     </div>
 
     <div class="section">
@@ -33,6 +36,16 @@
     </div>
 
     <div class="section">
+      <div class="section-title">近7天核心指标趋势</div>
+      <div v-if="weeklyErr" class="error-line">
+        趋势加载失败
+        <span class="link" @click="loadWeeklyStats">重试</span>
+      </div>
+      <van-empty v-else-if="!weeklyStats.length" description="暂无趋势数据" />
+      <div v-else ref="weeklyChartRef" class="weekly-chart"></div>
+    </div>
+
+    <div class="section">
       <div class="section-title">待办事项</div>
       <div v-if="todosErr" class="error-line">
         待办加载失败
@@ -59,13 +72,21 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { mobileHomeHeader, mobileHomeMetrics, mobileHomeTodos } from '@/api/biz/mobileHomeApi'
+import * as echarts from 'echarts'
+import { mobileHomeHeader, mobileHomeMetrics, mobileHomeTodos, mobileHomeWeeklyStats } from '@/api/biz/mobileHomeApi'
+import { orgTree } from '@/api/biz/bizOrgApi'
 
 const router = useRouter()
 const metricsErr = ref(false)
 const todosErr = ref(false)
+const weeklyErr = ref(false)
+const selectedFarmId = ref('')
+const farmOptions = ref([])
+const weeklyStats = ref([])
+const weeklyChartRef = ref(null)
+let weeklyChartIns = null
 const header = reactive({
   orgId: '',
   orgName: '',
@@ -80,7 +101,9 @@ const metrics = reactive({
 const todos = ref([])
 
 const loadHeader = async () => {
-  const res = await mobileHomeHeader()
+  const res = await mobileHomeHeader({
+    farmId: selectedFarmId.value || undefined
+  })
   const data = res?.data || {}
   header.orgId = data.orgId || ''
   header.orgName = data.orgName || ''
@@ -90,7 +113,9 @@ const loadHeader = async () => {
 const loadMetrics = async () => {
   metricsErr.value = false
   try {
-    const res = await mobileHomeMetrics()
+    const res = await mobileHomeMetrics({
+      farmId: selectedFarmId.value || undefined
+    })
     const data = res?.data || {}
     metrics.totalStockCount = data.totalStockCount || 0
     metrics.inStockCount = data.inStockCount || 0
@@ -104,21 +129,149 @@ const loadMetrics = async () => {
 const loadTodos = async () => {
   todosErr.value = false
   try {
-    const res = await mobileHomeTodos({ topN: 3 })
+    const res = await mobileHomeTodos({
+      farmId: selectedFarmId.value || undefined,
+      topN: 3
+    })
     todos.value = res?.data || []
   } catch (e) {
     todosErr.value = true
   }
 }
 
+const renderWeeklyChart = async () => {
+  if (!weeklyStats.value.length) {
+    if (weeklyChartIns) {
+      weeklyChartIns.dispose()
+      weeklyChartIns = null
+    }
+    return
+  }
+  await nextTick()
+  if (!weeklyChartRef.value) {
+    return
+  }
+  if (weeklyChartIns) {
+    weeklyChartIns.dispose()
+  }
+  weeklyChartIns = echarts.init(weeklyChartRef.value)
+  const xData = weeklyStats.value.map((item) => item.dayLabel || '-')
+  const totalStockData = weeklyStats.value.map((item) => item.totalStockCount || 0)
+  const inStockData = weeklyStats.value.map((item) => item.inStockCount || 0)
+  const deviceAnomalyData = weeklyStats.value.map((item) => item.deviceAnomalyCount || 0)
+  const collarAnomalyData = weeklyStats.value.map((item) => item.collarAnomalyCount || 0)
+  weeklyChartIns.setOption({
+    color: ['#0f8f5f', '#22c55e', '#14b8a6', '#ef4444'],
+    tooltip: {
+      trigger: 'axis'
+    },
+    grid: {
+      top: 36,
+      left: 10,
+      right: 10,
+      bottom: 10,
+      containLabel: true
+    },
+    legend: {
+      top: 0,
+      icon: 'roundRect',
+      itemWidth: 10,
+      itemHeight: 6,
+      textStyle: {
+        fontSize: 10
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: xData,
+      axisLabel: { fontSize: 10, color: '#5c6b7a' },
+      axisLine: { lineStyle: { color: '#d9e2ec' } }
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      axisLabel: { fontSize: 10, color: '#5c6b7a' },
+      splitLine: { lineStyle: { color: '#edf2f7' } }
+    },
+    series: [
+      { name: '总存栏量', type: 'line', smooth: true, symbolSize: 6, data: totalStockData },
+      { name: '在栏数', type: 'line', smooth: true, symbolSize: 6, data: inStockData },
+      { name: '设备异常', type: 'line', smooth: true, symbolSize: 6, data: deviceAnomalyData },
+      { name: '项圈异常', type: 'line', smooth: true, symbolSize: 6, data: collarAnomalyData }
+    ]
+  })
+}
+
+const loadWeeklyStats = async () => {
+  weeklyErr.value = false
+  try {
+    const res = await mobileHomeWeeklyStats({
+      farmId: selectedFarmId.value || undefined
+    })
+    weeklyStats.value = res?.data || []
+    renderWeeklyChart()
+  } catch (e) {
+    weeklyErr.value = true
+    weeklyStats.value = []
+    renderWeeklyChart()
+  }
+}
+
 const loadAll = async () => {
-  await Promise.allSettled([loadHeader(), loadMetrics(), loadTodos()])
+  await Promise.allSettled([loadHeader(), loadMetrics(), loadWeeklyStats(), loadTodos()])
+}
+
+const flattenFarmOptions = (nodes = [], collector = []) => {
+  ;(nodes || []).forEach((node) => {
+    const id = node?.id || node?.value
+    const name = node?.name || node?.title
+    if (id && name) {
+      collector.push({
+        text: String(name),
+        value: String(id)
+      })
+    }
+    if (node?.children?.length) {
+      flattenFarmOptions(node.children, collector)
+    }
+  })
+  return collector
+}
+
+const loadFarmOptions = async () => {
+  try {
+    const res = await orgTree()
+    const options = flattenFarmOptions(res?.data || [])
+    farmOptions.value = options
+    if (!selectedFarmId.value && options.length) {
+      selectedFarmId.value = options[0].value
+    }
+  } catch (e) {
+    farmOptions.value = []
+    selectedFarmId.value = ''
+  }
+}
+
+const onFarmChange = () => {
+  loadAll()
+}
+
+const metricNameMap = {
+  totalStockCount: '总存栏量',
+  inStockCount: '在栏数',
+  deviceAnomalyCount: '设备异常',
+  collarAnomalyCount: '项圈异常'
 }
 
 const toMyFarm = (source) => {
   router.push({
-    path: '/myFarm',
-    query: { source }
+    path: '/homeMetricList',
+    query: {
+      metricType: source,
+      metricName: metricNameMap[source] || source,
+      farmId: selectedFarmId.value || ''
+    }
   })
 }
 
@@ -127,13 +280,31 @@ const toTodoList = (todo) => {
     path: '/homeTodoList',
     query: {
       todoType: todo.todoType,
-      todoName: todo.todoName
+      todoName: todo.todoName,
+      farmId: selectedFarmId.value || ''
     }
   })
 }
 
 onMounted(() => {
-  loadAll()
+  loadFarmOptions().finally(() => {
+    loadAll()
+  })
+  window.addEventListener('resize', handleResize)
+})
+
+const handleResize = () => {
+  if (weeklyChartIns) {
+    weeklyChartIns.resize()
+  }
+}
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  if (weeklyChartIns) {
+    weeklyChartIns.dispose()
+    weeklyChartIns = null
+  }
 })
 </script>
 
@@ -226,6 +397,11 @@ onMounted(() => {
   gap: 8px;
 }
 
+.weekly-chart {
+  width: 100%;
+  height: 260px;
+}
+
 .todo-card {
   border: 1px solid #eef2f7;
   border-radius: 8px;
@@ -280,7 +456,7 @@ onMounted(() => {
 }
 
 .link {
-  color: #1989fa;
+  color: #0f8f5f;
   margin-left: 8px;
 }
 
