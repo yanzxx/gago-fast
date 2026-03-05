@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!--      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">-->
+      <script>
+		  var coverSupport = 'CSS' in window && typeof CSS.supports === 'function' && (CSS.supports('top: env(a)') ||
+			  CSS.supports('top: constant(a)'))
+		  document.write(
+			  '<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0' +
+			  (coverSupport ? ', viewport-fit=cover' : '') + '" />')
+      </script>
+      <!-- 引入高德 -->
+      <script type="text/javascript">
+		  window._AMapSecurityConfig = {
+			  securityJsCode:'883f9d20caf181b909483ee20b017c9e',
+		  }
+      </script>
+      <!-- <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.13&key=a992a74dd34b4ddcd48a4e1677ad236d"></script> -->
+      <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.13&key=a992a74dd34b4ddcd48a4e1677ad236d"></script>
+      <title>快速开发平台移动端前端</title>
+  </head>
+  <body>
+    <div id="app">
+        <div class="app-loading"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+<!--    <script src="./node_modules/amfe-flexible/index.js"></script>-->
+  </body>
+</html>

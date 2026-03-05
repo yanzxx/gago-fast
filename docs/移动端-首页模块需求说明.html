@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>移动端-首页模块需求说明</title>
+  <style>
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; color: #222; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    h2 { font-size: 18px; margin-top: 24px; margin-bottom: 8px; }
+    p { margin: 6px 0; }
+    ul, ol { margin: 6px 0 6px 24px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th, td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+    .meta { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>移动端-首页模块需求说明</h1>
+  <p class="meta"><strong>文档类型：</strong>移动端某模块需求文档</p>
+  <p class="meta"><strong>模块名称：</strong>首页模块</p>
+  <p class="meta"><strong>版本：</strong>V1.0</p>
+  <p class="meta"><strong>日期：</strong>2026-03-05</p>
+
+  <h2>1. 模块目标</h2>
+  <ol>
+    <li>在首页实时可视化展示核心养殖数据，帮助用户快速掌握经营状态。</li>
+    <li>突出设备/项圈异常，降低异常发现与处理延迟。</li>
+    <li>集中展示发情提醒、配种提醒、非法离栏等待办，提高处理效率。</li>
+  </ol>
+
+  <h2>2. 功能范围</h2>
+  <ol>
+    <li>核心指标展示：总存栏量、在栏数等。</li>
+    <li>异常展示：设备异常、项圈异常。</li>
+    <li>数据穿透：点击指标/异常项可进入对应详情页。</li>
+    <li>待办展示：发情提醒、配种提醒、非法离栏。</li>
+  </ol>
+
+  <h2>3. 页面结构</h2>
+  <ol>
+    <li>顶部信息区：当前养殖场/组织、最后更新时间。</li>
+    <li>核心指标区：以卡片方式展示关键数字。</li>
+    <li>异常概览区：按类型展示异常数量与状态标识。</li>
+    <li>待办事项区：展示待处理事项数量与摘要列表。</li>
+  </ol>
+
+  <h2>4. 详细需求</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>功能项</th>
+        <th>需求描述</th>
+        <th>交互要求</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>核心指标展示</td>
+        <td>展示总存栏量、在栏数等核心养殖数据，默认展示当前用户权限范围内数据。</td>
+        <td>点击指标卡可跳转详情页；支持下拉刷新数据。</td>
+      </tr>
+      <tr>
+        <td>设备/项圈异常</td>
+        <td>展示设备异常数、项圈异常数，按未恢复/未处理口径统计。</td>
+        <td>异常项高亮显示；点击进入异常列表并自动带筛选条件。</td>
+      </tr>
+      <tr>
+        <td>数据详情穿透</td>
+        <td>支持从首页卡片/列表穿透至详情页，查看明细记录。</td>
+        <td>需保留来源筛选条件，便于返回后状态不丢失。</td>
+      </tr>
+      <tr>
+        <td>待办事项聚合</td>
+        <td>集中展示发情提醒、配种提醒、非法离栏等待办事项。</td>
+        <td>显示每类待办数量与前N条摘要；点击进入对应处理页面。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5. 业务规则</h2>
+  <ol>
+    <li>数据权限：仅展示当前登录用户可见组织/养殖场数据。</li>
+    <li>统计口径：异常与待办均按“待处理”状态统计。</li>
+    <li>刷新机制：支持手动刷新，展示“最后更新时间”。</li>
+    <li>空态与错误：无数据时展示空态文案；接口异常时提供重试。</li>
+  </ol>
+
+  <h2>6. 非功能要求</h2>
+  <ol>
+    <li>性能：首页首屏关键信息加载目标 ≤ 2 秒（常规网络）。</li>
+    <li>稳定性：单个分区接口失败不影响整页渲染（分区降级）。</li>
+    <li>安全性：接口必须登录鉴权并执行数据权限校验。</li>
+    <li>兼容性：适配主流安卓/iOS手机分辨率。</li>
+  </ol>
+
+  <h2>7. 验收标准</h2>
+  <ol>
+    <li>首页可展示“总存栏量、在栏数、设备异常、项圈异常”。</li>
+    <li>支持点击穿透到详情页并携带筛选条件。</li>
+    <li>发情提醒、配种提醒、非法离栏可集中展示并跳转处理。</li>
+    <li>支持刷新、空态、错误态展示。</li>
+    <li>不同权限用户看到的数据范围正确。</li>
+  </ol>
+</body>
+</html>
