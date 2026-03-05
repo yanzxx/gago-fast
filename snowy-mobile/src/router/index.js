@@ -176,6 +176,14 @@ const routes = [
                 name: "trackList",
                 meta: { title: "作业轨迹", icon: "" },
             },
+            {
+                path: '/homeTodoList',
+                name: 'homeTodoList',
+                meta: {
+                    title: '待办详情'
+                },
+                component: () => import('@/views/home/todo-list.vue'),
+            },
         ]
     },
     {

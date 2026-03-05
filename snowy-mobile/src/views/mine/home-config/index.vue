@@ -29,7 +29,8 @@
 
 	// 快捷用户菜单
 	const homeConfigs = computed(() => {
-		return store.getters.homeConfigs
+		const rawConfigs = store.getters.homeConfigs || []
+		return rawConfigs.filter(item => item && item.code === 'chart')
 	})
 
 	const switchChange = () => {

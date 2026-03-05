@@ -372,4 +372,49 @@
         where o.id = #{farmId}
         limit 1
     </select>
+
+    <select id="pendingAnomalyCountByKeywords" resultType="java.lang.Long">
+        select cast(count(1) as bigint)
+        from yzx.biz_after_loan_anomaly a
+        <include refid="AnomalyScopeWhere"/>
+          and coalesce(a.status, '') not in ('已处置', '已完成', 'FINISHED', 'CLOSED')
+        <if test="keywords != null and keywords.size() &gt; 0">
+            and (
+            <foreach collection="keywords" item="keyword" separator=" or ">
+                a.anomaly_type like concat('%', #{keyword}, '%')
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <select id="pendingTodoRows" resultType="vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMobileTodoRowResult">
+        select
+            a.id as id,
+            a.farm_id as farmId,
+            case
+                when a.anomaly_type like '%发情%' then 'ESTRUS'
+                when a.anomaly_type like '%配种%' then 'BREED'
+                when a.anomaly_type like '%离栏%' then 'ILLEGAL_OUT'
+                else null
+                end as todoType,
+            case
+                when a.anomaly_type like '%发情%' then '发情提醒'
+                when a.anomaly_type like '%配种%' then '配种提醒'
+                when a.anomaly_type like '%离栏%' then '非法离栏'
+                else null
+                end as todoName,
+            a.anomaly_type as anomalyType,
+            to_char(a.trigger_time, 'YYYY-MM-DD HH24:MI:SS') as triggerTime,
+            a.status as status,
+            coalesce(a.description, a.target_no, '') as content
+        from yzx.biz_after_loan_anomaly a
+        <include refid="AnomalyScopeWhere"/>
+          and coalesce(a.status, '') not in ('已处置', '已完成', 'FINISHED', 'CLOSED')
+          and (
+            a.anomaly_type like '%发情%'
+            or a.anomaly_type like '%配种%'
+            or a.anomaly_type like '%离栏%'
+          )
+        order by a.trigger_time desc
+    </select>
 </mapper>

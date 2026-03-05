@@ -12,7 +12,9 @@
 	
 	// 快捷用户菜单
 	const homeConfigs = computed(() => {
-		return store.getters.homeConfigs
+		const rawConfigs = store.getters.homeConfigs || []
+		// 仅保留当前首页允许的模块，防止历史缓存把已下线模块渲染出来
+		return rawConfigs.filter(item => item && item.code === 'chart')
 	})
 </script>
 

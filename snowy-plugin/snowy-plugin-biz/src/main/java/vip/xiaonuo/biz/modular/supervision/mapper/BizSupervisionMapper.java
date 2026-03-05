@@ -6,6 +6,7 @@ import vip.xiaonuo.biz.modular.supervision.param.BizSupervisionHomeParam;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAlertResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionAnomalyResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionFarmStatsResult;
+import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMobileTodoRowResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionMapPointResult;
 import vip.xiaonuo.biz.modular.supervision.result.BizSupervisionOverviewResult;
 
@@ -38,4 +39,15 @@ public interface BizSupervisionMapper {
 
     @InterceptorIgnore(tenantLine = "1")
     BizSupervisionFarmStatsResult farmStats(@Param("farmId") String farmId);
+
+    @InterceptorIgnore(tenantLine = "1")
+    Long pendingAnomalyCountByKeywords(@Param("param") BizSupervisionHomeParam param,
+                                       @Param("allFarm") boolean allFarm,
+                                       @Param("farmIds") List<String> farmIds,
+                                       @Param("keywords") List<String> keywords);
+
+    @InterceptorIgnore(tenantLine = "1")
+    List<BizSupervisionMobileTodoRowResult> pendingTodoRows(@Param("param") BizSupervisionHomeParam param,
+                                                            @Param("allFarm") boolean allFarm,
+                                                            @Param("farmIds") List<String> farmIds);
 }

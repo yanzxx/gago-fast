@@ -13,12 +13,13 @@ const alias = {
 
 export default defineConfig(({ command, mode }) => {
     const envConfig = loadEnv(mode, './')
+    const apiTarget = envConfig.VITE_API_BASEURL || 'http://127.0.0.1:8082'
     return {
         server: {
-            port: envConfig.VITE_PORT,
+            port: Number(envConfig.VITE_PORT || 5174),
             proxy: {
                 '/api': {
-                    target: envConfig.VITE_API_BASEURL,
+                    target: apiTarget,
                     ws: false,
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/api/, '')

@@ -1,5 +1,8 @@
 const noTokenBackUrl = "login";
 const hasTokenBackUrl = "home";
+const apiBaseUrl =
+    import.meta.env.VITE_API_BASEURL ||
+    `${window.location.protocol}//${window.location.host}`;
 
 const bottomNavigationBar = [{
     name: '首页',
@@ -27,11 +30,9 @@ export default {
     TOKEN_NAME: 'token',
 
     // 接口地址
-    API_URL:
-        import.meta.env.VITE_API_BASEURL ||
-        `${window.location.protocol}//${window.location.host}/api`,
+    API_URL: apiBaseUrl,
 
-    DOMAN: import.meta.env.VITE_DOMAN,
+    DOMAIN: import.meta.env.VITE_DOMAIN || import.meta.env.VITE_DOMAN || '',
 
     storageType: 'localStorage',
 
@@ -64,31 +65,12 @@ export default {
 
     // 首页配置
     HOME_CONFIGS: [
-        // 轮播
+        // 首页看板
         {
-            name: "轮播",
-            code: "swiper",
-            isShow: true,
-        },
-        // 图表
-        {
-            name: "图表",
+            name: "首页看板",
             code: "chart",
             isShow: true,
         },
-        // 日程
-        {
-            name: "日程",
-            code: "schedule",
-            isShow: true,
-        },
-        // 测试
-        {
-            name: "测试",
-            code: "test",
-            isShow: true,
-        },
-
     ],
 
     // 没有token访问退回页面
@@ -120,6 +102,7 @@ export default {
         "/mineEditInfo",
         "/mineHomeConfig",
         "/editPwd",
-        "/myFarm"
+        "/myFarm",
+        "/homeTodoList"
     ]
 }
