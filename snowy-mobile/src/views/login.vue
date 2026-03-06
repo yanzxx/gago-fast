@@ -1,15 +1,8 @@
 <template>
     <div class="login-container">
         <div class="logo-content" @tap="logoTap">
-            <img
-                style="width: 50px; height: 10px"
-                :alt="sysBaseConfig.SNOWY_SYS_NAME"
-                :src="sysBaseConfig.SNOWY_SYS_LOGO"
-                mode="widthFix"
-            />
             <label class="title"
-                >{{ sysBaseConfig.SNOWY_SYS_NAME }}
-                {{ sysBaseConfig.SNOWY_SYS_VERSION }}</label
+                >格牧养殖中心</label
             >
         </div>
         <div class="login-form-content">
