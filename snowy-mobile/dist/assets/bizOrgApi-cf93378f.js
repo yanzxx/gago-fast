@@ -1,1 +1,0 @@
-import{I as e}from"./index-4dd1235b.js";function a(t){return e({url:"/biz/org/tree",method:"get",data:t})}function u(t,r=!0){return e({url:"/biz/org/"+(r?"add":"edit"),method:"post",data:t})}function d(t){return e({url:"/biz/org/delete",method:"post",data:t})}function i(t){return e({url:"/biz/org/detail",method:"get",data:t})}export{d as a,i as b,a as o,u as s};

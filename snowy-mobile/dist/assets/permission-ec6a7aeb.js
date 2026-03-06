@@ -1,0 +1,1 @@
+import{p as t}from"./index-7ddd0b05.js";function u(r,n="or"){if(!r)return!1;const s=t.getters.userInfo;if(!s)return!1;const{mobileButtonCodeList:e}=s;return e?Array.isArray(r)?r[n==="or"?"some":"every"](o=>e.includes(o)):e.includes(r):!1}export{u as h};
