@@ -117,6 +117,7 @@
 						:columns="anomalyColumns"
 						:data-source="anomalyRows"
 						:pagination="false"
+						:scroll="{ y: 280 }"
 						row-key="id"
 						size="small"
 					/>
@@ -198,14 +199,12 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import { useGlobalStore } from '@/store/global'
 import supervisionApi from '@/api/biz/supervisionApi'
 import sysOrgApi from '@/api/sys/orgApi'
 import { toFarmTreeSelectData, findFarmTreeNode } from '@/utils/farmTree'
 import tool from '@/utils/tool'
 
 const router = useRouter()
-const globalStore = useGlobalStore()
 const loading = ref(false)
 const mapChartRef = ref()
 let mapChart = null
@@ -554,16 +553,6 @@ const flattenFarmOptions = (tree = [], collector = []) => {
 
 const farmSelectOptions = computed(() => flattenFarmOptions(farmTree.value, []))
 
-const resolveUserFarmId = () => {
-	const userInfo = globalStore.userInfo || {}
-	return String(userInfo.farmId || userInfo.farm_id || userInfo.orgId || userInfo.org_id || '')
-}
-
-const hasFarmOption = (farmId) => {
-	if (!farmId) return false
-	return farmSelectOptions.value.some((item) => String(item.value) === String(farmId))
-}
-
 const collectLeafFarmIds = (nodes = [], collector = new Set()) => {
 	nodes.forEach((node) => {
 		if (!node) return
@@ -580,6 +569,22 @@ const collectLeafFarmIds = (nodes = [], collector = new Set()) => {
 }
 
 const leafFarmIdSet = computed(() => collectLeafFarmIds(farmTree.value, new Set()))
+
+const getFirstLeafFarmId = (nodes = []) => {
+	for (const node of nodes || []) {
+		if (!node) continue
+		if (node?.children?.length) {
+			const childLeafId = getFirstLeafFarmId(node.children)
+			if (childLeafId) return childLeafId
+			continue
+		}
+		const id = node?.value || node?.key
+		if (id !== undefined && id !== null && id !== '') {
+			return String(id)
+		}
+	}
+	return undefined
+}
 
 const chinaMapLoaded = ref(false)
 const chinaMapSources = ['/maps/china.json', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json']
@@ -735,16 +740,8 @@ const loadFarmTree = async () => {
 	try {
 		const tree = await sysOrgApi.orgTree()
 		farmTree.value = toFarmTreeSelectData(tree || [])
-		const preferredFarmId = selectedFarmId.value || resolveUserFarmId()
-		if (hasFarmOption(preferredFarmId)) {
-			selectedFarmId.value = String(preferredFarmId)
-			return
-		}
-		if (farmSelectOptions.value.length) {
-			selectedFarmId.value = String(farmSelectOptions.value[0].value)
-			return
-		}
-		selectedFarmId.value = undefined
+		// 大屏首页固定默认选中第一个叶子养殖场（跳过上级组织）
+		selectedFarmId.value = getFirstLeafFarmId(farmTree.value)
 	} catch (e) {
 		farmTree.value = []
 		selectedFarmId.value = undefined
@@ -1226,6 +1223,48 @@ onUnmounted(() => {
 	color: rgba(200, 255, 234, 0.82);
 }
 
+/* 左侧三张卡片做紧凑化，避免内容撑高超出 */
+.side-left .panel-title {
+	font-size: 14px;
+	margin-bottom: 3px;
+}
+
+.side-left .metric-item {
+	margin-bottom: 3px;
+}
+
+.side-left .metric-text {
+	font-size: 10px;
+	margin-bottom: 1px;
+}
+
+.side-left :deep(.ant-progress-line) {
+	margin: 0;
+}
+
+.side-left :deep(.ant-progress-inner) {
+	height: 5px;
+}
+
+.side-left .mini-chart {
+	padding: 5px;
+	margin-bottom: 3px;
+}
+
+.side-left .mini-title {
+	font-size: 10px;
+}
+
+.side-left .mini-value {
+	font-size: 16px;
+	margin-top: 0;
+}
+
+.side-left .mini-desc {
+	font-size: 9px;
+	margin-top: 0;
+}
+
 .board-center {
 	height: 100%;
 }
@@ -1323,6 +1362,8 @@ onUnmounted(() => {
 
 .anomaly-table {
 	flex: 1;
+	min-height: 0;
+	overflow: auto;
 }
 
 :deep(.anomaly-table .ant-table),
