@@ -1,1 +1,0 @@
-import{b as e}from"./index-d916c03a.js";const s=(s,...t)=>e(`/dbs/${s}`,...t),t={dbsPage:e=>s("storage/page",e,"get"),submitForm:(e,t=!1)=>s(t?"storage/add":"storage/edit",e),dbsDelete:e=>s("storage/delete",e),dbsDetail:e=>s("storage/detail",e,"get"),dbsTables:e=>s("tables",e,"get"),dbsTableColumns:e=>s("tableColumns",e,"get")};export{t as d};

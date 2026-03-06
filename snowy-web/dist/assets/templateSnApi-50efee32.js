@@ -1,1 +1,0 @@
-import{b as e}from"./index-d916c03a.js";const t=(t,...l)=>e(`/flw/templateSn/${t}`,...l),l={templateSnPage:e=>t("page",e,"get"),templateSnSubmitForm:(e,l=!1)=>t(l?"add":"edit",e),templateSnDelete:e=>t("delete",e),templateSnDetail:e=>t("detail",e,"get"),templateFlwTemplateSnSelector:e=>t("flwTemplateSnSelector",e,"get")};export{l as t};

@@ -1,0 +1,1 @@
+import{_ as s}from"./index-7b2df5a4.js";import{V as a,X as e,Z as r,_ as o,W as n,f as t}from"./vue-ccb65427.js";import"./ant-design-vue-a9a4e517.js";const d=s({},[["render",function(s,d){const i=a("SnowyFormDesign"),u=a("a-card");return e(),r(u,{bordered:!1},{default:o(()=>[n("div",null,[t(i,{"show-head":!1})])]),_:1})}]]);export{d as default};
