@@ -18,6 +18,15 @@ export function orgTree(data) {
 	})
 }
 
+// 获取机构列表（移动端可用于养殖场选择）
+export function orgList(data) {
+	return request({
+		url: '/biz/org/list',
+		method: 'get',
+		data: data
+	})
+}
+
 // 提交表单 add为false时为编辑，默认为新增
 export function submitForm(data, add = true) {
 	return request({

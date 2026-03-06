@@ -23,43 +23,43 @@
 		</div>
 
 		<div class="content-section">
-      <van-row>
+      <!-- <van-row>
         <van-col span="6">
           <div class="grid-item-box" @click="handleToHomeConfig">
-            <snowy-icon backgroundColor = "#2979ff" type="icon-greenhouse" size="20" color="#FFFFFF">
+            <snowy-icon backgroundColor = "#1f8a70" type="icon-greenhouse" size="20" color="#FFFFFF">
             </snowy-icon>
             <label class="text">首页设置</label>
           </div>
         </van-col>
         <van-col span="6">
           <div class="grid-item-box" @click="handleBuilding">
-            <snowy-icon backgroundColor = "#fa3534" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
+            <snowy-icon backgroundColor = "#2f9b7f" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
             </snowy-icon>
             <label class="text">建设中</label>
           </div>
         </van-col>
         <van-col span="6">
           <div class="grid-item-box" @click="handleBuilding">
-            <snowy-icon backgroundColor = "#ff9900" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
+            <snowy-icon backgroundColor = "#36b28f" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
             </snowy-icon>
             <label class="text">建设中</label>
           </div>
         </van-col>
         <van-col span="6">
           <div class="grid-item-box" @click="handleBuilding">
-            <snowy-icon backgroundColor = "#19be6b" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
+            <snowy-icon backgroundColor = "#57c3a5" type="icon-agricultural-facilities" size="20" color="#FFFFFF">
             </snowy-icon>
             <label class="text">建设中</label>
           </div>
         </van-col>
-      </van-row>
+      </van-row> -->
 		</div>
 
 		<div class="content-list">
       <van-cell value="" is-link  @click="handleToEditInfo">
         <!-- 使用 title 插槽来自定义标题 -->
         <template #title>
-          <van-icon name="contact" color="rgb(41, 121, 255)" size="19" />
+          <van-icon name="contact" color="#1f8a70" size="19" />
           <span class="custom-title">编辑资料</span>
         </template>
       </van-cell>
@@ -67,26 +67,32 @@
       <van-cell value="" is-link @click="handleToPwd">
         <!-- 使用 title 插槽来自定义标题 -->
         <template #title>
-          <van-icon name="eye-o" color="rgb(41, 121, 255)" size="19" />
+          <van-icon name="eye-o" color="#1f8a70" size="19" />
           <span class="custom-title">修改密码</span>
         </template>
       </van-cell>
 
       <van-cell value="" is-link @click="handleToMessageManage">
         <template #title>
-          <van-icon name="chat-o" color="rgb(41, 121, 255)" size="19" />
+          <van-icon name="chat-o" color="#1f8a70" size="19" />
           <span class="custom-title">消息通知</span>
         </template>
       </van-cell>
 
       <van-cell value="" is-link @click="handleToMessageCenter">
         <template #title>
-          <van-icon name="envelop-o" color="rgb(41, 121, 255)" size="19" />
+          <van-icon name="envelop-o" color="#1f8a70" size="19" />
           <span class="custom-title">消息管理</span>
         </template>
       </van-cell>
+
 		</div>
-    <van-button type="primary" @click="handleLogout" v-if="name" style="width: 100%;margin-top: 10px;font-size: 18px;">退出登录</van-button>
+    <van-button
+      type="primary"
+      @click="handleLogout"
+      v-if="name"
+      style="width: 100%;margin-top: 10px;font-size: 18px;background:#1f8a70;border-color:#1f8a70;"
+    >退出登录</van-button>
 	</div>
 </template>
 
@@ -183,7 +189,7 @@
 		.header-section {
 			border-radius: 5px;
 			padding: 30px 15px;
-			background-color: #2979ff;
+			background: linear-gradient(135deg, #1f8a70, #2f9b7f);
 			color: white;
 			display: flex;
 

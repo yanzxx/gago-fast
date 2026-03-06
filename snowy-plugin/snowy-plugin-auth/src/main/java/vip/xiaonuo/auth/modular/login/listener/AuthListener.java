@@ -5,6 +5,7 @@ import cn.dev33.satoken.listener.SaTokenListener;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vip.xiaonuo.auth.api.SaBaseLoginUserApi;
 import vip.xiaonuo.auth.core.enums.SaClientTypeEnum;
@@ -20,6 +21,7 @@ import javax.annotation.Resource;
  * @date 2021/12/28 11:35
  **/
 @Component
+@Slf4j
 public class AuthListener implements SaTokenListener {
 
     @Resource(name = "loginUserApi")
@@ -34,32 +36,42 @@ public class AuthListener implements SaTokenListener {
     /** 每次登录时触发 */
     @Override
     public void doLogin(String loginType, Object loginId, String tokenValue, SaLoginModel loginModel)  {
-        // 更新用户的登录时间和登录ip等信息
-        if(SaClientTypeEnum.B.getValue().equals(loginType)) {
-            loginUserApi.updateUserLoginInfo(Convert.toStr(loginId), loginModel.getDevice());
-            // 记录B端登录日志
-            Object name = loginModel.getExtra("name");
-            if(ObjectUtil.isNotEmpty(name)) {
-                devLogApi.executeLoginLog(Convert.toStr(name));
+        try {
+            // 更新用户的登录时间和登录ip等信息
+            if(SaClientTypeEnum.B.getValue().equals(loginType)) {
+                loginUserApi.updateUserLoginInfo(Convert.toStr(loginId), loginModel.getDevice());
+                // 记录B端登录日志
+                Object name = loginModel.getExtra("name");
+                if(ObjectUtil.isNotEmpty(name)) {
+                    devLogApi.executeLoginLog(Convert.toStr(name));
+                } else {
+                    devLogApi.executeLoginLog(null);
+                }
             } else {
-                devLogApi.executeLoginLog(null);
+                clientLoginUserApi.updateUserLoginInfo(Convert.toStr(loginId), loginModel.getDevice());
             }
-        } else {
-            clientLoginUserApi.updateUserLoginInfo(Convert.toStr(loginId), loginModel.getDevice());
+        } catch (Exception e) {
+            // 登录监听仅做附加动作，不阻断主登录流程
+            log.error("登录监听执行异常，loginType={}, loginId={}", loginType, loginId, e);
         }
     }
 
     /** 每次注销时触发 */
     @Override
     public void doLogout(String loginType, Object loginId, String tokenValue) {
-        if(SaClientTypeEnum.B.getValue().equals(loginType)) {
-            // 记录B端登出日志
-            SaBaseLoginUser saBaseLoginUser = loginUserApi.getUserById(Convert.toStr(loginId));
-            if(ObjectUtil.isNotEmpty(saBaseLoginUser)) {
-                devLogApi.executeLogoutLog(saBaseLoginUser.getName());
-            } else {
-                devLogApi.executeLogoutLog(null);
+        try {
+            if(SaClientTypeEnum.B.getValue().equals(loginType)) {
+                // 记录B端登出日志
+                SaBaseLoginUser saBaseLoginUser = loginUserApi.getUserById(Convert.toStr(loginId));
+                if(ObjectUtil.isNotEmpty(saBaseLoginUser)) {
+                    devLogApi.executeLogoutLog(saBaseLoginUser.getName());
+                } else {
+                    devLogApi.executeLogoutLog(null);
+                }
             }
+        } catch (Exception e) {
+            // 登出监听仅做附加动作，不阻断主登出流程
+            log.error("登出监听执行异常，loginType={}, loginId={}", loginType, loginId, e);
         }
     }
 

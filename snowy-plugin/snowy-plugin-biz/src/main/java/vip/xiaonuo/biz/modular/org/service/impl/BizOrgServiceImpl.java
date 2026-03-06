@@ -36,8 +36,11 @@ import vip.xiaonuo.common.page.CommonPageRequest;
 import vip.xiaonuo.sys.api.SysRoleApi;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -102,7 +105,7 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
             return CollectionUtil.newArrayList();
         }
         List<TreeNode<String>> treeNodeList = bizOrgSet.stream().map(bizOrg ->
-                new TreeNode<>(bizOrg.getId(), bizOrg.getParentId(),
+                new TreeNode<>(bizOrg.getId(), this.safeParentId(bizOrg, bizOrgSet),
                         bizOrg.getName(), bizOrg.getSortCode()).setExtra(JSONUtil.parseObj(bizOrg)))
                 .collect(Collectors.toList());
         return TreeUtil.build(treeNodeList, "0");
@@ -308,7 +311,7 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
         lambdaQueryWrapper.orderByAsc(BizOrg::getSortCode);
         List<BizOrg> bizOrgList = this.list(lambdaQueryWrapper);
         List<TreeNode<String>> treeNodeList = bizOrgList.stream().map(bizOrg ->
-                new TreeNode<>(bizOrg.getId(), bizOrg.getParentId(), bizOrg.getName(), bizOrg.getSortCode()))
+                new TreeNode<>(bizOrg.getId(), this.safeParentId(bizOrg, bizOrgList), bizOrg.getName(), bizOrg.getSortCode()))
                 .collect(Collectors.toList());
         return TreeUtil.build(treeNodeList, "0");
     }
@@ -360,6 +363,44 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
 
     /* ====以下为各种递归方法==== */
 
+    private String safeParentId(BizOrg current, Set<BizOrg> scopedOrgSet) {
+        if(ObjectUtil.isEmpty(current) || ObjectUtil.isEmpty(current.getId())) {
+            return "0";
+        }
+        Map<String, String> parentMap = new HashMap<>();
+        scopedOrgSet.forEach(item -> parentMap.put(item.getId(), item.getParentId()));
+        return normalizeParentId(current.getId(), current.getParentId(), parentMap);
+    }
+
+    private String safeParentId(BizOrg current, List<BizOrg> scopedOrgList) {
+        if(ObjectUtil.isEmpty(current) || ObjectUtil.isEmpty(current.getId())) {
+            return "0";
+        }
+        Map<String, String> parentMap = new HashMap<>();
+        scopedOrgList.forEach(item -> parentMap.put(item.getId(), item.getParentId()));
+        return normalizeParentId(current.getId(), current.getParentId(), parentMap);
+    }
+
+    private String normalizeParentId(String id, String parentId, Map<String, String> parentMap) {
+        if(ObjectUtil.isEmpty(parentId) || "0".equals(parentId) || id.equals(parentId)) {
+            return "0";
+        }
+        if(!parentMap.containsKey(parentId)) {
+            return "0";
+        }
+        Set<String> chain = new HashSet<>();
+        chain.add(id);
+        String cursor = parentId;
+        while(ObjectUtil.isNotEmpty(cursor) && !"0".equals(cursor)) {
+            if(chain.contains(cursor)) {
+                return "0";
+            }
+            chain.add(cursor);
+            cursor = parentMap.get(cursor);
+        }
+        return parentId;
+    }
+
     public List<BizOrg> getParentAndChildListById(List<BizOrg> originDataList, String id, boolean includeSelf) {
         List<BizOrg> parentListById = this.getParentListById(originDataList, id, false);
         List<BizOrg> childListById = this.getChildListById(originDataList, id, true);
@@ -369,7 +410,7 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
     
     public List<BizOrg> getChildListById(List<BizOrg> originDataList, String id, boolean includeSelf) {
         List<BizOrg> resultList = CollectionUtil.newArrayList();
-        execRecursionFindChild(originDataList, id, resultList);
+        execRecursionFindChild(originDataList, id, resultList, new HashSet<>());
         if(includeSelf) {
             BizOrg self = this.getById(originDataList, id);
             if(ObjectUtil.isNotEmpty(self)) {
@@ -381,7 +422,7 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
 
     public List<BizOrg> getParentListById(List<BizOrg> originDataList, String id, boolean includeSelf) {
         List<BizOrg> resultList = CollectionUtil.newArrayList();
-        execRecursionFindParent(originDataList, id, resultList);
+        execRecursionFindParent(originDataList, id, resultList, new HashSet<>());
         if(includeSelf) {
             BizOrg self = this.getById(originDataList, id);
             if(ObjectUtil.isNotEmpty(self)) {
@@ -391,25 +432,33 @@ public class BizOrgServiceImpl extends ServiceImpl<BizOrgMapper, BizOrg> impleme
         return resultList;
     }
 
-    public void execRecursionFindChild(List<BizOrg> originDataList, String id, List<BizOrg> resultList) {
+    public void execRecursionFindChild(List<BizOrg> originDataList, String id, List<BizOrg> resultList, Set<String> visited) {
+        if(ObjectUtil.isEmpty(id) || visited.contains(id)) {
+            return;
+        }
+        visited.add(id);
         originDataList.forEach(item -> {
             if(item.getParentId().equals(id)) {
                 resultList.add(item);
-                execRecursionFindChild(originDataList, item.getId(), resultList);
+                execRecursionFindChild(originDataList, item.getId(), resultList, visited);
             }
         });
     }
 
-    public void execRecursionFindParent(List<BizOrg> originDataList, String id, List<BizOrg> resultList) {
-        originDataList.forEach(item -> {
-            if(item.getId().equals(id)) {
-                BizOrg parent = this.getById(originDataList, item.getParentId());
-                if(ObjectUtil.isNotEmpty(parent)) {
-                    resultList.add(parent);
-                }
-                execRecursionFindParent(originDataList, item.getParentId(), resultList);
-            }
-        });
+    public void execRecursionFindParent(List<BizOrg> originDataList, String id, List<BizOrg> resultList, Set<String> visited) {
+        if(ObjectUtil.isEmpty(id) || visited.contains(id)) {
+            return;
+        }
+        visited.add(id);
+        BizOrg self = this.getById(originDataList, id);
+        if(ObjectUtil.isEmpty(self)) {
+            return;
+        }
+        BizOrg parent = this.getById(originDataList, self.getParentId());
+        if(ObjectUtil.isNotEmpty(parent)) {
+            resultList.add(parent);
+            execRecursionFindParent(originDataList, parent.getId(), resultList, visited);
+        }
     }
 
     public BizOrg getById(List<BizOrg> originDataList, String id) {

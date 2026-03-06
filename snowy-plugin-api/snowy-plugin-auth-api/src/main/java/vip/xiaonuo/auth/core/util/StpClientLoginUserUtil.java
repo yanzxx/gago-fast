@@ -2,6 +2,9 @@
 package vip.xiaonuo.auth.core.util;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import vip.xiaonuo.auth.api.SaBaseLoginUserApi;
 import vip.xiaonuo.auth.core.pojo.SaBaseClientLoginUser;
 
 import java.util.List;
@@ -21,7 +24,21 @@ public class StpClientLoginUserUtil {
      * @date 2022/7/8 10:41
      **/
     public static SaBaseClientLoginUser getClientLoginUser() {
-        return (SaBaseClientLoginUser) StpClientUtil.getTokenSession().get("loginUser");
+        SaBaseClientLoginUser loginUser = (SaBaseClientLoginUser) StpClientUtil.getTokenSession().get("loginUser");
+        if (ObjectUtil.isNotEmpty(loginUser)) {
+            return loginUser;
+        }
+        // 兜底：token session未命中时按loginId回源
+        SaBaseLoginUserApi clientLoginUserApi = SpringUtil.getBean("clientLoginUserApi", SaBaseLoginUserApi.class);
+        loginUser = clientLoginUserApi.getClientUserById(StpClientUtil.getLoginIdAsString());
+        if (ObjectUtil.isNotEmpty(loginUser)) {
+            try {
+                StpClientUtil.getTokenSession().set("loginUser", loginUser);
+            } catch (Exception ignored) {
+                // 忽略缓存异常，至少保证当前请求可用
+            }
+        }
+        return loginUser;
     }
 
     /**

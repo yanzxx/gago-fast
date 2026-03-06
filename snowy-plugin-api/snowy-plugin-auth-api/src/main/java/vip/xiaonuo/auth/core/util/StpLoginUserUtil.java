@@ -3,6 +3,9 @@ package vip.xiaonuo.auth.core.util;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import vip.xiaonuo.auth.api.SaBaseLoginUserApi;
 import vip.xiaonuo.auth.core.pojo.SaBaseLoginUser;
 import vip.xiaonuo.common.util.CommonServletUtil;
 
@@ -24,7 +27,21 @@ public class StpLoginUserUtil {
      * @date 2022/7/8 10:41
      **/
     public static SaBaseLoginUser getLoginUser() {
-        return (SaBaseLoginUser) StpUtil.getTokenSession().get("loginUser");
+        SaBaseLoginUser loginUser = (SaBaseLoginUser) StpUtil.getTokenSession().get("loginUser");
+        if (ObjectUtil.isNotEmpty(loginUser)) {
+            return loginUser;
+        }
+        // 兜底：token session未命中时按loginId回源，避免因会话缓存异常导致全链路NPE
+        SaBaseLoginUserApi loginUserApi = SpringUtil.getBean("loginUserApi", SaBaseLoginUserApi.class);
+        loginUser = loginUserApi.getUserById(StpUtil.getLoginIdAsString());
+        if (ObjectUtil.isNotEmpty(loginUser)) {
+            try {
+                StpUtil.getTokenSession().set("loginUser", loginUser);
+            } catch (Exception ignored) {
+                // 忽略缓存异常，至少保证当前请求可用
+            }
+        }
+        return loginUser;
     }
 
     public static List<String> getRoleIds() {

@@ -8,8 +8,8 @@ const bottomNavigationBar = [{
     name: '首页',
     path: '/home',
 }, {
-    name: '工作台',
-    path: '/work',
+    name: '生产管理',
+    path: '/production',
 }, {
     name: '消息',
     path: '/message',
@@ -88,11 +88,17 @@ export default {
     // 顶部导航栏数据
     BOTTOMNAVIGATIONBAR: bottomNavigationBar,
     // 显示顶部导航栏数据的路由
-    SHOWNAVIGATIONBARROUTERLIST: ["/home", "/work", "/message", "/mine"],
+    SHOWNAVIGATIONBARROUTERLIST: ["/home", "/production", "/message", "/mine"],
     // 显示头部导航栏的路由
     SHOWTOPBARROUTERLIST: [
         "/message",
         "/messageManage",
+        "/production",
+        "/production/register",
+        "/production/batch",
+        "/production/records",
+        "/production/detail",
+        "/production/exports",
         "/org",
         "/orgForm",
         "/position",

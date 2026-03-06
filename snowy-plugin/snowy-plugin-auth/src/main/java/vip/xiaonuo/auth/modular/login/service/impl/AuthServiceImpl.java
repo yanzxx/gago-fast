@@ -12,6 +12,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vip.xiaonuo.auth.api.SaBaseLoginUserApi;
 import vip.xiaonuo.auth.core.enums.AuthTerminalTypeEnum;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
  * @date 2021/12/23 21:52
  */
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private static final String SNOWY_SYS_DEFAULT_CAPTCHA_OPEN_KEY = "SNOWY_SYS_DEFAULT_CAPTCHA_OPEN";
@@ -138,20 +140,29 @@ public class AuthServiceImpl implements AuthService {
     private void validValidCode(String phoneOrEmail, String validCode, String validCodeReqNo) {
         // 依据请求号，取出缓存中的验证码进行校验
         Object existValidCode;
-        if(ObjectUtil.isEmpty(phoneOrEmail)) {
-            existValidCode = commonCacheOperator.get(AUTH_VALID_CODE_CACHE_KEY + validCodeReqNo);
-        } else {
-            existValidCode = commonCacheOperator.get(AUTH_VALID_CODE_CACHE_KEY + phoneOrEmail + StrUtil.UNDERLINE + validCodeReqNo);
+        try {
+            if(ObjectUtil.isEmpty(phoneOrEmail)) {
+                existValidCode = commonCacheOperator.get(AUTH_VALID_CODE_CACHE_KEY + validCodeReqNo);
+            } else {
+                existValidCode = commonCacheOperator.get(AUTH_VALID_CODE_CACHE_KEY + phoneOrEmail + StrUtil.UNDERLINE + validCodeReqNo);
+            }
+        } catch (Exception e) {
+            log.error("验证码缓存读取失败，reqNo={}, phoneOrEmail={}", validCodeReqNo, phoneOrEmail, e);
+            throw new CommonException(AuthExceptionEnum.VALID_CODE_ERROR.getValue());
         }
         // 为空则直接验证码错误
         if(ObjectUtil.isEmpty(existValidCode)) {
             throw new CommonException(AuthExceptionEnum.VALID_CODE_ERROR.getValue());
         }
         // 移除该验证码
-        if(ObjectUtil.isEmpty(phoneOrEmail)) {
-            commonCacheOperator.remove(AUTH_VALID_CODE_CACHE_KEY + validCodeReqNo);
-        } else {
-            commonCacheOperator.remove(AUTH_VALID_CODE_CACHE_KEY + phoneOrEmail + StrUtil.UNDERLINE + validCodeReqNo);
+        try {
+            if(ObjectUtil.isEmpty(phoneOrEmail)) {
+                commonCacheOperator.remove(AUTH_VALID_CODE_CACHE_KEY + validCodeReqNo);
+            } else {
+                commonCacheOperator.remove(AUTH_VALID_CODE_CACHE_KEY + phoneOrEmail + StrUtil.UNDERLINE + validCodeReqNo);
+            }
+        } catch (Exception e) {
+            log.warn("验证码缓存清理失败，reqNo={}, phoneOrEmail={}", validCodeReqNo, phoneOrEmail, e);
         }
         // 不一致则直接验证码错误
         if (!validCode.equals(Convert.toStr(existValidCode).toLowerCase())) {
@@ -271,6 +282,9 @@ public class AuthServiceImpl implements AuthService {
                 handleLoginFailed(account);
             }
             throw e;
+        } catch (Exception e) {
+            log.error("账号密码登录异常，account={}, type={}", account, type, e);
+            throw new CommonException("登录服务异常，请联系管理员");
         }
     }
 
@@ -364,7 +378,12 @@ public class AuthServiceImpl implements AuthService {
         // 获取表单显示字段
         saBaseLoginUser.setDisplayColumnMap(bizTabularDisplayApi.getDisplayColumnMap(saBaseLoginUser.getId()));
         // 缓存用户信息，此处使用TokenSession为了指定时间内无操作则自动下线
-        StpUtil.getTokenSession().set("loginUser", saBaseLoginUser);
+        // 如果缓存异常，不阻断登录主流程，后续由登录用户工具类按loginId兜底回源
+        try {
+            StpUtil.getTokenSession().set("loginUser", saBaseLoginUser);
+        } catch (Exception e) {
+            log.error("缓存B端登录用户信息失败，userId={}", saBaseLoginUser.getId(), e);
+        }
         // 返回token
         return StpUtil.getTokenInfo().tokenValue;
     }
@@ -418,7 +437,12 @@ public class AuthServiceImpl implements AuthService {
         // 获取角色码
         saBaseClientLoginUser.setRoleCodeList(roleCodeList);
         // 缓存用户信息，此处使用TokenSession为了指定时间内无操作则自动下线
-        StpClientUtil.getTokenSession().set("loginUser", saBaseClientLoginUser);
+        // 如果缓存异常，不阻断登录主流程，后续由登录用户工具类按loginId兜底回源
+        try {
+            StpClientUtil.getTokenSession().set("loginUser", saBaseClientLoginUser);
+        } catch (Exception e) {
+            log.error("缓存C端登录用户信息失败，userId={}", saBaseClientLoginUser.getId(), e);
+        }
         // 返回token
         return StpClientUtil.getTokenInfo().tokenValue;
     }
@@ -477,18 +501,24 @@ public class AuthServiceImpl implements AuthService {
      * 检查账号是否被锁定
      */
     private void checkAccountLocked(String account) {
-        String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
-        if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
-            return;
-        }
-        
-        Object lockObj = commonCacheOperator.get(LOGIN_LOCK_KEY_PREFIX + account);
-        if(ObjectUtil.isNotEmpty(lockObj)) {
-            String lockDuration = devConfigApi.getValueByKey(LOGIN_LOCK_DURATION_KEY);
-            if(ObjectUtil.isEmpty(lockDuration)) {
+        try {
+            String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
+            if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
                 return;
             }
-            throw new CommonException(StrUtil.format(AuthExceptionEnum.ACCOUNT_LOCKED.getValue(), lockDuration));
+
+            Object lockObj = commonCacheOperator.get(LOGIN_LOCK_KEY_PREFIX + account);
+            if(ObjectUtil.isNotEmpty(lockObj)) {
+                String lockDuration = devConfigApi.getValueByKey(LOGIN_LOCK_DURATION_KEY);
+                if(ObjectUtil.isEmpty(lockDuration)) {
+                    return;
+                }
+                throw new CommonException(StrUtil.format(AuthExceptionEnum.ACCOUNT_LOCKED.getValue(), lockDuration));
+            }
+        } catch (CommonException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("检查账号锁定状态失败，account={}", account, e);
         }
     }
 
@@ -496,39 +526,45 @@ public class AuthServiceImpl implements AuthService {
      * 处理登录失败
      */
     private void handleLoginFailed(String account) {
-        String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
-        if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
-            return;
-        }
-
-        String maxAttemptsStr = devConfigApi.getValueByKey(LOGIN_LOCK_MAX_ATTEMPTS_KEY);
-        if(ObjectUtil.isEmpty(maxAttemptsStr)) {
-            return;
-        }
-        int maxAttempts = Convert.toInt(maxAttemptsStr);
-        
-        String countTimeStr = devConfigApi.getValueByKey(LOGIN_LOCK_COUNT_TIME_KEY);
-        if(ObjectUtil.isEmpty(countTimeStr)) {
-            return;
-        }
-        
-        String countKey = LOGIN_FAIL_COUNT_KEY_PREFIX + account;
-        Object countObj = commonCacheOperator.get(countKey);
-        int failCount = ObjectUtil.isEmpty(countObj) ? 1 : Convert.toInt(countObj) + 1;
-        
-        if(failCount >= maxAttempts) {
-            // 达到最大次数，设置锁定
-            String lockDuration = devConfigApi.getValueByKey(LOGIN_LOCK_DURATION_KEY);
-            if(ObjectUtil.isEmpty(lockDuration)) {
+        try {
+            String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
+            if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
                 return;
             }
-            commonCacheOperator.put(LOGIN_LOCK_KEY_PREFIX + account, "1", Convert.toInt(lockDuration) * 60);
-            commonCacheOperator.remove(countKey);
-            throw new CommonException(StrUtil.format(AuthExceptionEnum.ACCOUNT_LOCKED.getValue(), lockDuration));
-        } else {
-            // 未达到最大次数，更新计数
-            commonCacheOperator.put(countKey, String.valueOf(failCount), Convert.toInt(countTimeStr) * 60);
-            throw new CommonException(StrUtil.format(AuthExceptionEnum.LOGIN_ATTEMPTS_EXCEED.getValue(), failCount, maxAttempts));
+
+            String maxAttemptsStr = devConfigApi.getValueByKey(LOGIN_LOCK_MAX_ATTEMPTS_KEY);
+            if(ObjectUtil.isEmpty(maxAttemptsStr)) {
+                return;
+            }
+            int maxAttempts = Convert.toInt(maxAttemptsStr);
+
+            String countTimeStr = devConfigApi.getValueByKey(LOGIN_LOCK_COUNT_TIME_KEY);
+            if(ObjectUtil.isEmpty(countTimeStr)) {
+                return;
+            }
+
+            String countKey = LOGIN_FAIL_COUNT_KEY_PREFIX + account;
+            Object countObj = commonCacheOperator.get(countKey);
+            int failCount = ObjectUtil.isEmpty(countObj) ? 1 : Convert.toInt(countObj) + 1;
+
+            if(failCount >= maxAttempts) {
+                // 达到最大次数，设置锁定
+                String lockDuration = devConfigApi.getValueByKey(LOGIN_LOCK_DURATION_KEY);
+                if(ObjectUtil.isEmpty(lockDuration)) {
+                    return;
+                }
+                commonCacheOperator.put(LOGIN_LOCK_KEY_PREFIX + account, "1", Convert.toInt(lockDuration) * 60);
+                commonCacheOperator.remove(countKey);
+                throw new CommonException(StrUtil.format(AuthExceptionEnum.ACCOUNT_LOCKED.getValue(), lockDuration));
+            } else {
+                // 未达到最大次数，更新计数
+                commonCacheOperator.put(countKey, String.valueOf(failCount), Convert.toInt(countTimeStr) * 60);
+                throw new CommonException(StrUtil.format(AuthExceptionEnum.LOGIN_ATTEMPTS_EXCEED.getValue(), failCount, maxAttempts));
+            }
+        } catch (CommonException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("登录失败次数处理异常，account={}", account, e);
         }
     }
 
@@ -536,10 +572,14 @@ public class AuthServiceImpl implements AuthService {
      * 处理登录成功
      */
     private void handleLoginSuccess(String account) {
-        String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
-        if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
-            return;
+        try {
+            String enabledStr = devConfigApi.getValueByKey(LOGIN_LOCK_ENABLED_KEY);
+            if(ObjectUtil.isEmpty(enabledStr) || !Convert.toBool(enabledStr)) {
+                return;
+            }
+            commonCacheOperator.remove(LOGIN_FAIL_COUNT_KEY_PREFIX + account);
+        } catch (Exception e) {
+            log.warn("登录成功后清理失败计数异常，account={}", account, e);
         }
-        commonCacheOperator.remove(LOGIN_FAIL_COUNT_KEY_PREFIX + account);
     }
 }

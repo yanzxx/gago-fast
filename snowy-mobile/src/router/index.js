@@ -53,6 +53,54 @@ const routes = [
                 component: () => import('@/views/mine/index.vue'),
             },
             {
+                path: '/production',
+                name: 'production',
+                meta: {
+                    title: '生产管理'
+                },
+                component: () => import('@/views/production/index.vue'),
+            },
+            {
+                path: '/production/register',
+                name: 'productionRegister',
+                meta: {
+                    title: '项圈登记'
+                },
+                component: () => import('@/views/production/register.vue'),
+            },
+            {
+                path: '/production/batch',
+                name: 'productionBatch',
+                meta: {
+                    title: '批量登记'
+                },
+                component: () => import('@/views/production/batch.vue'),
+            },
+            {
+                path: '/production/records',
+                name: 'productionRecords',
+                meta: {
+                    title: '登记记录'
+                },
+                component: () => import('@/views/production/records.vue'),
+            },
+            {
+                path: '/production/detail',
+                name: 'productionDetail',
+                meta: {
+                    title: '登记详情'
+                },
+                component: () => import('@/views/production/detail.vue'),
+            },
+            {
+                path: '/production/exports',
+                name: 'productionExports',
+                meta: {
+                    title: '导出任务'
+                },
+                component: () => import('@/views/production/exports.vue'),
+            },
+            {
                 path: '/org',
                 name: 'org',
                 meta: {
