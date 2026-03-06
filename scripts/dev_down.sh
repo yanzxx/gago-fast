@@ -6,7 +6,7 @@ RUN_DIR="${ROOT_DIR}/.dev/run"
 BACKEND_PID_FILE="${RUN_DIR}/backend.pid"
 FRONTEND_PID_FILE="${RUN_DIR}/frontend.pid"
 BACKEND_PORT="${BACKEND_PORT:-8082}"
-FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+FRONTEND_PORT="${FRONTEND_PORT:-5174}"
 
 is_pid_running() {
   local pid="$1"

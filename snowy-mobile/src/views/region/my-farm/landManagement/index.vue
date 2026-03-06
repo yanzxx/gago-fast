@@ -298,7 +298,7 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import * as echarts from 'echarts'
 import myFarm from "@/api/region/myFarm/index.js"
-import Hls from 'hls.js'
+// import Hls from 'hls.js'
 import mapIcon1 from './img/mapIcon/mapIcon1.png'
 import mapIcon2 from './img/mapIcon/mapIcon2.png'
 import mapIcon3 from './img/mapIcon/mapIcon3.png'
@@ -978,7 +978,7 @@ const getCameraInfo = (value) => {
   }).then(res => {
     if(res.code === 200) {
       data.cameraInfo = res.data
-      initializePlayer(data.cameraInfo[0].cameraUrl)
+     // initializePlayer(data.cameraInfo[0].cameraUrl)
     }
   })
 }
@@ -1199,27 +1199,27 @@ const cameraClose = () => {
   videoElement.play()
 }
 /** m3u8视频格式播放 */
-const initializePlayer = (url) => {
-  const videoElement = videoPlayer.value
-  const videoSrc = url
-  if (Hls.isSupported()) {
-    // 如果浏览器支持 HLS，创建 Hls 实例并将其附加到 video 元素上
-    const hls = new Hls()
-    hls.loadSource(videoSrc)
-    hls.attachMedia(videoElement)
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      videoElement.play()
-    })
-  } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-    // 如果浏览器支持原生 HLS 播放
-    videoElement.src = videoSrc
-    videoElement.addEventListener('canplay', () => {
-      videoElement.play()
-    })
-  } else {
-    console.error('HLS is not supported in this browser.')
-  }
-}
+// const initializePlayer = (url) => {
+//   const videoElement = videoPlayer.value
+//   const videoSrc = url
+//   if (Hls.isSupported()) {
+//     // 如果浏览器支持 HLS，创建 Hls 实例并将其附加到 video 元素上
+//     const hls = new Hls()
+//     hls.loadSource(videoSrc)
+//     hls.attachMedia(videoElement)
+//     hls.on(Hls.Events.MANIFEST_PARSED, () => {
+//       videoElement.play()
+//     })
+//   } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+//     // 如果浏览器支持原生 HLS 播放
+//     videoElement.src = videoSrc
+//     videoElement.addEventListener('canplay', () => {
+//       videoElement.play()
+//     })
+//   } else {
+//     console.error('HLS is not supported in this browser.')
+//   }
+// }
 /** 划分多组 */
 const chunkArray = (array, size) => {
   const chunks = []

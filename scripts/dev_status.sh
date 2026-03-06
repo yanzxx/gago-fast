@@ -11,7 +11,7 @@ BACKEND_LOG="${LOG_DIR}/backend.log"
 FRONTEND_LOG="${LOG_DIR}/frontend.log"
 
 BACKEND_PORT="${BACKEND_PORT:-8082}"
-FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+FRONTEND_PORT="${FRONTEND_PORT:-5174}"
 PG_HOST="${PG_HOST:-pgm-8vb5g50kv356g56r0o.pgsql.zhangbei.rds.aliyuncs.com}"
 PG_PORT="${PG_PORT:-1921}"
 PG_DB_NAME="${PG_DB_NAME:-liudayu_ks}"
