@@ -1,1 +1,0 @@
-import{I as o}from"./index-7ddd0b05.js";function a(t){return o({url:"/biz/position/page",method:"get",data:t})}function n(t,i=!0){return o({url:"/biz/position/"+(i?"add":"edit"),method:"post",data:t})}function r(t){return o({url:"/biz/position/delete",method:"post",data:t})}function s(t){return o({url:"/biz/position/detail",method:"get",data:t})}export{a,s as b,r as p,n as s};

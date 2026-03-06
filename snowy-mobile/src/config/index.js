@@ -2,7 +2,7 @@ const noTokenBackUrl = "login";
 const hasTokenBackUrl = "home";
 const apiBaseUrl =
     import.meta.env.VITE_API_BASEURL ||
-    `${window.location.protocol}//${window.location.host}`;
+    `${window.location.protocol}//${window.location.host}/api`;
 
 const bottomNavigationBar = [{
     name: '首页',
