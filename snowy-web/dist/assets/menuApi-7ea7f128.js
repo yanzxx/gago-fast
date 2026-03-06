@@ -1,1 +1,0 @@
-import{b as e}from"./index-7b2df5a4.js";const t=(t,...m)=>e(`/sys/menu/${t}`,...m),m={menuTree:e=>t("tree",e,"get"),submitForm:(e,m=!1)=>t(m?"add":"edit",e),menuChangeModule:e=>t("changeModule",e),menuDelete:e=>t("delete",e),menuDetail:e=>t("detail",e,"get"),menuModuleSelector:e=>t("moduleSelector",e,"get"),menuTreeSelector:e=>t("menuTreeSelector",e,"get")};export{m};

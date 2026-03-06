@@ -1,0 +1,1 @@
+import{b as e}from"./index-d916c03a.js";const s=(s,...o)=>e(`/flw/process/${s}`,...o),o={processMyModelList:e=>s("myModelList",e,"get"),processStart:e=>s("start",e),processMyPage:e=>s("myPage",e,"get"),processRevoke:e=>s("revoke",e),processDetail:e=>s("detail",e,"get")};export{o as p};

@@ -1,0 +1,1 @@
+import{_ as a}from"./index-d916c03a.js";import{V as s,X as e,Z as r,_ as t,E as n}from"./vue-ccb65427.js";import"./ant-design-vue-a9a4e517.js";const o=a({name:"Other"},[["render",function(a,o,u,d,i,m){const f=s("a-card");return e(),r(f,null,{default:t(()=>[n(" 被放开的一个界面 ")]),_:1})}]]);export{o as default};

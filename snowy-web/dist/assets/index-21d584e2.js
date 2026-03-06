@@ -1,0 +1,1 @@
+import{_ as n}from"./index-d916c03a.js";import{X as s,Y as r,W as t}from"./vue-ccb65427.js";import"./ant-design-vue-a9a4e517.js";const e={},o=[t("h2",null,"抄送事宜",-1)];const a=n(e,[["render",function(n,t){return s(),r("div",null,o)}]]);export{a as default};

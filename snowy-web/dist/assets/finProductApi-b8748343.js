@@ -1,0 +1,1 @@
+import{b as e}from"./index-d916c03a.js";const t=(t,...d)=>e(`/biz/finProduct/${t}`,...d),d={add:e=>t("add",e),edit:e=>t("edit",e),detail:e=>t("detail",e,"get"),page:e=>t("page",e,"get"),onShelf:e=>t("onShelf",e),offShelf:e=>t("offShelf",e),delete:e=>t("delete",e),batchDelete:e=>t("batchDelete",e)};export{d as f};

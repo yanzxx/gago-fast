@@ -1,0 +1,1 @@
+import{b as e}from"./index-d916c03a.js";const t=(t,...i)=>e(`/biz/livestock/${t}`,...i),i={add:e=>t("add",e),edit:e=>t("edit",e),detail:e=>t("detail",e,"get"),page:e=>t("page",e,"get"),speciesOptions:e=>t("species/options",e,"get")};export{i as l};

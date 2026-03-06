@@ -1,1 +1,0 @@
-import{_ as r}from"./index-7b2df5a4.js";import{V as e,X as s,Z as t}from"./vue-ccb65427.js";import"./ant-design-vue-a9a4e517.js";const o=r({},[["render",function(r,o){const n=e("router-view");return s(),t(n)}]]);export{o as default};

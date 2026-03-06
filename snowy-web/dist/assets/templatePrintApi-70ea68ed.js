@@ -1,1 +1,0 @@
-import{b as e}from"./index-7b2df5a4.js";const t=(t,...l)=>e(`/flw/templatePrint/${t}`,...l),l={templatePrintPage:e=>t("page",e,"get"),templatePrintSubmitForm:(e,l=!1)=>t(l?"add":"edit",e),templatePrintDelete:e=>t("delete",e),templatePrintDetail:e=>t("detail",e,"get"),templateFlwTemplatePrintSelector:e=>t("flwTemplatePrintSelector",e,"get")};export{l as t};
