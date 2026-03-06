@@ -1,13 +1,15 @@
 <template>
 	<div class="home-container">
 		<div class="home-title-bar">
-			<div class="system-name">{{ systemName }}</div>
+			<div class="system-name">格牧养殖中心</div>
 		</div>
+    <home-swiper />
 		<item v-for="(it, i) in homeConfigs" :index="i" :key="i" :code="it.code" :isShow="it.isShow"></item>
 	</div>
 </template>
 <script setup>
 	import Item from "./item.vue"
+	import HomeSwiper from "./home-swiper.vue"
 	import store from '@/store'
 	import {
 		computed

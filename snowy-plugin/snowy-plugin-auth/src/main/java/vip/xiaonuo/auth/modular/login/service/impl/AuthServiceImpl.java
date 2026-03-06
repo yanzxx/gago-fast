@@ -284,7 +284,7 @@ public class AuthServiceImpl implements AuthService {
             throw e;
         } catch (Exception e) {
             log.error("账号密码登录异常，account={}, type={}", account, type, e);
-            throw new CommonException("登录服务异常，请联系管理员");
+            throw new CommonException("登录服务异常: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
     }
 
@@ -582,4 +582,5 @@ public class AuthServiceImpl implements AuthService {
             log.warn("登录成功后清理失败计数异常，account={}", account, e);
         }
     }
+
 }

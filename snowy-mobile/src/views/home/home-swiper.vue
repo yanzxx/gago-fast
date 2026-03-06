@@ -10,7 +10,11 @@
 
 <script setup>
 	import { reactive } from "vue";
-	const data = reactive(['/static/images/image1.jpeg', '/static/images/image2.jpeg'])
+	const data = reactive([
+    '/static/images/home-banner-overview.svg',
+    '/static/images/home-banner-production.svg',
+    '/static/images/home-banner-risk.svg'
+  ])
 </script>
 
 <style lang="scss">

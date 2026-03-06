@@ -2,7 +2,7 @@
   <div class="production-page">
     <div class="intro-card">
       <div class="title">生产管理</div>
-      <div class="desc">项圈登记、批量录入、记录查询与导出</div>
+      <div class="desc">项圈登记、批量录入、记录查询</div>
     </div>
 
     <div class="grid-wrap">
@@ -17,10 +17,6 @@
       <div class="grid-item" @click="go('/production/records')">
         <van-icon name="search" size="22" color="#1f8a70" />
         <div>登记记录</div>
-      </div>
-      <div class="grid-item" @click="go('/production/exports')">
-        <van-icon name="description" size="22" color="#1f8a70" />
-        <div>导出任务</div>
       </div>
     </div>
   </div>

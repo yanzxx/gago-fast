@@ -20,10 +20,9 @@
       <van-tabbar-item replace :to="item.path" v-for="(item, index) of BOTTOMNAVIGATIONBAR" :key="index">
         {{item.name}}
         <template #icon="props">
-          <van-icon name="wap-home-o" v-if="index == 0" />
-          <van-icon name="font-o" v-if="index == 1" />
-          <van-icon name="chat-o" v-if="index == 2" />
-          <van-icon name="manager-o" v-if="index == 3" />
+          <van-icon name="wap-home-o" v-if="item.path === '/home'" />
+          <van-icon name="font-o" v-if="item.path === '/production'" />
+          <van-icon name="manager-o" v-if="item.path === '/mine'" />
         </template>
       </van-tabbar-item>
     </van-tabbar>

@@ -86,6 +86,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { showFailToast, showSuccessToast } from 'vant'
 import { buildCodeByRule, existsCode, saveRecord } from './storage'
 import { orgTree } from '@/api/biz/bizOrgApi'
+import { livestockAdd } from '@/api/biz/livestockApi'
 
 const form = reactive({
   codeMode: 'AUTO',
@@ -103,6 +104,7 @@ const camelFileList = ref([])
 const collarFileList = ref([])
 const showFarmSelector = ref(false)
 const farmActions = ref([])
+const submitting = ref(false)
 
 const flattenFarmOptions = (nodes = [], collector = []) => {
   ;(nodes || []).forEach((node) => {
@@ -156,6 +158,7 @@ const onSelectFarm = (action) => {
 }
 
 const submit = () => {
+  if (submitting.value) return
   if (!form.collarCode || !form.camelTag || !form.orgName || !form.registerDate) {
     showFailToast('请完整填写必填项')
     return
@@ -170,17 +173,36 @@ const submit = () => {
   }
   form.camelPhoto = getFileName(camelFileList.value[0])
   form.collarPhoto = getFileName(collarFileList.value[0])
-  saveRecord({ ...form, status: '已登记' })
-  showSuccessToast('登记成功')
-  form.camelTag = ''
-  form.camelPhoto = ''
-  form.collarPhoto = ''
-  form.remark = ''
-  camelFileList.value = []
-  collarFileList.value = []
-  if (form.codeMode === 'AUTO') form.collarCode = `AUTO${Date.now()}`
-  if (form.codeMode === 'RULE') form.collarCode = buildCodeByRule('XC')
-  if (form.codeMode === 'MANUAL') form.collarCode = ''
+  const payload = {
+    farmId: form.orgId || undefined,
+    speciesName: form.camelTag,
+    birthDate: form.registerDate,
+    immunityStatus: 'NORMAL',
+    lastImmunityDate: form.registerDate,
+    collarNo: form.collarCode,
+    remark: form.remark || '',
+    imageUrls: JSON.stringify([form.camelPhoto, form.collarPhoto].filter(Boolean)),
+    status: 'IN_STOCK'
+  }
+  submitting.value = true
+  livestockAdd(payload).then(() => {
+    saveRecord({ ...form, status: '已登记', syncStatus: 'SERVER' })
+    showSuccessToast('登记成功')
+  }).catch(() => {
+    saveRecord({ ...form, status: '已登记(离线)', syncStatus: 'LOCAL_ONLY' })
+    showFailToast('后端提交失败，已离线保存')
+  }).finally(() => {
+    submitting.value = false
+    form.camelTag = ''
+    form.camelPhoto = ''
+    form.collarPhoto = ''
+    form.remark = ''
+    camelFileList.value = []
+    collarFileList.value = []
+    if (form.codeMode === 'AUTO') form.collarCode = `AUTO${Date.now()}`
+    if (form.codeMode === 'RULE') form.collarCode = buildCodeByRule('XC')
+    if (form.codeMode === 'MANUAL') form.collarCode = ''
+  })
 }
 
 onMounted(() => {

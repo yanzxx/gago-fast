@@ -93,14 +93,6 @@ const routes = [
                 component: () => import('@/views/production/detail.vue'),
             },
             {
-                path: '/production/exports',
-                name: 'productionExports',
-                meta: {
-                    title: '导出任务'
-                },
-                component: () => import('@/views/production/exports.vue'),
-            },
-            {
                 path: '/org',
                 name: 'org',
                 meta: {

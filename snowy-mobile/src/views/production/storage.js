@@ -52,13 +52,16 @@ export const listExportTasks = () => load(EXPORT_KEY)
 
 export const createExportTask = (payload = {}) => {
   const tasks = listExportTasks()
+  const fileName = payload.fileName || `${payload.name || `项圈登记导出_${Date.now()}`}.csv`
   const task = {
     id: id(),
     name: payload.name || `项圈登记导出_${Date.now()}`,
     status: 'DONE',
     createTime: nowText(),
     filter: payload.filter || {},
-    downloadUrl: '#',
+    downloadUrl: payload.downloadUrl || '#',
+    fileName,
+    content: payload.content || '',
     total: payload.total || 0
   }
   tasks.unshift(task)
@@ -69,7 +72,7 @@ export const createExportTask = (payload = {}) => {
 export const parseBatchText = (text) => {
   const rows = String(text || '').split('\n').map(v => v.trim()).filter(Boolean)
   return rows.map((line, idx) => {
-    const parts = line.split(',').map(v => v.trim())
+    const parts = line.replace(/，/g, ',').split(',').map(v => v.trim())
     return {
       rowNo: idx + 1,
       collarCode: parts[0] || '',
@@ -87,4 +90,43 @@ export const buildCodeByRule = (prefix = 'XC') => {
   const day = String(d.getDate()).padStart(2, '0')
   const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
   return `${prefix}${y}${m}${day}${rand}`
+}
+
+const escapeCsv = (value) => {
+  const text = String(value ?? '')
+  if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+    return `"${text.replace(/"/g, '""')}"`
+  }
+  return text
+}
+
+export const buildRecordCsv = (records = []) => {
+  const header = ['项圈编号', '骆驼标识', '养殖场', '登记日期', '状态', '备注', '创建时间']
+  const lines = records.map((item) => {
+    return [
+      escapeCsv(item.collarCode || item.collarNo || ''),
+      escapeCsv(item.camelTag || item.speciesName || ''),
+      escapeCsv(item.orgName || ''),
+      escapeCsv(item.registerDate || ''),
+      escapeCsv(item.status || ''),
+      escapeCsv(item.remark || ''),
+      escapeCsv(item.createTime || '')
+    ].join(',')
+  })
+  return [header.join(','), ...lines].join('\n')
+}
+
+export const downloadExportTask = (taskId) => {
+  const task = listExportTasks().find((item) => String(item.id) === String(taskId))
+  if (!task || !task.content) return false
+  const blob = new Blob(['\ufeff' + task.content], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = task.fileName || `${task.name || '导出数据'}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  return true
 }

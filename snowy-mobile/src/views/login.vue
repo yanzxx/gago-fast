@@ -120,27 +120,17 @@ const pwdLogin = async () => {
     store
         .dispatch('Login', loginForm)
         .then(() => {
-            // 所有异步请求结束之后才能够进行下一步操作
-            Promise.all([
+            // 登录成功后立即进入系统，其他初始化数据后台异步加载
+            router.replace({
+                path: '/home',
+            });
+            Promise.allSettled([
                 store.dispatch('GetUserLoginMenu'),
                 store.dispatch('GetUserInfo'),
                 store.dispatch('GetDictTypeTreeData'),
-            ])
-                .then(() => {
-                    router.push({
-                        path: '/home',
-                    });
-                })
-                .catch((error) => {
-                    console.log('promise.all catch', error);
-                    if (
-                        sysBaseConfig.value.SNOWY_SYS_DEFAULT_CAPTCHA_OPEN ===
-                        'true'
-                    ) {
-                        loginCaptcha();
-                        loginForm.validCode = '';
-                    }
-                });
+            ]).catch((error) => {
+                console.log('init data catch', error);
+            });
         })
         .catch(() => {
             if (sysBaseConfig.value.SNOWY_SYS_DEFAULT_CAPTCHA_OPEN === 'true') {

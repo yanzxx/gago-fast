@@ -198,12 +198,14 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import { useGlobalStore } from '@/store/global'
 import supervisionApi from '@/api/biz/supervisionApi'
 import sysOrgApi from '@/api/sys/orgApi'
 import { toFarmTreeSelectData, findFarmTreeNode } from '@/utils/farmTree'
 import tool from '@/utils/tool'
 
 const router = useRouter()
+const globalStore = useGlobalStore()
 const loading = ref(false)
 const mapChartRef = ref()
 let mapChart = null
@@ -552,6 +554,16 @@ const flattenFarmOptions = (tree = [], collector = []) => {
 
 const farmSelectOptions = computed(() => flattenFarmOptions(farmTree.value, []))
 
+const resolveUserFarmId = () => {
+	const userInfo = globalStore.userInfo || {}
+	return String(userInfo.farmId || userInfo.farm_id || userInfo.orgId || userInfo.org_id || '')
+}
+
+const hasFarmOption = (farmId) => {
+	if (!farmId) return false
+	return farmSelectOptions.value.some((item) => String(item.value) === String(farmId))
+}
+
 const collectLeafFarmIds = (nodes = [], collector = new Set()) => {
 	nodes.forEach((node) => {
 		if (!node) return
@@ -723,11 +735,19 @@ const loadFarmTree = async () => {
 	try {
 		const tree = await sysOrgApi.orgTree()
 		farmTree.value = toFarmTreeSelectData(tree || [])
-		if (!selectedFarmId.value && farmSelectOptions.value.length) {
-			selectedFarmId.value = farmSelectOptions.value[0].value
+		const preferredFarmId = selectedFarmId.value || resolveUserFarmId()
+		if (hasFarmOption(preferredFarmId)) {
+			selectedFarmId.value = String(preferredFarmId)
+			return
 		}
+		if (farmSelectOptions.value.length) {
+			selectedFarmId.value = String(farmSelectOptions.value[0].value)
+			return
+		}
+		selectedFarmId.value = undefined
 	} catch (e) {
 		farmTree.value = []
+		selectedFarmId.value = undefined
 	}
 }
 
@@ -905,7 +925,8 @@ onMounted(async () => {
 		localNow.value = formatNow()
 	}, 1000)
 	document.addEventListener('mousedown', handleClickOutside)
-	await Promise.all([loadFarmTree(), loadHomeData()])
+	await loadFarmTree()
+	await loadHomeData()
 	await initChinaMap()
 	window.addEventListener('resize', onAllChartResize)
 })

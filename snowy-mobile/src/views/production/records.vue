@@ -13,12 +13,13 @@
     </div>
 
     <div class="card">
+      <van-loading v-if="loading" size="24px" vertical>加载中</van-loading>
       <van-cell v-for="item in list" :key="item.id" :title="item.collarCode" :label="`${item.camelTag} | ${item.orgName} | ${item.registerDate}`" is-link @click="goDetail(item.id)">
         <template #value>
-          <span class="ok">{{ item.status || '已登记' }}</span>
+          <span class="ok">{{ item.status || 'IN_STOCK' }}</span>
         </template>
       </van-cell>
-      <snowy-empty v-if="list.length === 0" />
+      <snowy-empty v-if="!loading && list.length === 0" />
     </div>
   </div>
 </template>
@@ -26,9 +27,11 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import router from '@/router'
-import { showSuccessToast } from 'vant'
+import { showFailToast, showSuccessToast } from 'vant'
 import SnowyEmpty from '@/components/snowy-empty.vue'
-import { createExportTask, listRecords } from './storage'
+import { buildRecordCsv, createExportTask, listRecords } from './storage'
+import { livestockPage } from '@/api/biz/livestockApi'
+import { orgTree } from '@/api/biz/bizOrgApi'
 
 const filter = reactive({
   collarCode: '',
@@ -37,6 +40,8 @@ const filter = reactive({
   endDate: ''
 })
 const list = ref([])
+const loading = ref(false)
+const farmNameMap = ref({})
 
 const inDate = (d, start, end) => {
   if (!d) return false
@@ -45,14 +50,70 @@ const inDate = (d, start, end) => {
   return true
 }
 
-const load = () => {
+const flattenFarmMap = (nodes = [], collector = {}) => {
+  ;(nodes || []).forEach((node) => {
+    const id = node?.id || node?.value
+    const name = node?.name || node?.title
+    if (id && name) {
+      collector[String(id)] = String(name)
+    }
+    if (node?.children?.length) {
+      flattenFarmMap(node.children, collector)
+    }
+  })
+  return collector
+}
+
+const mapRemoteItem = (item = {}) => {
+  const farmId = item.farmId || ''
+  return {
+    id: item.id || item.livestockId || item.livestockID || item.livestock_id || item.livestockNo,
+    livestockNo: item.livestockNo || '',
+    collarCode: item.collarNo || '',
+    camelTag: item.speciesName || '-',
+    orgName: farmNameMap.value[String(farmId)] || farmId || '-',
+    registerDate: item.registerDate || '',
+    status: item.status || 'IN_STOCK',
+    source: 'REMOTE'
+  }
+}
+
+const loadLocal = () => {
   const all = listRecords()
-  list.value = all.filter(item => {
+  list.value = all.filter((item) => {
     if (filter.collarCode && !String(item.collarCode || '').includes(filter.collarCode)) return false
     if (filter.orgName && !String(item.orgName || '').includes(filter.orgName)) return false
     if ((filter.startDate || filter.endDate) && !inDate(item.registerDate, filter.startDate, filter.endDate)) return false
     return true
   })
+}
+
+const load = async () => {
+  loading.value = true
+  try {
+    if (!Object.keys(farmNameMap.value).length) {
+      const orgRes = await orgTree()
+      farmNameMap.value = flattenFarmMap(orgRes?.data || [])
+    }
+    const res = await livestockPage({
+      current: 1,
+      size: 50,
+      collarNo: filter.collarCode || undefined,
+      registerStartDate: filter.startDate || undefined,
+      registerEndDate: filter.endDate || undefined
+    })
+    const records = res?.data?.records || []
+    let mapped = records.map(mapRemoteItem)
+    if (filter.orgName) {
+      mapped = mapped.filter((item) => String(item.orgName || '').includes(filter.orgName))
+    }
+    list.value = mapped
+  } catch (e) {
+    loadLocal()
+    showFailToast('已切换离线记录')
+  } finally {
+    loading.value = false
+  }
 }
 
 const reset = () => {
@@ -64,15 +125,25 @@ const reset = () => {
 }
 
 const exportNow = () => {
+  if (!list.value.length) {
+    showFailToast('暂无可导出数据')
+    return
+  }
+  const content = buildRecordCsv(list.value)
   createExportTask({
     name: `项圈登记导出_${Date.now()}`,
     filter: { ...filter },
+    fileName: `项圈登记导出_${Date.now()}.csv`,
+    content,
     total: list.value.length
   })
   showSuccessToast('已创建导出任务')
 }
 
-const goDetail = (id) => router.push({ path: '/production/detail', query: { id } })
+const goDetail = (id) => {
+  const row = list.value.find((item) => String(item.id) === String(id)) || {}
+  router.push({ path: '/production/detail', query: { id, livestockNo: row.livestockNo || '' } })
+}
 
 load()
 </script>

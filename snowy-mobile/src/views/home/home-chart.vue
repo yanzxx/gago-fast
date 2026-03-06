@@ -77,6 +77,7 @@ import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { mobileHomeHeader, mobileHomeMetrics, mobileHomeTodos, mobileHomeWeeklyStats } from '@/api/biz/mobileHomeApi'
 import { orgTree } from '@/api/biz/bizOrgApi'
+import store from '@/store'
 
 const router = useRouter()
 const metricsErr = ref(false)
@@ -226,17 +227,29 @@ const flattenFarmOptions = (nodes = [], collector = []) => {
   ;(nodes || []).forEach((node) => {
     const id = node?.id || node?.value
     const name = node?.name || node?.title
+    const children = node?.children || []
+    if (children.length) {
+      flattenFarmOptions(children, collector)
+      return
+    }
     if (id && name) {
       collector.push({
         text: String(name),
         value: String(id)
       })
     }
-    if (node?.children?.length) {
-      flattenFarmOptions(node.children, collector)
-    }
   })
   return collector
+}
+
+const resolveUserFarmId = () => {
+  const userInfo = store.getters.userInfo || {}
+  return String(userInfo.farmId || userInfo.farm_id || userInfo.orgId || userInfo.org_id || '')
+}
+
+const hasFarmOption = (farmId) => {
+  if (!farmId) return false
+  return farmOptions.value.some((item) => String(item.value) === String(farmId))
 }
 
 const loadFarmOptions = async () => {
@@ -244,9 +257,16 @@ const loadFarmOptions = async () => {
     const res = await orgTree()
     const options = flattenFarmOptions(res?.data || [])
     farmOptions.value = options
-    if (!selectedFarmId.value && options.length) {
-      selectedFarmId.value = options[0].value
+    const preferredFarmId = selectedFarmId.value || resolveUserFarmId()
+    if (hasFarmOption(preferredFarmId)) {
+      selectedFarmId.value = String(preferredFarmId)
+      return
     }
+    if (options.length) {
+      selectedFarmId.value = String(options[0].value)
+      return
+    }
+    selectedFarmId.value = ''
   } catch (e) {
     farmOptions.value = []
     selectedFarmId.value = ''

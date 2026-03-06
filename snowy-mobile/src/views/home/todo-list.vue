@@ -1,6 +1,6 @@
 <template>
   <div class="todo-page">
-    <div class="page-header">
+    <div v-if="showHeader" class="page-header">
       <div class="left" @click="goBack">
         <van-icon name="arrow-left" />
         <span>返回</span>
@@ -75,6 +75,13 @@ const list = ref([])
 const detailVisible = ref(false)
 const activeDetail = ref({})
 const pageTitle = computed(() => route.query.todoName || '待办详情')
+const showHeader = computed(() => {
+  const todoType = String(route.query.todoType || '')
+  const todoName = String(route.query.todoName || '')
+  const hiddenTypes = ['ESTRUS', 'BREED', 'ILLEGAL_OUT']
+  const hiddenNames = ['发情提醒', '配种提醒', '非法离栏']
+  return !hiddenTypes.includes(todoType) && !hiddenNames.includes(todoName)
+})
 
 const loadList = async () => {
   refreshing.value = true

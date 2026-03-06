@@ -21,21 +21,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { showFailToast, showSuccessToast } from 'vant'
 import { existsCode, parseBatchText, saveBatch } from './storage'
+import { orgTree } from '@/api/biz/bizOrgApi'
+import { livestockAdd } from '@/api/biz/livestockApi'
 
 const batchText = ref('')
 const checkResult = ref([])
+const farmIdByName = ref({})
+const submitting = ref(false)
+
+const flattenFarmMap = (nodes = [], collector = {}) => {
+  ;(nodes || []).forEach((node) => {
+    const id = node?.id || node?.value
+    const name = node?.name || node?.title
+    if (id && name) {
+      collector[String(name)] = String(id)
+    }
+    if (node?.children?.length) {
+      flattenFarmMap(node.children, collector)
+    }
+  })
+  return collector
+}
+
+const loadFarmMap = async () => {
+  try {
+    const res = await orgTree()
+    farmIdByName.value = flattenFarmMap(res?.data || [])
+  } catch (e) {
+    farmIdByName.value = {}
+  }
+}
 
 const checkBatch = () => {
   const rows = parseBatchText(batchText.value)
   if (!rows.length) {
+    checkResult.value = []
     showFailToast('请先输入批量数据')
-    return
+    return false
   }
   const seen = new Set()
-  checkResult.value = rows.map(r => {
+  checkResult.value = rows.map((r) => {
     let error = ''
     if (!r.collarCode || !r.camelTag || !r.orgName || !r.registerDate) error = '必填字段缺失'
     else if (seen.has(r.collarCode)) error = '批次内编号重复'
@@ -44,30 +72,70 @@ const checkBatch = () => {
     return { ...r, error }
   })
   showSuccessToast('校验完成')
+  return checkResult.value.some((v) => !v.error)
 }
 
-const submitBatch = () => {
+const submitBatch = async () => {
+  if (submitting.value) return
   if (!checkResult.value.length) {
-    checkBatch()
+    const hasPass = checkBatch()
+    if (!hasPass) return
   }
   const passRows = checkResult.value.filter(v => !v.error)
   if (!passRows.length) {
     showFailToast('无可提交数据')
     return
   }
-  saveBatch(passRows.map(v => ({
-    codeMode: 'MANUAL',
-    collarCode: v.collarCode,
-    camelTag: v.camelTag,
-    orgName: v.orgName,
-    registerDate: v.registerDate,
-    camelPhoto: '批量补传',
-    collarPhoto: '批量补传',
-    remark: '批量登记',
-    status: '已登记'
-  })))
-  showSuccessToast(`提交成功 ${passRows.length} 条`)
+  submitting.value = true
+  const failedRows = []
+  let successCount = 0
+  for (const row of passRows) {
+    try {
+      await livestockAdd({
+        farmId: farmIdByName.value[row.orgName] || undefined,
+        speciesName: row.camelTag,
+        birthDate: row.registerDate,
+        immunityStatus: 'NORMAL',
+        lastImmunityDate: row.registerDate,
+        collarNo: row.collarCode,
+        remark: '批量登记',
+        imageUrls: '[]',
+        status: 'IN_STOCK'
+      })
+      successCount += 1
+    } catch (e) {
+      failedRows.push(row)
+    }
+  }
+  if (failedRows.length) {
+    saveBatch(failedRows.map(v => ({
+      codeMode: 'MANUAL',
+      collarCode: v.collarCode,
+      camelTag: v.camelTag,
+      orgName: v.orgName,
+      registerDate: v.registerDate,
+      camelPhoto: '批量补传',
+      collarPhoto: '批量补传',
+      remark: '批量登记(离线)',
+      status: '已登记(离线)',
+      syncStatus: 'LOCAL_ONLY'
+    })))
+  }
+  submitting.value = false
+  if (!successCount) {
+    showFailToast(`后端提交失败，已离线保存 ${failedRows.length} 条`)
+    return
+  }
+  if (failedRows.length) {
+    showSuccessToast(`提交成功 ${successCount} 条，离线保存 ${failedRows.length} 条`)
+    return
+  }
+  showSuccessToast(`提交成功 ${successCount} 条`)
 }
+
+onMounted(() => {
+  loadFarmMap()
+})
 </script>
 
 <style scoped lang="scss">

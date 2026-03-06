@@ -65,11 +65,25 @@ public class StpLoginUserUtil {
      **/
     public static List<String> getLoginUserDataScope() {
         List<String> resultList = CollectionUtil.newArrayList();
-        getLoginUser().getDataScopeList().forEach(dataScope -> {
-            if(dataScope.getApiUrl().equals(CommonServletUtil.getRequest().getServletPath())) {
-                resultList.addAll(dataScope.getDataScope());
+        SaBaseLoginUser loginUser = getLoginUser();
+        if (ObjectUtil.isNotEmpty(loginUser) && ObjectUtil.isNotEmpty(loginUser.getDataScopeList())
+                && ObjectUtil.isNotEmpty(CommonServletUtil.getRequest())) {
+            String apiUrl = CommonServletUtil.getRequest().getServletPath();
+            loginUser.getDataScopeList().forEach(dataScope -> {
+                if (ObjectUtil.isNotEmpty(dataScope) && apiUrl.equals(dataScope.getApiUrl())
+                        && ObjectUtil.isNotEmpty(dataScope.getDataScope())) {
+                    resultList.addAll(dataScope.getDataScope());
+                }
+            });
+        }
+        // Fallback: avoid empty scope caused by stale token-session cache or missing scope initialization.
+        // Use current login org as minimal available data scope.
+        if (CollectionUtil.isEmpty(resultList)) {
+            String orgId = ObjectUtil.isNotEmpty(loginUser) ? loginUser.getOrgId() : null;
+            if (ObjectUtil.isNotEmpty(orgId)) {
+                resultList.add(orgId);
             }
-        });
+        }
         return resultList;
     }
 
